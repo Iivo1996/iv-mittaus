@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IV Mittaus | Ilmamäärien mittauspöytäkirja</title>
+<meta name="theme-color" content="#102a43">
+<meta name="application-name" content="IV Mittaus">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IV Mittaus">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2317202a'/%3E%3Cpath d='M15 20h34M15 32h34M15 44h22' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{--navy:#102a43;--blue:#1769aa;--blue-soft:#eaf3fb;--ink:#172b3a;--muted:#5e7182;--line:#ccd7e0;--panel:#f4f7f9;--green:#067647;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#eef2f5;color:var(--ink);font-size:16px}
+header{background:var(--navy);color:#fff;padding:13px 16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(16,42,67,.22)}
+.brand{max-width:1040px;margin:auto;display:flex;align-items:center;gap:12px}.brand-mark{width:38px;height:38px;border:2px solid #fff;border-radius:9px;display:grid;place-items:center;font-weight:800;letter-spacing:-1px}.brand-copy{min-width:0}.brand-copy h1{margin:0;font-size:19px;line-height:1.1}.brand-copy p{margin:3px 0 0;color:#c9d9e7;font-size:12px}.tool-badge{margin-left:auto;border:1px solid #5f88a8;border-radius:999px;padding:5px 9px;color:#dce9f3;font-size:10px;font-weight:800;letter-spacing:.09em}
+.menu-wrap{position:relative}.menu-button{background:#fff;color:var(--navy);border-color:#fff;min-height:36px;padding:7px 11px}.menu-panel{display:none;position:absolute;right:0;top:44px;width:220px;background:#fff;border:1px solid #b9c8d4;border-radius:10px;padding:7px;box-shadow:0 12px 30px rgba(16,42,67,.24);z-index:30}.menu-panel.open{display:grid;gap:5px}.menu-panel button{text-align:left;width:100%;background:#fff;border-color:transparent}.menu-panel button:hover{background:#eef4f8}.menu-panel small{display:block;color:var(--muted);padding:5px 9px 7px;line-height:1.35}
+main{max-width:1040px;margin:auto;padding:18px 14px 30px}.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(16,42,67,.06)}
+.card-heading{display:flex;align-items:center;gap:9px;margin-bottom:15px}.step{width:27px;height:27px;border-radius:7px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:800}h2{font-size:17px;margin:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+label{font-size:13px;font-weight:650;color:#43586a;display:block;margin-bottom:6px}input,textarea{width:100%;padding:11px 12px;border:1px solid #b9c7d3;border-radius:8px;font:inherit;font-size:16px;background:#fff;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(23,105,170,.14)}textarea{min-height:104px;resize:vertical;line-height:1.45}
+button{border:1px solid transparent;border-radius:8px;padding:10px 13px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;background:#e8eef3;color:var(--ink);min-height:40px}button:active{transform:translateY(1px)}button.primary{background:var(--navy);color:#fff;padding:11px 17px}button.save-project{background:var(--blue);color:#fff}button.secondary{background:#fff;border-color:#aebdca;color:var(--navy)}button.danger{background:#fff5f4;border-color:#f2c7c3;color:var(--red)}button.small{padding:6px 9px;font-size:12px;min-height:32px}
+.apartment{background:#dfe8ef;border-color:#b8c8d5;padding:12px;border-radius:14px}.apartment-title{display:grid;grid-template-columns:auto minmax(150px,300px) 1fr auto;gap:10px;align-items:center;margin-bottom:12px}.apartment-index{background:var(--navy);color:#fff;border-radius:7px;padding:8px 10px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.apartment-title input{font-weight:750;background:#fff}.apartment-title .danger{justify-self:end}
+.room{margin:12px 0 0;background:#fff;border-left:5px solid var(--blue);box-shadow:none}.room-title{display:grid;grid-template-columns:auto minmax(140px,260px) 1fr auto;gap:9px;align-items:center;padding-bottom:12px;border-bottom:1px solid #e1e7ec}.room-index{color:var(--navy);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.room-title input{font-weight:700}.room-title .danger{justify-self:end}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:17px;padding:8px 10px;border-radius:7px;background:var(--panel)}.section-title strong{font-size:13px;text-transform:uppercase;letter-spacing:.05em}.section-title.supply{border-left:4px solid #1769aa}.section-title.exhaust{border-left:4px solid #7b4f9d}
+.row{display:grid;grid-template-columns:1.45fr .5fr .65fr .9fr .95fr .8fr auto;gap:8px;align-items:end;padding:11px 4px;border-bottom:1px solid #e2e8ed}.row:last-child{border-bottom:0}.row label{font-size:12px}.row input{padding:9px}
+.signed-input{display:flex;gap:5px}.signed-input input{min-width:0}.signed-input button{flex:0 0 40px;padding:8px 4px;font-size:18px;font-weight:800}
+.air-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:15px}.summary-box{background:#fff;border:1px solid #b9c8d4;border-radius:9px;padding:11px 12px}.summary-box span{display:block;color:var(--muted);font-size:12px;font-weight:650;margin-bottom:5px}.summary-box strong{font-size:19px;color:var(--navy)}.summary-box em{display:block;font-size:12px;font-style:normal;font-weight:750;margin-top:4px}.summary-box.negative em,.summary-box.balanced em{color:var(--green)}.summary-box.positive em{color:var(--red)}
+.add-room{width:100%;margin-top:11px;background:#fff;border:1px dashed #7e94a6;color:var(--navy)}.empty-state{background:#fff;border:1px dashed #9eb0bf;border-radius:12px;padding:32px 18px;text-align:center;color:var(--muted);margin-bottom:16px}.empty-state strong{display:block;color:var(--navy);font-size:17px;margin-bottom:6px}.empty-state button{margin-top:14px}
+.action-card{position:static;border-color:#aabac7;box-shadow:0 2px 8px rgba(16,42,67,.08);padding:12px 14px}.bottom{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center}.bottom .save-note{margin-right:auto;color:var(--muted);font-size:12px}.muted{color:var(--muted);font-size:12px;margin:8px 0 0}
+.modal{display:none;position:fixed;inset:0;background:rgba(8,24,38,.58);z-index:50;padding:16px;align-items:center;justify-content:center}.modal.open{display:flex}.modal-card{background:#fff;border-radius:14px;width:min(680px,100%);max-height:85vh;overflow:auto;box-shadow:0 24px 70px rgba(0,0,0,.32)}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 18px;border-bottom:1px solid #d8e1e8}.modal-head h2{font-size:19px}.modal-body{padding:14px 18px 18px}.project-list{display:grid;gap:9px}.project-item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid #c8d4dd;border-radius:10px;padding:12px}.project-item strong{display:block;color:var(--navy);margin-bottom:4px}.project-item span{display:block;color:var(--muted);font-size:12px}.project-actions{display:flex;gap:6px}.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;border-radius:9px;padding:11px 15px;box-shadow:0 8px 24px rgba(16,42,67,.28);opacity:0;pointer-events:none;transition:.2s;z-index:70;font-size:14px;font-weight:700}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.pdf-frame{width:100%;height:62vh;border:1px solid #b9c8d4;border-radius:9px;background:#eef2f5}.button-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:8px;padding:10px 14px;min-height:40px;font-size:14px;font-weight:750}.button-link.primary{background:var(--navy);color:#fff}.button-link.secondary{background:#fff;border:1px solid #aebdca;color:var(--navy)}
+.settings-grid{display:grid;gap:13px}.logo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.logo-preview{width:150px;height:72px;border:1px dashed #9eb0bf;border-radius:9px;background:#f7f9fb;display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:12px}.logo-preview img{max-width:100%;max-height:100%;object-fit:contain}.file-button{display:inline-flex;align-items:center;justify-content:center;border:1px solid #aebdca;border-radius:8px;padding:10px 13px;font-size:14px;font-weight:700;color:var(--navy);cursor:pointer;background:#fff}.file-button input{display:none}
+@media(max-width:700px){header{padding:10px 12px}.tool-badge{display:none}.brand{gap:9px}.brand-mark{width:34px;height:34px}.brand-copy h1{font-size:17px}.menu-button{font-size:13px;padding:6px 9px}main{padding:12px 9px 30px}.card{padding:13px;border-radius:10px}.grid{grid-template-columns:1fr}.apartment{padding:8px}.apartment-title,.room-title{grid-template-columns:auto 1fr}.apartment-title .danger,.room-title .danger{grid-column:2;justify-self:end}.row{grid-template-columns:1fr 1fr 1fr;gap:8px}.row>div:first-child{grid-column:1/-1}.row>button{grid-column:3}.air-summary{grid-template-columns:1fr 1fr}.summary-box:last-child{grid-column:1/-1}.bottom{display:grid;grid-template-columns:1fr 1fr}.bottom .save-note{grid-column:1/-1;margin:0}.bottom .primary,.bottom .save-project{grid-column:1/-1}.bottom button{width:100%}.project-item{grid-template-columns:1fr}.project-actions{justify-content:flex-end}.project-actions button{flex:1}.toast{bottom:24px;white-space:nowrap}.pdf-frame{height:50vh}.modal-actions{display:grid;grid-template-columns:1fr 1fr}.modal-actions>*{width:100%}}
+@media print{body{background:#fff}header,.no-print,button{display:none!important}main{max-width:none;padding:0}.card{border:0;box-shadow:none;page-break-inside:avoid;padding:4px 0}input,textarea{border:0;padding:2px 0}.row{grid-template-columns:1.5fr .5fr .6fr .9fr .9fr .7fr}.row>button{display:none}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="brand-mark">IV</div><div class="brand-copy"><h1>IV Mittaus</h1><p>Ilmamäärien mittauspöytäkirja</p></div><span class="tool-badge">AMMATTITYÖKALU</span><div class="menu-wrap no-print"><button type="button" class="menu-button" onclick="toggleMenu()">☰ Valikko</button><div id="top-menu" class="menu-panel"><button type="button" onclick="newProject()">＋ Uusi projekti</button><button type="button" onclick="saveCurrentProject()">✓ Tallenna projekti</button><button type="button" onclick="openProjects()">▤ Vanhat projektit</button><button type="button" onclick="openPdfSettings()">⚙ PDF-asetukset</button><button id="install-menu-button" type="button" onclick="installApp()">⇩ Asenna sovellus</button><small>Projektit tallentuvat tälle laitteelle.</small></div></div></div></header>
+<div id="projects-modal" class="modal no-print" onclick="if(event.target===this)closeProjects()"><div class="modal-card"><div class="modal-head"><h2>Vanhat projektit</h2><button type="button" class="small secondary" onclick="closeProjects()">Sulje</button></div><div class="modal-body"><div id="project-list" class="project-list"></div></div></div></div>
+<div id="new-project-modal" class="modal no-print" onclick="if(event.target===this)closeNewProject()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Aloita uusi projekti</h2><button type="button" class="small secondary" onclick="closeNewProject()">Sulje</button></div><div class="modal-body"><p style="margin-top:0;line-height:1.5">Nykyinen mittaus suljetaan ja näyttö tyhjennetään. Nykyinen projekti löytyy Vanhoista projekteista vain, jos siitä on luotu PDF.</p><div class="modal-actions"><button type="button" class="secondary" onclick="closeNewProject()">Peruuta</button><button type="button" class="primary" onclick="startNewProject()">Aloita uusi projekti</button></div></div></div></div>
+<div id="pdf-modal" class="modal no-print" onclick="if(event.target===this)closePdfPreview()"><div class="modal-card" style="width:min(900px,100%)"><div class="modal-head"><h2>PDF-esikatselu</h2><button type="button" class="small secondary" onclick="closePdfPreview()">Sulje</button></div><div class="modal-body"><iframe id="pdf-preview" class="pdf-frame" title="Mittauspöytäkirjan PDF-esikatselu"></iframe><div class="modal-actions"><a id="pdf-open" class="button-link secondary" target="_blank" rel="noopener">Avaa PDF</a><a id="pdf-download" class="button-link primary" download>Lataa tiedosto</a></div></div></div></div>
+<div id="install-modal" class="modal no-print" onclick="if(event.target===this)closeInstallHelp()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Asenna IV Mittaus</h2><button type="button" class="small secondary" onclick="closeInstallHelp()">Sulje</button></div><div class="modal-body"><div id="install-help-content" style="line-height:1.55"></div><div class="modal-actions"><button type="button" class="primary" onclick="closeInstallHelp()">Selvä</button></div></div></div></div>
+<div id="pdf-settings-modal" class="modal no-print" onclick="if(event.target===this)closePdfSettings()"><div class="modal-card" style="max-width:600px"><div class="modal-head"><h2>PDF-tiedoston asetukset</h2><button type="button" class="small secondary" onclick="closePdfSettings()">Sulje</button></div><div class="modal-body"><div class="settings-grid"><div><label>Yrityksen nimi</label><input id="setting-company" placeholder="Esim. Ilmastointi Oy"></div><div><label>Y-tunnus</label><input id="setting-business-id" inputmode="text" placeholder="1234567-8"></div><div><label>Yrityksen logo</label><div class="logo-row"><div id="logo-preview" class="logo-preview">Ei logoa</div><label class="file-button">Valitse logo<input id="setting-logo" type="file" accept="image/png,image/jpeg,image/webp" onchange="handleLogoFile(this.files[0])"></label><button type="button" class="danger small" onclick="removeLogo()">Poista logo</button></div><p class="muted">PNG-, JPG- tai WebP-kuva. Logo lisätään PDF:n ylätunnisteeseen.</p></div></div><div class="modal-actions"><button type="button" class="secondary" onclick="closePdfSettings()">Peruuta</button><button type="button" class="primary" onclick="savePdfSettings()">Tallenna asetukset</button></div></div></div></div>
+<div id="toast" class="toast no-print"></div>
+<main>
+<section class="card"><div class="card-heading"><span class="step">1</span><h2>Kohteen tiedot</h2></div>
+<div class="grid">
+<div><label>Kohde</label><input id="kohde" placeholder="Esim. Virusmäentie 27, Turku"></div>
+<div><label>Mittauspäivä</label><input id="paiva" type="date"></div>
+<div><label>Mittaaja</label><input id="mittaaja" placeholder="Nimi"></div>
+<div><label>Mittausväline</label><input id="valine" placeholder="Esim. Swema 3000md"></div>
+</div></section>
+<div id="apartments"></div>
+<section class="card action-card no-print"><div class="bottom">
+<span class="save-note">Tallennettu automaattisesti tälle laitteelle</span>
+<button type="button" class="secondary" onclick="addApartment()">+ Lisää asunto</button><button type="button" class="save-project" onclick="saveCurrentProject()">Tallenna projekti</button><button type="button" class="danger" onclick="clearAll()">Tyhjennä</button>
+<button type="button" class="primary" onclick="generatePdf()">Luo PDF</button></div>
+</section>
+</main>
+<script>
+const emptyData=()=>({projectId:null,kohde:"",paiva:new Date().toISOString().slice(0,10),mittaaja:"",valine:"",apartments:[]});
+function loadData(){
+  try{
+    const saved=JSON.parse(localStorage.getItem("iv_proto")||"null");
+    if(saved&&Array.isArray(saved.apartments))return saved;
+    if(saved&&Array.isArray(saved.rooms)){
+      saved.apartments=saved.rooms.length?[{name:"Asunto 1",rooms:saved.rooms}]:[];
+      delete saved.rooms;
+      return saved;
+    }
+  }catch(e){}
+  return emptyData();
+}
+let data=loadData();
+let deferredInstallPrompt=null;
+const isStandalone=()=>window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
+window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();deferredInstallPrompt=event});
+window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;showToast("IV Mittaus asennettu")});
+function closeInstallHelp(){document.getElementById("install-modal").classList.remove("open")}
+async function installApp(){
+  closeMenu();
+  if(isStandalone()){showToast("Sovellus on jo asennettu");return}
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt=null;
+    return;
+  }
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  document.getElementById("install-help-content").innerHTML=ios
+    ?'<p style="margin-top:0"><strong>Asenna iPhoneen:</strong></p><ol style="padding-left:22px"><li>Avaa tämä sivu <strong>Safarissa</strong>.</li><li>Paina alareunan <strong>Jaa</strong>-painiketta.</li><li>Valitse <strong>Lisää Koti-valikkoon</strong>.</li><li>Paina <strong>Lisää</strong>.</li></ol><p>Sovellus ilmestyy aloitusnäytölle omalla IV-kuvakkeella.</p>'
+    :'<p style="margin-top:0">Avaa selaimen valikko ja valitse <strong>Asenna sovellus</strong> tai <strong>Lisää aloitusnäyttöön</strong>.</p>';
+  document.getElementById("install-modal").classList.add("open");
+}
+const emptyPdfSettings=()=>({company:"",businessId:"",logoData:"",logoWidth:0,logoHeight:0});
+function getPdfSettings(){try{return{...emptyPdfSettings(),...JSON.parse(localStorage.getItem("iv_pdf_settings")||"{}")}}catch(e){return emptyPdfSettings()}}
+let pendingPdfSettings=getPdfSettings();
+function renderLogoPreview(){const box=document.getElementById("logo-preview");box.innerHTML=pendingPdfSettings.logoData?'<img src="'+pendingPdfSettings.logoData+'" alt="Yrityksen logo">':'Ei logoa'}
+function openPdfSettings(){closeMenu();pendingPdfSettings=getPdfSettings();document.getElementById("setting-company").value=pendingPdfSettings.company;document.getElementById("setting-business-id").value=pendingPdfSettings.businessId;document.getElementById("setting-logo").value="";renderLogoPreview();document.getElementById("pdf-settings-modal").classList.add("open")}
+function closePdfSettings(){document.getElementById("pdf-settings-modal").classList.remove("open")}
+function handleLogoFile(file){
+  if(!file)return;
+  if(!/^image\/(png|jpeg|webp)$/.test(file.type)){showToast("Valitse PNG-, JPG- tai WebP-kuva");return}
+  const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,900/img.width,360/img.height),w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale)),canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");canvas.width=w;canvas.height=h;ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);pendingPdfSettings.logoData=canvas.toDataURL("image/jpeg",.88);pendingPdfSettings.logoWidth=w;pendingPdfSettings.logoHeight=h;renderLogoPreview()};img.onerror=()=>showToast("Logoa ei voitu lukea");img.src=reader.result};reader.readAsDataURL(file)
+}
+function removeLogo(){pendingPdfSettings.logoData="";pendingPdfSettings.logoWidth=0;pendingPdfSettings.logoHeight=0;document.getElementById("setting-logo").value="";renderLogoPreview()}
+function savePdfSettings(){pendingPdfSettings.company=document.getElementById("setting-company").value.trim();pendingPdfSettings.businessId=document.getElementById("setting-business-id").value.trim();try{localStorage.setItem("iv_pdf_settings",JSON.stringify(pendingPdfSettings));closePdfSettings();showToast("PDF-asetukset tallennettu")}catch(e){showToast("Asetuksia ei voitu tallentaa")}}
+function save(){
+  data.kohde=document.getElementById("kohde").value;data.paiva=document.getElementById("paiva").value;data.mittaaja=document.getElementById("mittaaja").value;data.valine=document.getElementById("valine").value;
+  try{localStorage.setItem("iv_proto",JSON.stringify(data))}catch(e){}
+}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
+function getProjects(){try{const p=JSON.parse(localStorage.getItem("iv_projects")||"[]");return Array.isArray(p)?p:[]}catch(e){return[]}}
+function setProjects(projects){try{localStorage.setItem("iv_projects",JSON.stringify(projects));return true}catch(e){return false}}
+function projectHasContent(){return !!(data.kohde||data.mittaaja||data.valine||data.apartments.length)}
+function projectName(projectData=data){return projectData.kohde?.trim()||projectData.apartments?.[0]?.name?.trim()||"Nimetön projekti"}
+function toggleMenu(force){const m=document.getElementById("top-menu");if(typeof force==="boolean")m.classList.toggle("open",force);else m.classList.toggle("open")}
+function closeMenu(){document.getElementById("top-menu").classList.remove("open")}
+function showToast(message){const t=document.getElementById("toast");t.textContent=message;t.classList.add("show");clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove("show"),2600)}
+function saveProjectSnapshot(){
+  save();
+  if(!data.projectId)data.projectId=(globalThis.crypto?.randomUUID?.()||("projekti-"+Date.now()+"-"+Math.random().toString(36).slice(2)));
+  const projects=getProjects(),snapshot=JSON.parse(JSON.stringify(data)),item={id:data.projectId,name:projectName(),savedAt:new Date().toISOString(),data:snapshot},i=projects.findIndex(p=>p.id===data.projectId);
+  if(i>=0)projects.splice(i,1);projects.unshift(item);
+  const ok=setProjects(projects.slice(0,100));save();return ok;
+}
+function saveCurrentProject(){closeMenu();const ok=saveProjectSnapshot();showToast(ok?"Projekti tallennettu":"Projektia ei voitu tallentaa")}
+function newProject(){
+  closeMenu();
+  if(!projectHasContent()){startNewProject();return}
+  document.getElementById("new-project-modal").classList.add("open");
+}
+function closeNewProject(){document.getElementById("new-project-modal").classList.remove("open")}
+function startNewProject(){data=emptyData();render();save();closeNewProject();window.scrollTo({top:0,behavior:"smooth"});showToast("Uusi projekti avattu")}
+function openProjects(){closeMenu();renderProjectList();document.getElementById("projects-modal").classList.add("open")}
+function closeProjects(){document.getElementById("projects-modal").classList.remove("open")}
+function renderProjectList(){
+  const list=document.getElementById("project-list"),projects=getProjects();
+  if(!projects.length){list.innerHTML='<div class="empty-state"><strong>Ei tallennettuja projekteja</strong>Projekti tallentuu tähän listaan, kun lataat siitä PDF:n.</div>';return}
+  list.innerHTML=projects.map(p=>'<div class="project-item"><div><strong>'+esc(p.name||"Nimetön projekti")+'</strong><span>Tallennettu '+esc(new Date(p.savedAt).toLocaleString("fi-FI"))+'</span></div><div class="project-actions"><button type="button" class="primary" onclick="loadProject(\''+esc(p.id)+'\')">Avaa</button><button type="button" class="danger" onclick="deleteProject(\''+esc(p.id)+'\')">Poista</button></div></div>').join("");
+}
+function loadProject(id){
+  const p=getProjects().find(x=>x.id===id);if(!p)return;
+  data=JSON.parse(JSON.stringify(p.data));data.projectId=id;render();save();closeProjects();window.scrollTo({top:0,behavior:"smooth"});showToast("Projekti avattu");
+}
+function deleteProject(id){
+  const projects=getProjects(),p=projects.find(x=>x.id===id);if(!p||!confirm('Poistetaanko projekti "'+(p.name||"Nimetön projekti")+'"?'))return;
+  setProjects(projects.filter(x=>x.id!==id));if(data.projectId===id)data.projectId=null;save();renderProjectList();showToast("Projekti poistettu");
+}
+let pdfObjectUrl=null;
+function closePdfPreview(){document.getElementById("pdf-modal").classList.remove("open")}
+function addApartment(){data.apartments.push({name:"",comments:"",rooms:[]});render();save();document.querySelectorAll(".apartment-title input")[data.apartments.length-1]?.focus()}
+function removeApartment(ai){if(confirm("Poistetaanko tämä asunto huoneineen?")){data.apartments.splice(ai,1);render();save()}}
+function updateApartment(ai,v){data.apartments[ai].name=v;save()}
+function updateApartmentComments(ai,v){data.apartments[ai].comments=v;save()}
+function addRoom(ai){data.apartments[ai].rooms.push({name:"",supply:[],exhaust:[]});render();save();let a=document.querySelectorAll(".apartment")[ai];a?.querySelectorAll(".room-title input")[data.apartments[ai].rooms.length-1]?.focus()}
+function addVent(ai,ri,t){data.apartments[ai].rooms[ri][t].push({valve:"",kpl:"1",pa:"",target:"",adjusted:"",position:""});render();save()}
+function removeRoom(ai,ri){if(confirm("Poistetaanko tämä huone?")){data.apartments[ai].rooms.splice(ri,1);render();save()}}
+function removeVent(ai,ri,t,v){data.apartments[ai].rooms[ri][t].splice(v,1);render();save()}
+function updateRoom(ai,ri,v){data.apartments[ai].rooms[ri].name=v;save()}
+function updateVent(ai,ri,t,v,k,x){data.apartments[ai].rooms[ri][t][v][k]=x;save();if(k==="adjusted")updateApartmentSummary(ai)}
+function togglePositionSign(ai,ri,t,v){let x=String(data.apartments[ai].rooms[ri][t][v].position||"");data.apartments[ai].rooms[ri][t][v].position=x.startsWith("-")?x.slice(1):"-"+x;render();save()}
+function flowNumber(v){const n=Number(String(v??"").replace(",","."));return Number.isFinite(n)?n:0}
+function flowFormat(v){return (Math.round(v*10)/10).toLocaleString("fi-FI",{maximumFractionDigits:1}).replace("−","-")}
+function apartmentTotals(a){let supply=0,exhaust=0;a.rooms.forEach(r=>{r.supply.forEach(v=>supply+=flowNumber(v.adjusted));r.exhaust.forEach(v=>exhaust+=flowNumber(v.adjusted))});const difference=supply-exhaust;return{supply,exhaust,difference,status:Math.abs(difference)<0.05?"Tasapainossa":difference<0?"Alipaineinen":"Ylipaineinen",statusClass:Math.abs(difference)<0.05?"balanced":difference<0?"negative":"positive"}}
+function updateApartmentSummary(ai){const t=apartmentTotals(data.apartments[ai]),s=document.getElementById("summary-supply-"+ai),e=document.getElementById("summary-exhaust-"+ai),d=document.getElementById("summary-difference-"+ai);if(!s||!e||!d)return;s.textContent=flowFormat(t.supply)+" l/s";e.textContent=flowFormat(t.exhaust)+" l/s";d.querySelector("strong").textContent=(t.difference>0?"+":"")+flowFormat(t.difference)+" l/s";d.querySelector("em").textContent=t.status;d.className="summary-box "+t.statusClass}
+function pdfText(v){return String(v??"").replace(/[\\()]/g,m=>"\\"+m).replace(/[^\x20-\x7e\xa0-\xff]/g,"?")}
+function makePdf(){
+  save();
+  const settings=getPdfSettings(),logoBytes=settings.logoData.startsWith("data:image/jpeg;base64,")?Uint8Array.from(atob(settings.logoData.split(",")[1]),c=>c.charCodeAt(0)):null;
+  const pages=[[]],left=32,width=531,cols=[175,38,42,88,96,92],headers=["Venttiili / päätelaite","Kpl","Pa","Suunniteltu l/s","Säädetty l/s","Asento mm"];
+  let page=pages[0],y=0;
+  const n=v=>Number(v).toFixed(2).replace(/\.00$/,"");
+  const text=(v,x,yy,size=9,bold=false,color="0 0 0")=>page.push(color+" rg BT /F"+(bold?2:1)+" "+n(size)+" Tf "+n(x)+" "+n(yy)+" Td ("+pdfText(v)+") Tj ET");
+  const rect=(x,yy,w,h,fill=null,stroke="0.68 0.72 0.77")=>{let c="";if(fill)c+=fill+" rg ";if(stroke)c+=stroke+" RG 0.6 w ";c+=n(x)+" "+n(yy)+" "+n(w)+" "+n(h)+" re "+(fill&&stroke?"B":fill?"f":"S");page.push(c)};
+  const line=(x1,y1,x2,y2,color="0.68 0.72 0.77")=>page.push(color+" RG 0.6 w "+n(x1)+" "+n(y1)+" m "+n(x2)+" "+n(y2)+" l S");
+  const image=(x,yy,w,h)=>page.push("q "+n(w)+" 0 0 "+n(h)+" "+n(x)+" "+n(yy)+" cm /Im1 Do Q");
+  const fit=(v,max)=>{v=String(v||"-");return v.length>max?v.slice(0,max-3)+"...":v};
+  const wrap=(v,max=90)=>{const out=[];String(v||"").split(/\r?\n/).forEach(part=>{let words=part.split(/\s+/),row="";if(!part){out.push("");return}words.forEach(word=>{if((row+" "+word).trim().length>max){if(row)out.push(row);while(word.length>max){out.push(word.slice(0,max));word=word.slice(max)}row=word}else row=(row+" "+word).trim()});if(row)out.push(row)});return out};
+  function newPage(){
+    if(page.length){page=[];pages.push(page)}
+    rect(0,790,595,52,"0.08 0.13 0.19",null);
+    text("IV-MITTAPÖYTÄKIRJA",left,815,15,true,"1 1 1");
+    text(fit(data.kohde||"",48),left,799,8,false,"0.82 0.87 0.92");
+    let logoX=563;
+    if(logoBytes&&settings.logoWidth&&settings.logoHeight){const logoH=36,logoW=Math.min(78,logoH*settings.logoWidth/settings.logoHeight);logoX=563-logoW;image(logoX,798,logoW,logoH)}
+    const companyWidth=Math.max(50,logoX-342),companyChars=Math.max(8,Math.floor(companyWidth/5.2));
+    if(settings.company)text(fit(settings.company,companyChars),330,815,9,true,"1 1 1");
+    if(settings.businessId)text("Y-tunnus "+fit(settings.businessId,20),330,800,7,false,"0.82 0.87 0.92");
+    y=772;
+  }
+  function ensure(h){if(y-h<42)newPage()}
+  function field(label,value,x,top,w,h=36){
+    rect(x,top-h,w,h,"0.97 0.98 0.99","0.72 0.76 0.81");
+    text(label.toUpperCase(),x+8,top-12,7,true,"0.35 0.40 0.46");
+    text(fit(value,Math.max(12,Math.floor(w/6.2))),x+8,top-27,10,false);
+  }
+  function apartmentBar(name,continued=false){
+    ensure(27);rect(left,y-24,width,24,"0.12 0.25 0.37",null);
+    text("ASUNTO  "+(name||"-")+(continued?"  (jatkuu)":""),left+9,y-16,11,true,"1 1 1");y-=31;
+  }
+  function roomBar(name,continued=false){
+    ensure(23);rect(left,y-20,width,20,"0.87 0.91 0.94","0.65 0.70 0.75");
+    text("HUONE  "+(name||"-")+(continued?"  (jatkuu)":""),left+8,y-14,9,true,"0.10 0.17 0.24");y-=27;
+  }
+  function tableHeader(title){
+    text(title,left,y-11,8,true,"0.12 0.25 0.37");y-=17;
+    rect(left,y-22,width,22,"0.91 0.93 0.95","0.58 0.63 0.68");
+    let x=left;headers.forEach((h,i)=>{text(h,x+4,y-14,7,true,"0.18 0.22 0.27");x+=cols[i];if(i<headers.length-1)line(x,y-22,x,y)});y-=22;
+  }
+  function tableRow(values){
+    rect(left,y-20,width,20,"1 1 1","0.68 0.72 0.77");
+    let x=left;values.forEach((v,i)=>{text(fit(v,i?12:29),x+4,y-13,8,false);x+=cols[i];if(i<values.length-1)line(x,y-20,x,y)});y-=20;
+  }
+  function drawTable(a,r,type,title){
+    const rows=r[type].length?r[type]:[{valve:"-",kpl:"-",pa:"-",target:"-",adjusted:"-",position:"-"}];
+    if(y-(17+22+20)<42){newPage();apartmentBar(a.name,true);roomBar(r.name,true)}
+    tableHeader(title);
+    rows.forEach(v=>{if(y-20<42){newPage();apartmentBar(a.name,true);roomBar(r.name,true);tableHeader(title+" (jatkuu)")}tableRow([v.valve,v.kpl,v.pa,v.target,v.adjusted,v.position])});
+    y-=7;
+  }
+  function drawSummary(a){
+    const t=apartmentTotals(a);if(y-62<42){newPage();apartmentBar(a.name,true)}
+    rect(left,y-20,width,20,"0.12 0.25 0.37",null);text("ILMAMÄÄRIEN YHTEENVETO",left+7,y-14,8,true,"1 1 1");y-=20;
+    const w=width/3;rect(left,y-39,width,39,"0.96 0.97 0.98","0.65 0.70 0.75");line(left+w,y-39,left+w,y);line(left+w*2,y-39,left+w*2,y);
+    [["TULOILMA YHTEENSÄ",flowFormat(t.supply)+" l/s"],["POISTOILMA YHTEENSÄ",flowFormat(t.exhaust)+" l/s"],["EROTUS (TULO - POISTO)",(t.difference>0?"+":"")+flowFormat(t.difference)+" l/s  -  "+t.status]].forEach((item,i)=>{text(item[0],left+w*i+7,y-12,7,true,"0.35 0.40 0.46");text(item[1],left+w*i+7,y-29,10,i===2,"0.10 0.17 0.24")});y-=53;
+  }
+  newPage();
+  field("Kohde",data.kohde,left,y,width,38);y-=45;
+  field("Mittauspäivä",data.paiva,left,y,150);
+  field("Mittaaja",data.mittaaja,left+150,y,190);
+  field("Mittausväline",data.valine,left+340,y,width-340);y-=44;
+  if(!data.apartments.length){text("Ei lisättyjä asuntoja.",left,y-14,10,false,"0.35 0.40 0.46");y-=24}
+  data.apartments.forEach(a=>{
+    ensure(a.rooms.length?125:75);
+    apartmentBar(a.name);
+    if(!a.rooms.length){text("Ei lisättyjä huoneita.",left+8,y-12,9,false,"0.35 0.40 0.46");y-=24}
+    a.rooms.forEach(r=>{if(y-90<42){newPage();apartmentBar(a.name,true)}roomBar(r.name);drawTable(a,r,"supply","TULOILMA");drawTable(a,r,"exhaust","POISTOILMA");y-=5});
+    drawSummary(a);
+    let comments=wrap(a.comments||"",88);if(!comments.length)comments=["-"];
+    let commentIndex=0;
+    while(commentIndex<comments.length){
+      if(y-47<42){newPage();apartmentBar(a.name,true)}
+      const count=Math.max(1,Math.min(comments.length-commentIndex,Math.floor((y-42-27)/12)));
+      const chunk=comments.slice(commentIndex,commentIndex+count),boxH=27+chunk.length*12;
+      rect(left,y-boxH,width,boxH,"0.97 0.98 0.99","0.65 0.70 0.75");
+      rect(left,y-20,width,20,"0.89 0.92 0.94","0.65 0.70 0.75");
+      text("KOMMENTIT / TEHDYT KORJAUKSET JA KULUT"+(commentIndex?" (jatkuu)":""),left+7,y-14,8,true,"0.18 0.24 0.30");
+      chunk.forEach((row,i)=>text(row||" ",left+8,y-34-i*12,8,false));
+      y-=boxH+14;commentIndex+=count;
+      if(commentIndex<comments.length){newPage();apartmentBar(a.name,true)}
+    }
+  });
+  pages.forEach((p,i)=>{page=p;line(left,31,563,31,"0.72 0.76 0.80");text("IV-mittapöytäkirja",left,18,7,false,"0.45 0.49 0.54");text("Sivu "+(i+1)+" / "+pages.length,510,18,7,false,"0.45 0.49 0.54")});
+  const objects=[],pageIds=pages.map((_,i)=>5+i*2),contentIds=pages.map((_,i)=>6+i*2),imageId=logoBytes?5+pages.length*2:null;
+  objects[1]="<< /Type /Catalog /Pages 2 0 R >>";
+  objects[2]="<< /Type /Pages /Kids ["+pageIds.map(id=>id+" 0 R").join(" ")+"] /Count "+pages.length+" >>";
+  objects[3]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
+  objects[4]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
+  pages.forEach((commands,i)=>{
+    objects[pageIds[i]]="<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >>"+(imageId?" /XObject << /Im1 "+imageId+" 0 R >>":"")+" >> /Contents "+contentIds[i]+" 0 R >>";
+    const body=commands.join("\n");
+    objects[contentIds[i]]="<< /Length "+body.length+" >>\nstream\n"+body+"\nendstream";
+  });
+  if(imageId)objects[imageId]={dict:"<< /Type /XObject /Subtype /Image /Width "+settings.logoWidth+" /Height "+settings.logoHeight+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+logoBytes.length+" >>",bytes:logoBytes};
+  const latin1=s=>Uint8Array.from([...s],ch=>ch.charCodeAt(0)&255),chunks=[],offsets=[0];let total=0;
+  const append=bytes=>{chunks.push(bytes);total+=bytes.length};append(latin1("%PDF-1.4\n%âãÏÓ\n"));
+  for(let i=1;i<objects.length;i++){offsets[i]=total;append(latin1(i+" 0 obj\n"));const obj=objects[i];if(obj&&obj.bytes){append(latin1(obj.dict+"\nstream\n"));append(obj.bytes);append(latin1("\nendstream"))}else append(latin1(obj));append(latin1("\nendobj\n"))}
+  const xref=total;let tail="xref\n0 "+objects.length+"\n0000000000 65535 f \n";for(let i=1;i<objects.length;i++)tail+=String(offsets[i]).padStart(10,"0")+" 00000 n \n";tail+="trailer\n<< /Size "+objects.length+" /Root 1 0 R >>\nstartxref\n"+xref+"\n%%EOF";append(latin1(tail));
+  const pdf=new Uint8Array(total);let pos=0;chunks.forEach(chunk=>{pdf.set(chunk,pos);pos+=chunk.length});return pdf;
+}
+function generatePdf(){
+  const stored=saveProjectSnapshot(),blob=new Blob([makePdf()],{type:"application/pdf"}),url=URL.createObjectURL(blob);
+  const base=(data.kohde||"iv-mittapoytakirja").replace(/[^a-zA-Z0-9äöåÄÖÅ_-]+/g,"_");
+  if(pdfObjectUrl)URL.revokeObjectURL(pdfObjectUrl);pdfObjectUrl=url;
+  document.getElementById("pdf-preview").src=url;
+  const open=document.getElementById("pdf-open"),download=document.getElementById("pdf-download");open.href=url;download.href=url;download.download=base+".pdf";
+  document.getElementById("pdf-modal").classList.add("open");
+  showToast(stored?"PDF luotu ja projekti tallennettu":"PDF luotu, mutta projektia ei voitu tallentaa");
+}
+function clearAll(){if(confirm("Tyhjennetäänkö koko mittaus?")){try{localStorage.removeItem("iv_proto")}catch(e){}data=emptyData();render()}}
+function rows(ai,ri,type,title){
+let a=data.apartments[ai].rooms[ri][type],out='<div class="section-title '+type+'"><strong>'+title+'</strong><button type="button" class="small secondary no-print" onclick="addVent('+ai+','+ri+',\''+type+'\')">+ Lisää venttiili</button></div>';
+if(!a.length)return out+'<div class="muted">Ei venttiilejä.</div>';
+a.forEach((v,vi)=>{out+='<div class="row">'+
+'<div><label>Venttiili / päätelaite</label><input value="'+esc(v.valve)+'" oninput="updateVent('+ai+','+ri+',\''+type+'\','+vi+',\'valve\',this.value)" placeholder="KSO-125"></div>'+
+'<div><label>Kpl</label><input inputmode="decimal" value="'+esc(v.kpl)+'" oninput="updateVent('+ai+','+ri+',\''+type+'\','+vi+',\'kpl\',this.value)"></div>'+
+'<div><label>Pa</label><input inputmode="decimal" value="'+esc(v.pa)+'" oninput="updateVent('+ai+','+ri+',\''+type+'\','+vi+',\'pa\',this.value)"></div>'+
+'<div><label>Suunn. l/s</label><input inputmode="decimal" value="'+esc(v.target)+'" oninput="updateVent('+ai+','+ri+',\''+type+'\','+vi+',\'target\',this.value)"></div>'+
+'<div><label>Säädetty l/s</label><input inputmode="decimal" value="'+esc(v.adjusted)+'" oninput="updateVent('+ai+','+ri+',\''+type+'\','+vi+',\'adjusted\',this.value)"></div>'+
+'<div><label>Asento mm</label><div class="signed-input"><input inputmode="decimal" value="'+esc(v.position)+'" oninput="updateVent('+ai+','+ri+',\''+type+'\','+vi+',\'position\',this.value)" placeholder="-7"><button type="button" class="small no-print" onclick="togglePositionSign('+ai+','+ri+',\''+type+'\','+vi+')" aria-label="Vaihda etumerkki">±</button></div></div>'+
+'<button type="button" class="danger small no-print" onclick="removeVent('+ai+','+ri+',\''+type+'\','+vi+')">×</button></div>'}) ;return out}
+function render(){
+document.getElementById("kohde").value=data.kohde;document.getElementById("paiva").value=data.paiva;document.getElementById("mittaaja").value=data.mittaaja;document.getElementById("valine").value=data.valine;
+let e=document.getElementById("apartments");e.innerHTML="";
+if(!data.apartments.length)e.innerHTML='<div class="empty-state no-print"><strong>Aloita lisäämällä asunto</strong>Asunnon alle lisätään huoneet ja niiden tulo- ja poistoilmaventtiilit.<br><button type="button" class="primary" onclick="addApartment()">+ Lisää ensimmäinen asunto</button></div>';
+data.apartments.forEach((a,ai)=>{const t=apartmentTotals(a);let apartment=document.createElement("section");apartment.className="card apartment";apartment.innerHTML='<div class="apartment-title"><span class="apartment-index">Asunto '+(ai+1)+'</span><input aria-label="Asunnon tunnus" value="'+esc(a.name)+'" oninput="updateApartment('+ai+',this.value)" placeholder="Tunnus, esim. A1"><span></span><button type="button" class="danger small no-print" onclick="removeApartment('+ai+')">Poista asunto</button></div><div class="apartment-rooms"></div><div class="no-print"><button type="button" class="add-room" onclick="addRoom('+ai+')">+ Lisää huone asuntoon</button></div><div class="air-summary"><div class="summary-box"><span>Tuloilma yhteensä</span><strong id="summary-supply-'+ai+'">'+flowFormat(t.supply)+' l/s</strong></div><div class="summary-box"><span>Poistoilma yhteensä</span><strong id="summary-exhaust-'+ai+'">'+flowFormat(t.exhaust)+' l/s</strong></div><div id="summary-difference-'+ai+'" class="summary-box '+t.statusClass+'"><span>Erotus (tulo − poisto)</span><strong>'+(t.difference>0?"+":"")+flowFormat(t.difference)+' l/s</strong><em>'+t.status+'</em></div></div><div style="margin-top:15px"><label>Kommentit / tehdyt korjaukset ja kulut</label><textarea oninput="updateApartmentComments('+ai+',this.value)" placeholder="Kirjaa tehdyt korjaukset, havainnot ja kulut...">'+esc(a.comments||"")+'</textarea></div>';
+let roomList=apartment.querySelector(".apartment-rooms");
+a.rooms.forEach((r,ri)=>{let c=document.createElement("section");c.className="card room";c.innerHTML='<div class="room-title"><span class="room-index">Huone '+(ri+1)+'</span><input aria-label="Huoneen nimi" value="'+esc(r.name)+'" oninput="updateRoom('+ai+','+ri+',this.value)" placeholder="Nimi, esim. OH"><span></span><button type="button" class="danger small no-print" onclick="removeRoom('+ai+','+ri+')">Poista huone</button></div>'+rows(ai,ri,"supply","Tuloilma")+rows(ai,ri,"exhaust","Poistoilma");roomList.appendChild(c)});
+e.appendChild(apartment)})}
+["kohde","paiva","mittaaja","valine"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
+</script></body></html>
