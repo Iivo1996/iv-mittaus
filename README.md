@@ -1,6 +1,6 @@
 # IV Mittaus
 
-Ilmamäärien mittauspöytäkirjasovellus, jossa on paikallinen automaattitallennus, PDF-vienti, asennettava PWA sekä käyttäjäkohtainen Supabase-pilvivarmuuskopiointi.
+Ilmamäärien mittauspöytäkirjasovellus, jossa on paikallinen automaattitallennus, PDF-vienti, asennettava PWA sekä käyttäjäkohtainen Supabase-pilvivarmuuskopiointi. Jokaisella venttiilirivillä valitaan tila ja tulo/poisto. Kohteelle voidaan lisätä paine-ero sekä säädetty/mitattu nopeus.
 
 Puhelimella toimiva ilmanvaihdon mittauspöytäkirjasovellus (PWA).
 
