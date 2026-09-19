@@ -51,6 +51,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 .room-group{background:var(--ui-surface-2);border-color:var(--ui-border)}.room-group>summary{color:var(--ui-text)}.room-group[open]>summary::before{color:var(--ui-accent)}.room-group-body{background:var(--ui-surface-2)}
 .vent-card,.vent-card.exhaust{border:1px solid var(--ui-border);border-left:1px solid var(--ui-border);background:var(--ui-surface)}.vent-card>summary{background:var(--ui-surface-2)}.vent-card>summary::before{background:var(--ui-surface-3);color:var(--ui-text)}.vent-card[open]>summary::before{color:var(--ui-accent)}.vent-summary-main strong,.vent-summary-flow{color:var(--ui-text)}.vent-summary-main span{display:inline-block;width:max-content;padding:3px 8px;border-radius:999px;margin-top:4px;font-weight:750}.vent-card.supply .vent-summary-main span{color:var(--ui-supply);background:var(--ui-supply-soft)}.vent-card.exhaust .vent-summary-main span{color:var(--ui-exhaust);background:var(--ui-exhaust-soft)}.vent-card .vent-row{background:var(--ui-surface);border-top-color:var(--ui-border)}
 .optional-field,.summary-box,.empty-state,.project-item,.cloud-box{background:var(--ui-surface-2);border-color:var(--ui-border)}.optional-field-head strong,.summary-box strong,.empty-state strong,.project-item strong,.cloud-box strong{color:var(--ui-text)}.summary-box.negative em,.summary-box.balanced em,.sync-ok{color:var(--ui-accent)!important}.summary-box.positive em,.sync-error{color:var(--ui-danger)!important}.add-room{background:var(--ui-surface-2);border-color:var(--ui-border);color:var(--ui-text)}.action-card{border-color:var(--ui-border)}.pdf-frame{background:var(--ui-bg);border-color:var(--ui-border)}.logo-preview{background:var(--ui-surface-2);border-color:var(--ui-border)}.file-button{background:var(--ui-surface-2);border-color:var(--ui-border);color:var(--ui-text)}.toast{background:var(--ui-accent);color:#04130e}.muted,.bottom .save-note,.room-group-count{color:var(--ui-muted)}
+.vent-row input.measurement-alert{background:color-mix(in srgb,var(--ui-danger) 14%,var(--ui-surface-2));border-color:var(--ui-danger);color:var(--ui-danger);font-weight:800}.deviation-comments{margin-top:10px;padding:11px 12px;border-left:4px solid var(--ui-danger);border-radius:8px;background:color-mix(in srgb,var(--ui-danger) 10%,var(--ui-surface-2));color:var(--ui-text);font-size:13px;line-height:1.45}.deviation-comments strong{display:block;color:var(--ui-danger);margin-bottom:5px}.deviation-comments ul{margin:0;padding-left:19px}.deviation-comments li+li{margin-top:4px}.deviation-comments[hidden]{display:none}
 @media(max-width:700px){header{padding:10px 12px}.tool-badge{display:none}.brand{gap:9px}.brand-mark{width:34px;height:34px}.brand-copy h1{font-size:17px}.menu-button{font-size:13px;padding:6px 9px}main{padding:12px 9px 30px}.card{padding:13px;border-radius:10px}.grid{grid-template-columns:1fr}.apartment{padding:0}.apartment-summary{padding:12px}.apartment-body{padding:8px}.apartment-title,.room-title{grid-template-columns:auto 1fr}.apartment-title .danger,.room-title .danger{grid-column:2;justify-self:end}.row{grid-template-columns:1fr 1fr 1fr;gap:8px}.row>div:first-child{grid-column:1/-1}.row>button{grid-column:3}.air-summary{grid-template-columns:1fr 1fr}.summary-box:last-child{grid-column:1/-1}.bottom{display:grid;grid-template-columns:1fr 1fr}.bottom .save-note{grid-column:1/-1;margin:0}.bottom .primary,.bottom .save-project{grid-column:1/-1}.bottom button{width:100%}.project-item{grid-template-columns:1fr}.project-actions{justify-content:flex-end}.project-actions button{flex:1}.toast{bottom:24px;white-space:nowrap}.pdf-frame{height:50vh}.modal-actions{display:grid;grid-template-columns:1fr 1fr}.modal-actions>*{width:100%}}
 @media(max-width:700px){.vent-row{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.vent-row .field-space{grid-column:span 3}.vent-row .field-type{grid-column:span 3}.vent-row .field-valve{grid-column:1/-1}.vent-row .field-small{grid-column:span 2}.vent-row .field-flow{grid-column:span 3}.vent-row .field-position{grid-column:span 3}.vent-row .remove-vent{grid-column:1/-1;width:100%}.optional-fields{grid-template-columns:1fr}.vent-actions{display:grid;grid-template-columns:1fr}.vent-actions button{width:100%}.room-group>summary{padding:11px 10px}.room-group-body{padding:0 7px 7px}.vent-card>summary{padding:9px 8px}}
 @media(max-width:700px){.apartment-title{grid-template-columns:1fr}.apartment-title>input{max-width:none}.apartment-title .danger{grid-column:1}}
@@ -332,15 +333,35 @@ function updateVent(ai,vi,key,value){
       const typeLabel=card.querySelector(".vent-summary-main span");
       if(typeLabel)typeLabel.textContent=isExhaust?"Poisto":"Tulo";
     }
-    updateApartmentSummary(ai);save();return;
+    updateApartmentSummary(ai);updateVentDeviation(ai,vi);updateApartmentDeviationNotes(ai);save();return;
   }
-  save();if(key==="adjusted")updateApartmentSummary(ai)
+  save();if(key==="adjusted")updateApartmentSummary(ai);updateVentDeviation(ai,vi);updateApartmentDeviationNotes(ai)
 }
 function togglePositionSign(ai,vi){let x=String(data.apartments[ai].vents[vi].position||"");data.apartments[ai].vents[vi].position=x.startsWith("-")?x.slice(1):"-"+x;render();save()}
 function toggleApartmentOption(ai,key){data.apartments[ai][key]=!data.apartments[ai][key];render();save()}
 function updateApartmentOption(ai,key,value){data.apartments[ai][key]=value;save()}
 function flowNumber(v){const n=Number(String(v??"").replace(",","."));return Number.isFinite(n)?n:0}
 function flowFormat(v){return (Math.round(v*10)/10).toLocaleString("fi-FI",{maximumFractionDigits:1}).replace("−","-")}
+function strictFlowNumber(v){const value=String(v??"").trim().replace(",",".");if(!value)return null;const n=Number(value);return Number.isFinite(n)?n:null}
+function airflowDeviation(v){
+  const target=strictFlowNumber(v?.target),adjusted=strictFlowNumber(v?.adjusted);if(target===null||adjusted===null||target<=0)return null;
+  const difference=adjusted-target,percent=difference/target*100,tolerance=Math.max(target*.2,1);
+  return{difference,percent,tolerance,exceeds:Math.abs(difference)>tolerance+1e-9};
+}
+function ventDeviationText(v){
+  const d=airflowDeviation(v);if(!d?.exceeds)return"";
+  const space=String(v.space||"").trim()||"Nimetön tila",valve=String(v.valve||"").trim()||"Nimetön venttiili",direction=d.difference<0?"alittaa":"ylittää";
+  return space+" / "+valve+": säädetty ilmamäärä "+direction+" suunnitteluarvon "+flowFormat(Math.abs(d.difference))+" l/s ("+flowFormat(Math.abs(d.percent))+" %).";
+}
+function apartmentDeviationComments(a){return(a.vents||[]).map(ventDeviationText).filter(Boolean)}
+function updateVentDeviation(ai,vi){
+  const card=document.querySelector('.apartment[data-apartment-index="'+ai+'"] .vent-card[data-vent-index="'+vi+'"]'),input=card?.querySelector("[data-adjusted-result]");
+  if(input)input.classList.toggle("measurement-alert",!!airflowDeviation(data.apartments[ai].vents[vi])?.exceeds);
+}
+function updateApartmentDeviationNotes(ai){
+  const box=document.getElementById("deviation-comments-"+ai);if(!box)return;const notes=apartmentDeviationComments(data.apartments[ai]);
+  box.hidden=!notes.length;box.innerHTML=notes.length?'<strong>Automaattinen huomio</strong><ul>'+notes.map(note=>'<li>'+esc(note)+'</li>').join("")+'</ul>':"";
+}
 function apartmentTotals(a){let supply=0,exhaust=0,hasSupply=false,hasExhaust=false;(a.vents||[]).forEach(v=>{if(v.type==="exhaust"){hasExhaust=true;exhaust+=flowNumber(v.adjusted)}else{hasSupply=true;supply+=flowNumber(v.adjusted)}});const difference=supply-exhaust;return{supply,exhaust,hasSupply,hasExhaust,difference,status:Math.abs(difference)<0.05?"Tasapainossa":difference<0?"Alipaineinen":"Ylipaineinen",statusClass:Math.abs(difference)<0.05?"balanced":difference<0?"negative":"positive"}}
 function updateApartmentSummary(ai){const t=apartmentTotals(data.apartments[ai]),s=document.getElementById("summary-supply-"+ai),e=document.getElementById("summary-exhaust-"+ai),d=document.getElementById("summary-difference-"+ai);if(!s||!e||!d)return;s.textContent=flowFormat(t.supply)+" l/s";e.textContent=flowFormat(t.exhaust)+" l/s";d.querySelector("strong").textContent=(t.difference>0?"+":"")+flowFormat(t.difference)+" l/s";d.querySelector("em").textContent=t.status;d.className="summary-box "+t.statusClass}
 function pdfText(v){return String(v??"").replace(/[\\()]/g,m=>"\\"+m).replace(/[^\x20-\x7e\xa0-\xff]/g,"?")}
@@ -348,7 +369,7 @@ function makePdf(){
   save();
   const settings=getPdfSettings(),logoBytes=settings.logoData.startsWith("data:image/jpeg;base64,")?Uint8Array.from(atob(settings.logoData.split(",")[1]),c=>c.charCodeAt(0)):null;
   const pages=[[]],left=32,width=531,cols=[64,57,125,30,35,67,72,81],headers=["Tila","Tulo/poisto","Venttiili / päätelaite","Kpl","Pa","Suunn. l/s","Säädetty l/s","Asento"];
-  const C={ink:"0.09 0.14 0.18",muted:"0.38 0.44 0.48",line:"0.80 0.84 0.86",pale:"0.96 0.97 0.97",green:"0.06 0.65 0.43",supply:"0.38 0.50 0.59",exhaust:"0.54 0.50 0.46",red:"0.71 0.14 0.09"};
+  const C={ink:"0.09 0.14 0.18",muted:"0.38 0.44 0.48",line:"0.80 0.84 0.86",pale:"0.96 0.97 0.97",green:"0.06 0.65 0.43",supply:"0.38 0.50 0.59",exhaust:"0.54 0.50 0.46",red:"0.71 0.14 0.09",redPale:"0.99 0.90 0.90"};
   const hasCover=data.apartments.length>=3;
   let page=pages[0],y=0;
   const n=v=>Number(v).toFixed(2).replace(/\.00$/,"");
@@ -400,22 +421,27 @@ function makePdf(){
     if(a.speedEnabled&&String(a.measurementSpeed||"").trim())items.push({label:"SÄÄDETTY/MITATTU",value:String(a.measurementSpeed).trim()});
     return items;
   }
-  function apartmentHeight(a){const commentLines=Math.max(1,wrap(a.comments||"-",76).length);return 26+18+20+(a.vents||[]).length*17+8+16+34+8+Math.max(24,10+commentLines*9)+13}
+  function commentRows(a){
+    const rows=[];if(String(a.comments||"").trim())wrap(a.comments,76).forEach(row=>rows.push({text:row||" ",color:C.ink}));
+    apartmentDeviationComments(a).forEach(note=>wrap("Automaattinen huomio: "+note,76).forEach(row=>rows.push({text:row||" ",color:C.red,bold:true})));
+    return rows.length?rows:[{text:"-",color:C.ink}];
+  }
+  function apartmentHeight(a){const rows=commentRows(a);return 26+18+20+(a.vents||[]).length*17+8+16+34+8+Math.max(24,10+rows.length*9)+13}
   function apartmentBar(name,continued=false){ensure(27);text((name||"-")+(continued?"  (jatkuu)":""),left,y-15,13,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=30}
   function tableHeader(title){
     text(title,left,y-9,7.5,true,C.ink);y-=14;rect(left,y-20,width,20,C.pale,C.line);
     let x=left;headers.forEach((h,i)=>{text(fit(h,[10,10,21,4,5,10,11,10][i]),x+3,y-13,6.3,true,C.ink);x+=cols[i];if(i<headers.length-1)line(x,y-20,x,y,C.line)});y-=20;
   }
-  function tableRow(values){
+  function tableRow(values,alertAdjusted=false){
     rect(left,y-17,width,17,"1 1 1",C.line);
-    const limits=[11,10,22,4,5,9,10,12];let x=left;values.forEach((v,i)=>{const color=i===1?(v==="Poisto"?C.exhaust:C.supply):C.ink;text(fit(v,limits[i]),x+3,y-11.5,6.6,i===1,color);x+=cols[i];if(i<values.length-1)line(x,y-17,x,y,C.line)});y-=17;
+    const limits=[11,10,22,4,5,9,10,12];let x=left;values.forEach((v,i)=>{const alert=alertAdjusted&&i===6;if(alert)rect(x,y-17,cols[i],17,C.redPale,C.red);const color=alert?C.red:i===1?(v==="Poisto"?C.exhaust:C.supply):C.ink;text(fit(v,limits[i]),x+3,y-11.5,6.6,i===1||alert,color);x+=cols[i];if(i<values.length-1)line(x,y-17,x,y,C.line)});y-=17;
   }
   function drawVentTable(a){
     const rows=a.vents||[];
     if(!rows.length){text("Ei lisättyjä venttiilejä.",left+5,y-11,8,false,C.muted);y-=22;return}
     if(y-(14+20+17)<42){newContentPage();apartmentBar(a.name,true)}
     tableHeader("MITTAUSTULOKSET");
-    rows.forEach(v=>{if(y-17<42){newContentPage();apartmentBar(a.name,true);tableHeader("MITTAUSTULOKSET (jatkuu)")}tableRow([v.space,v.type==="exhaust"?"Poisto":"Tulo",v.valve,v.kpl,v.pa,v.target,v.adjusted,v.position])});
+    rows.forEach(v=>{if(y-17<42){newContentPage();apartmentBar(a.name,true);tableHeader("MITTAUSTULOKSET (jatkuu)")}tableRow([v.space,v.type==="exhaust"?"Poisto":"Tulo",v.valve,v.kpl,v.pa,v.target,v.adjusted,v.position],!!airflowDeviation(v)?.exceeds)});
     y-=6;
   }
   function drawSummary(a){
@@ -426,8 +452,8 @@ function makePdf(){
     items.forEach((item,i)=>{const x=left+w*i;if(i)line(x,y-34,x,y,C.line);text(fit(item.label,Math.max(10,Math.floor(w/5.4))),x+5,y-10,5.8,false,C.muted);text(fit(item.value,Math.max(10,Math.floor(w/5.1))),x+5,y-25,8.5,true,C.ink);if(item.sub)text(item.sub,x+5,y-32,5.5,true,item.color||C.green)});y-=42;
   }
   function drawComments(a){
-    const rows=wrap(a.comments||"-",76),boxH=Math.max(24,10+rows.length*9);if(y-boxH-7<42){newContentPage();apartmentBar(a.name,true)}
-    const labelW=106;rect(left,y-boxH,labelW,boxH,C.pale,C.line);rect(left+labelW,y-boxH,width-labelW,boxH,"1 1 1",C.line);text("KOMMENTIT / KORJAUKSET",left+6,y-14,6.1,true,C.muted);rows.forEach((row,i)=>text(row||" ",left+labelW+7,y-14-i*9,6.7,false,C.ink));y-=boxH+12;
+    const rows=commentRows(a),boxH=Math.max(24,10+rows.length*9);if(y-boxH-7<42){newContentPage();apartmentBar(a.name,true)}
+    const labelW=106;rect(left,y-boxH,labelW,boxH,C.pale,C.line);rect(left+labelW,y-boxH,width-labelW,boxH,"1 1 1",C.line);text("KOMMENTIT / KORJAUKSET",left+6,y-14,6.1,true,C.muted);rows.forEach((row,i)=>text(row.text,left+labelW+7,y-14-i*9,6.7,!!row.bold,row.color||C.ink));y-=boxH+12;
   }
   if(hasCover){coverPage();newContentPage()}else{brandHeader();y=758;reportIntro()}
   if(!data.apartments.length){text("Ei lisättyjä asuntoja.",left,y-14,10,false,C.muted);y-=24}
@@ -463,23 +489,23 @@ function clearAll(){if(confirm("Tyhjennetäänkö koko mittaus?")){try{localStor
 function ventRows(ai){
   const vents=data.apartments[ai].vents||[];if(!vents.length)return '<div class="empty-state" style="margin:0;padding:22px 14px"><strong>Ei venttiilejä</strong>Lisää ensimmäinen mittausrivi.</div>';
   const groups=[];vents.forEach((v,vi)=>{const name=String(v.space||"").trim()||"Nimetön tila",key=name.toLocaleLowerCase("fi");let group=groups.find(g=>g.key===key);if(!group){group={key,name,items:[]};groups.push(group)}group.items.push({v,vi})});
-  const ventCard=(v,vi)=>'<details class="vent-card '+(v.type==="exhaust"?"exhaust":"supply")+'" data-vent-index="'+vi+'"><summary><span class="vent-summary-main"><strong>'+esc(v.valve||"Uusi venttiili")+'</strong><span>'+(v.type==="exhaust"?"Poisto":"Tulo")+'</span></span><span class="vent-summary-flow">'+(String(v.adjusted||"").trim()?esc(v.adjusted)+' l/s':'Ei tulosta')+'</span></summary><div class="vent-row '+(v.type==="exhaust"?"exhaust":"supply")+'">'+
+  const ventCard=(v,vi)=>{const alert=!!airflowDeviation(v)?.exceeds;return '<details class="vent-card '+(v.type==="exhaust"?"exhaust":"supply")+'" data-vent-index="'+vi+'"><summary><span class="vent-summary-main"><strong>'+esc(v.valve||"Uusi venttiili")+'</strong><span>'+(v.type==="exhaust"?"Poisto":"Tulo")+'</span></span><span class="vent-summary-flow">'+(String(v.adjusted||"").trim()?esc(v.adjusted)+' l/s':'Ei tulosta')+'</span></summary><div class="vent-row '+(v.type==="exhaust"?"exhaust":"supply")+'">'+
   '<div class="field-space"><label>Tila</label><input value="'+esc(v.space)+'" oninput="updateVent('+ai+','+vi+',\'space\',this.value)" placeholder="Esim. OH"></div>'+
   '<div class="field-type select-wrap"><label>Tulo/poisto</label><select onchange="updateVent('+ai+','+vi+',\'type\',this.value)"><option value="supply"'+(v.type!=="exhaust"?" selected":"")+'>Tulo</option><option value="exhaust"'+(v.type==="exhaust"?" selected":"")+'>Poisto</option></select></div>'+
   '<div class="field-valve"><label>Venttiili / päätelaite</label><input value="'+esc(v.valve)+'" oninput="updateVent('+ai+','+vi+',\'valve\',this.value)" placeholder="KSO-125"></div>'+
   '<div class="field-small"><label>Kpl</label><input inputmode="decimal" value="'+esc(v.kpl)+'" oninput="updateVent('+ai+','+vi+',\'kpl\',this.value)"></div>'+
   '<div class="field-small"><label>Pa</label><input inputmode="decimal" value="'+esc(v.pa)+'" oninput="updateVent('+ai+','+vi+',\'pa\',this.value)"></div>'+
   '<div class="field-flow"><label>Suunn. l/s</label><input inputmode="decimal" value="'+esc(v.target)+'" oninput="updateVent('+ai+','+vi+',\'target\',this.value)"></div>'+
-  '<div class="field-flow"><label>Säädetty l/s</label><input inputmode="decimal" value="'+esc(v.adjusted)+'" oninput="updateVent('+ai+','+vi+',\'adjusted\',this.value)"></div>'+
+  '<div class="field-flow"><label>Säädetty l/s</label><input data-adjusted-result inputmode="decimal" class="'+(alert?'measurement-alert':'')+'" value="'+esc(v.adjusted)+'" oninput="updateVent('+ai+','+vi+',\'adjusted\',this.value)"></div>'+
   '<div class="field-position"><label>Asento</label><div class="signed-input"><input value="'+esc(v.position)+'" oninput="updateVent('+ai+','+vi+',\'position\',this.value)" placeholder="-7 tai kiinni"><button type="button" class="small no-print" onclick="togglePositionSign('+ai+','+vi+')" aria-label="Vaihda etumerkki">±</button></div></div>'+
-  '<button type="button" class="danger small no-print remove-vent" onclick="removeVent('+ai+','+vi+')">Poista</button></div></details>';
+  '<button type="button" class="danger small no-print remove-vent" onclick="removeVent('+ai+','+vi+')">Poista</button></div></details>'};
   return '<div class="vent-list">'+groups.map(group=>'<details class="room-group"><summary><span class="room-group-title">'+esc(group.name)+'</span><span class="room-group-count">'+group.items.length+' '+(group.items.length===1?'venttiili':'venttiiliä')+'</span></summary><div class="room-group-body">'+group.items.map(item=>ventCard(item.v,item.vi)).join('')+'</div></details>').join('')+'</div>'
 }
 function render(){
 document.getElementById("kohde").value=data.kohde;document.getElementById("paiva").value=data.paiva;document.getElementById("mittaaja").value=data.mittaaja;document.getElementById("valine").value=data.valine;
 let e=document.getElementById("apartments"),openApartments=new Set([...e.querySelectorAll(".apartment[open]")].map(x=>Number(x.dataset.apartmentIndex)));e.innerHTML="";
 if(!data.apartments.length)e.innerHTML='<div class="empty-state no-print"><strong>Aloita lisäämällä asunto tai mittauskohde</strong>Lisää sen alle venttiilit ja valitse jokaiselle tulo tai poisto.<br><button type="button" class="primary" onclick="addApartment()">+ Lisää ensimmäinen kohde</button></div>';
-data.apartments.forEach((a,ai)=>{const t=apartmentTotals(a);let apartment=document.createElement("details");apartment.className="card apartment";apartment.dataset.apartmentIndex=ai;if(openApartments.has(ai))apartment.open=true;apartment.innerHTML='<summary class="apartment-summary"><span class="apartment-summary-name">'+esc(a.name||"Nimetön kohde")+'</span></summary><div class="apartment-body"><div class="apartment-title"><input aria-label="Kohteen tunnus" value="'+esc(a.name)+'" oninput="updateApartment('+ai+',this.value)" placeholder="Tunnus, esim. A1"><button type="button" class="danger small no-print" onclick="removeApartment('+ai+')">Poista kohde</button></div>'+ventRows(ai)+'<div class="vent-actions no-print"><button type="button" class="secondary" onclick="addVent('+ai+')">+ Lisää venttiili</button>'+(!a.pressureEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">+ Paine-ero</button>':'')+(!a.speedEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">+ Säädetty/mitattu nopeudella</button>':'')+'</div><div class="optional-fields">'+(a.pressureEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Paine-ero</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">Poista</button></div><input inputmode="decimal" value="'+esc(a.pressureDifference)+'" oninput="updateApartmentOption('+ai+',\'pressureDifference\',this.value)" placeholder="Esim. -5 Pa"></div>':'')+(a.speedEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Säädetty/mitattu nopeudella</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">Poista</button></div><input value="'+esc(a.measurementSpeed)+'" oninput="updateApartmentOption('+ai+',\'measurementSpeed\',this.value)" placeholder="Esim. teho 2 / 60 %"></div>':'')+'</div><div class="air-summary"><div class="summary-box"><span>Tuloilma yhteensä</span><strong id="summary-supply-'+ai+'">'+flowFormat(t.supply)+' l/s</strong></div><div class="summary-box"><span>Poistoilma yhteensä</span><strong id="summary-exhaust-'+ai+'">'+flowFormat(t.exhaust)+' l/s</strong></div><div id="summary-difference-'+ai+'" class="summary-box '+t.statusClass+'"><span>Erotus (tulo − poisto)</span><strong>'+(t.difference>0?"+":"")+flowFormat(t.difference)+' l/s</strong><em>'+t.status+'</em></div></div><div style="margin-top:15px"><label>Kommentit / tehdyt korjaukset ja kulut</label><textarea oninput="updateApartmentComments('+ai+',this.value)" placeholder="Kirjaa tehdyt korjaukset, havainnot ja kulut...">'+esc(a.comments||"")+'</textarea></div></div>';
+data.apartments.forEach((a,ai)=>{const t=apartmentTotals(a),deviationNotes=apartmentDeviationComments(a);let apartment=document.createElement("details");apartment.className="card apartment";apartment.dataset.apartmentIndex=ai;if(openApartments.has(ai))apartment.open=true;apartment.innerHTML='<summary class="apartment-summary"><span class="apartment-summary-name">'+esc(a.name||"Nimetön kohde")+'</span></summary><div class="apartment-body"><div class="apartment-title"><input aria-label="Kohteen tunnus" value="'+esc(a.name)+'" oninput="updateApartment('+ai+',this.value)" placeholder="Tunnus, esim. A1"><button type="button" class="danger small no-print" onclick="removeApartment('+ai+')">Poista kohde</button></div>'+ventRows(ai)+'<div class="vent-actions no-print"><button type="button" class="secondary" onclick="addVent('+ai+')">+ Lisää venttiili</button>'+(!a.pressureEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">+ Paine-ero</button>':'')+(!a.speedEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">+ Säädetty/mitattu nopeudella</button>':'')+'</div><div class="optional-fields">'+(a.pressureEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Paine-ero</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">Poista</button></div><input inputmode="decimal" value="'+esc(a.pressureDifference)+'" oninput="updateApartmentOption('+ai+',\'pressureDifference\',this.value)" placeholder="Esim. -5 Pa"></div>':'')+(a.speedEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Säädetty/mitattu nopeudella</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">Poista</button></div><input value="'+esc(a.measurementSpeed)+'" oninput="updateApartmentOption('+ai+',\'measurementSpeed\',this.value)" placeholder="Esim. teho 2 / 60 %"></div>':'')+'</div><div class="air-summary"><div class="summary-box"><span>Tuloilma yhteensä</span><strong id="summary-supply-'+ai+'">'+flowFormat(t.supply)+' l/s</strong></div><div class="summary-box"><span>Poistoilma yhteensä</span><strong id="summary-exhaust-'+ai+'">'+flowFormat(t.exhaust)+' l/s</strong></div><div id="summary-difference-'+ai+'" class="summary-box '+t.statusClass+'"><span>Erotus (tulo − poisto)</span><strong>'+(t.difference>0?"+":"")+flowFormat(t.difference)+' l/s</strong><em>'+t.status+'</em></div></div><div style="margin-top:15px"><label>Kommentit / tehdyt korjaukset ja kulut</label><textarea oninput="updateApartmentComments('+ai+',this.value)" placeholder="Kirjaa tehdyt korjaukset, havainnot ja kulut...">'+esc(a.comments||"")+'</textarea><div id="deviation-comments-'+ai+'" class="deviation-comments"'+(deviationNotes.length?'':' hidden')+'>'+(deviationNotes.length?'<strong>Automaattinen huomio</strong><ul>'+deviationNotes.map(note=>'<li>'+esc(note)+'</li>').join("")+'</ul>':'')+'</div></div></div>';
 e.appendChild(apartment)})}
 ["kohde","paiva","mittaaja","valine"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();initializeCloudAuth();
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
