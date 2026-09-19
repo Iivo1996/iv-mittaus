@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="fi">
+<html lang="fi" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IV Mittaus | Ilmamäärien mittauspöytäkirja</title>
-<meta name="theme-color" content="#102a43">
+<meta name="theme-color" content="#081216">
 <meta name="application-name" content="IV Mittaus">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -37,6 +37,20 @@ button{border:1px solid transparent;border-radius:8px;padding:10px 13px;font:inh
 .apartment-title{grid-template-columns:minmax(0,1fr) auto}.apartment-title>input{max-width:420px}.apartment-title .danger{justify-self:end}
 .vent-list{display:grid;gap:12px}.vent-row{background:#fff;border:1px solid #bfd0dc;border-left:5px solid var(--blue);border-radius:11px;padding:12px;display:grid;grid-template-columns:1.05fr .75fr 1.4fr .42fr .5fr .72fr .78fr .72fr auto;gap:8px;align-items:end}.vent-row.exhaust{border-left-color:#7b4f9d}.vent-row label{font-size:11px}.vent-row input,.vent-row select{width:100%;min-width:0;padding:9px;border:1px solid #b9c7d3;border-radius:8px;font:inherit;font-size:15px;background:#fff;color:var(--ink)}.vent-row .remove-vent{align-self:end}.vent-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.vent-actions button{flex:1;min-width:150px}.optional-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.optional-field{background:#fff;border:1px solid #b9c8d4;border-radius:9px;padding:11px}.optional-field-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.optional-field-head strong{font-size:13px;color:var(--navy)}.optional-field input{background:#fff}.select-wrap select{appearance:auto}
 .room-group{background:#fff;border:1px solid #b9c8d4;border-radius:11px;overflow:hidden}.room-group+.room-group{margin-top:9px}.room-group>summary,.vent-card>summary{list-style:none;cursor:pointer;-webkit-tap-highlight-color:transparent}.room-group>summary::-webkit-details-marker,.vent-card>summary::-webkit-details-marker{display:none}.room-group>summary{display:flex;align-items:center;gap:10px;padding:12px 13px;color:var(--navy);font-weight:800}.room-group>summary::before{content:"›";font-size:22px;line-height:1;transition:transform .15s}.room-group[open]>summary::before{transform:rotate(90deg)}.room-group-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.room-group-count{margin-left:auto;color:var(--muted);font-size:12px;font-weight:650;white-space:nowrap}.room-group-body{padding:0 10px 10px}.vent-card{border:1px solid #c9d5de;border-left:5px solid var(--blue);border-radius:9px;overflow:hidden}.vent-card.exhaust{border-left-color:#7b4f9d}.vent-card+.vent-card{margin-top:8px}.vent-card>summary{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 11px;background:#f7f9fb}.vent-card>summary::before{content:"+";display:grid;place-items:center;width:24px;height:24px;border-radius:6px;background:#e7eef4;color:var(--navy);font-weight:800}.vent-card[open]>summary::before{content:"−"}.vent-summary-main{min-width:0}.vent-summary-main strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.vent-summary-main span{display:block;color:var(--muted);font-size:11px;margin-top:2px}.vent-summary-flow{color:var(--navy);font-size:13px;font-weight:800;white-space:nowrap}.vent-card .vent-row{border:0;border-top:1px solid #d5dee5;border-left:0;border-radius:0}
+.theme-button{width:38px;min-height:36px;padding:6px;border:1px solid var(--ui-border);background:var(--ui-surface-2);color:var(--ui-text);font-size:18px;line-height:1}
+:root{color-scheme:light;--ui-bg:#eef2f1;--ui-surface:#fff;--ui-surface-2:#f5f7f6;--ui-surface-3:#e8eeeb;--ui-text:#18232e;--ui-muted:#63717a;--ui-border:#cbd5d1;--ui-accent:#087a52;--ui-accent-soft:#e4f3ed;--ui-supply:#627f96;--ui-supply-soft:#e8eff4;--ui-exhaust:#8b8178;--ui-exhaust-soft:#f0ece8;--ui-danger:#b42318;--ui-shadow:rgba(24,35,46,.08)}
+html[data-theme="dark"]{color-scheme:dark;--ui-bg:#071116;--ui-surface:#101a1f;--ui-surface-2:#141f25;--ui-surface-3:#1a272d;--ui-text:#f2f6f4;--ui-muted:#a5b1b7;--ui-border:#304048;--ui-accent:#20d994;--ui-accent-soft:#10342b;--ui-supply:#8eabc1;--ui-supply-soft:#182b38;--ui-exhaust:#c1b5aa;--ui-exhaust-soft:#302d2a;--ui-danger:#ff8179;--ui-shadow:rgba(0,0,0,.3)}
+body{background:var(--ui-bg);color:var(--ui-text)}
+header{background:#081216;border-bottom:1px solid var(--ui-border);box-shadow:0 2px 14px rgba(0,0,0,.22)}
+.brand-mark{border-color:var(--ui-accent);color:var(--ui-accent)}.brand-copy p{color:#9dacb3}.tool-badge{border-color:#36505c;color:#c4d0d5}
+.menu-button,.theme-button{background:#101a1f!important;color:#f2f6f4!important;border-color:#304048!important}.menu-panel{background:var(--ui-surface);border-color:var(--ui-border);box-shadow:0 14px 34px var(--ui-shadow)}.menu-panel button{background:var(--ui-surface);color:var(--ui-text)}.menu-panel button:hover{background:var(--ui-surface-3)}
+.card,.modal-card{background:var(--ui-surface);border-color:var(--ui-border);box-shadow:0 2px 10px var(--ui-shadow)}.modal-head{border-color:var(--ui-border)}
+label{color:var(--ui-muted)}input,textarea,.vent-row input,.vent-row select{background:var(--ui-surface-2);color:var(--ui-text);border-color:var(--ui-border)}input:focus,textarea:focus,.vent-row input:focus,.vent-row select:focus{border-color:var(--ui-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--ui-accent) 18%,transparent)}
+button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button.save-project,.button-link.primary{background:var(--ui-accent);color:#04130e}button.secondary,.button-link.secondary{background:var(--ui-surface-2);border-color:var(--ui-border);color:var(--ui-text)}button.danger{background:color-mix(in srgb,var(--ui-danger) 10%,var(--ui-surface));border-color:color-mix(in srgb,var(--ui-danger) 35%,var(--ui-border));color:var(--ui-danger)}
+.step{background:var(--ui-accent);color:#04130e}.apartment{background:var(--ui-surface);border-color:var(--ui-border)}.apartment-summary{background:var(--ui-surface-2);color:var(--ui-text);border-bottom:1px solid transparent}.apartment[open]>.apartment-summary{background:var(--ui-accent-soft);border-bottom-color:color-mix(in srgb,var(--ui-accent) 45%,var(--ui-border))}.apartment[open]>.apartment-summary::before{color:var(--ui-accent)}.apartment-body{background:var(--ui-surface)}.apartment-title input{background:var(--ui-surface-2)}
+.room-group{background:var(--ui-surface-2);border-color:var(--ui-border)}.room-group>summary{color:var(--ui-text)}.room-group[open]>summary::before{color:var(--ui-accent)}.room-group-body{background:var(--ui-surface-2)}
+.vent-card,.vent-card.exhaust{border:1px solid var(--ui-border);border-left:1px solid var(--ui-border);background:var(--ui-surface)}.vent-card>summary{background:var(--ui-surface-2)}.vent-card>summary::before{background:var(--ui-surface-3);color:var(--ui-text)}.vent-card[open]>summary::before{color:var(--ui-accent)}.vent-summary-main strong,.vent-summary-flow{color:var(--ui-text)}.vent-summary-main span{display:inline-block;width:max-content;padding:3px 8px;border-radius:999px;margin-top:4px;font-weight:750}.vent-card.supply .vent-summary-main span{color:var(--ui-supply);background:var(--ui-supply-soft)}.vent-card.exhaust .vent-summary-main span{color:var(--ui-exhaust);background:var(--ui-exhaust-soft)}.vent-card .vent-row{background:var(--ui-surface);border-top-color:var(--ui-border)}
+.optional-field,.summary-box,.empty-state,.project-item,.cloud-box{background:var(--ui-surface-2);border-color:var(--ui-border)}.optional-field-head strong,.summary-box strong,.empty-state strong,.project-item strong,.cloud-box strong{color:var(--ui-text)}.summary-box.negative em,.summary-box.balanced em,.sync-ok{color:var(--ui-accent)!important}.summary-box.positive em,.sync-error{color:var(--ui-danger)!important}.add-room{background:var(--ui-surface-2);border-color:var(--ui-border);color:var(--ui-text)}.action-card{border-color:var(--ui-border)}.pdf-frame{background:var(--ui-bg);border-color:var(--ui-border)}.logo-preview{background:var(--ui-surface-2);border-color:var(--ui-border)}.file-button{background:var(--ui-surface-2);border-color:var(--ui-border);color:var(--ui-text)}.toast{background:var(--ui-accent);color:#04130e}.muted,.bottom .save-note,.room-group-count{color:var(--ui-muted)}
 @media(max-width:700px){header{padding:10px 12px}.tool-badge{display:none}.brand{gap:9px}.brand-mark{width:34px;height:34px}.brand-copy h1{font-size:17px}.menu-button{font-size:13px;padding:6px 9px}main{padding:12px 9px 30px}.card{padding:13px;border-radius:10px}.grid{grid-template-columns:1fr}.apartment{padding:0}.apartment-summary{padding:12px}.apartment-body{padding:8px}.apartment-title,.room-title{grid-template-columns:auto 1fr}.apartment-title .danger,.room-title .danger{grid-column:2;justify-self:end}.row{grid-template-columns:1fr 1fr 1fr;gap:8px}.row>div:first-child{grid-column:1/-1}.row>button{grid-column:3}.air-summary{grid-template-columns:1fr 1fr}.summary-box:last-child{grid-column:1/-1}.bottom{display:grid;grid-template-columns:1fr 1fr}.bottom .save-note{grid-column:1/-1;margin:0}.bottom .primary,.bottom .save-project{grid-column:1/-1}.bottom button{width:100%}.project-item{grid-template-columns:1fr}.project-actions{justify-content:flex-end}.project-actions button{flex:1}.toast{bottom:24px;white-space:nowrap}.pdf-frame{height:50vh}.modal-actions{display:grid;grid-template-columns:1fr 1fr}.modal-actions>*{width:100%}}
 @media(max-width:700px){.vent-row{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.vent-row .field-space{grid-column:span 3}.vent-row .field-type{grid-column:span 3}.vent-row .field-valve{grid-column:1/-1}.vent-row .field-small{grid-column:span 2}.vent-row .field-flow{grid-column:span 3}.vent-row .field-position{grid-column:span 3}.vent-row .remove-vent{grid-column:1/-1;width:100%}.optional-fields{grid-template-columns:1fr}.vent-actions{display:grid;grid-template-columns:1fr}.vent-actions button{width:100%}.room-group>summary{padding:11px 10px}.room-group-body{padding:0 7px 7px}.vent-card>summary{padding:9px 8px}}
 @media(max-width:700px){.apartment-title{grid-template-columns:1fr}.apartment-title>input{max-width:none}.apartment-title .danger{grid-column:1}}
@@ -44,7 +58,7 @@ button{border:1px solid transparent;border-radius:8px;padding:10px 13px;font:inh
 </style>
 </head>
 <body>
-<header><div class="brand"><div class="brand-mark">IV</div><div class="brand-copy"><h1>IV Mittaus</h1><p>Ilmamäärien mittauspöytäkirja</p></div><span class="tool-badge">AMMATTITYÖKALU</span><div class="menu-wrap no-print"><button type="button" class="menu-button" onclick="toggleMenu()">☰ Valikko</button><div id="top-menu" class="menu-panel"><button type="button" onclick="newProject()">＋ Uusi projekti</button><button type="button" onclick="saveCurrentProject()">✓ Tallenna projekti</button><button type="button" onclick="openProjects()">▤ Vanhat projektit</button><button type="button" onclick="openPdfSettings()">⚙ PDF-asetukset</button><button type="button" onclick="openCloudSettings()">☁ Pilvitallennus</button><button id="install-menu-button" type="button" onclick="installApp()">⇩ Asenna sovellus</button><small id="cloud-menu-status">Projektit tallentuvat tälle laitteelle.</small></div></div></div></header>
+<header><div class="brand"><div class="brand-mark">IV</div><div class="brand-copy"><h1>IV Mittaus</h1><p>Ilmamäärien mittauspöytäkirja</p></div><span class="tool-badge">AMMATTITYÖKALU</span><button id="theme-button" type="button" class="theme-button no-print" onclick="cycleTheme()" aria-label="Vaihda teemaa">☾</button><div class="menu-wrap no-print"><button type="button" class="menu-button" onclick="toggleMenu()">☰ Valikko</button><div id="top-menu" class="menu-panel"><button type="button" onclick="newProject()">＋ Uusi projekti</button><button type="button" onclick="saveCurrentProject()">✓ Tallenna projekti</button><button type="button" onclick="openProjects()">▤ Vanhat projektit</button><button type="button" onclick="openPdfSettings()">⚙ PDF-asetukset</button><button type="button" onclick="openCloudSettings()">☁ Pilvitallennus</button><button type="button" onclick="cycleTheme()">◐ Vaihda teemaa</button><button id="install-menu-button" type="button" onclick="installApp()">⇩ Asenna sovellus</button><small id="cloud-menu-status">Projektit tallentuvat tälle laitteelle.</small></div></div></div></header>
 <div id="projects-modal" class="modal no-print" onclick="if(event.target===this)closeProjects()"><div class="modal-card"><div class="modal-head"><h2>Vanhat projektit</h2><button type="button" class="small secondary" onclick="closeProjects()">Sulje</button></div><div class="modal-body"><div id="project-list" class="project-list"></div></div></div></div>
 <div id="new-project-modal" class="modal no-print" onclick="if(event.target===this)closeNewProject()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Aloita uusi projekti</h2><button type="button" class="small secondary" onclick="closeNewProject()">Sulje</button></div><div class="modal-body"><p style="margin-top:0;line-height:1.5">Nykyinen mittaus suljetaan ja näyttö tyhjennetään. Nykyinen projekti löytyy Vanhoista projekteista vain, jos siitä on luotu PDF.</p><div class="modal-actions"><button type="button" class="secondary" onclick="closeNewProject()">Peruuta</button><button type="button" class="primary" onclick="startNewProject()">Aloita uusi projekti</button></div></div></div></div>
 <div id="pdf-modal" class="modal no-print" onclick="if(event.target===this)closePdfPreview()"><div class="modal-card" style="width:min(900px,100%)"><div class="modal-head"><h2>PDF-esikatselu</h2><button type="button" class="small secondary" onclick="closePdfPreview()">Sulje</button></div><div class="modal-body"><iframe id="pdf-preview" class="pdf-frame" title="Mittauspöytäkirjan PDF-esikatselu"></iframe><div class="modal-actions"><a id="pdf-open" class="button-link secondary" target="_blank" rel="noopener">Avaa PDF</a><a id="pdf-download" class="button-link primary" download>Lataa tiedosto</a></div></div></div></div>
@@ -68,6 +82,21 @@ button{border:1px solid transparent;border-radius:8px;padding:10px 13px;font:inh
 </section>
 </main>
 <script>
+const themeMedia=window.matchMedia("(prefers-color-scheme: dark)");
+function themeMode(){try{return localStorage.getItem("iv_theme")||"dark"}catch(e){return"dark"}}
+function applyTheme(mode=themeMode(),persist=false){
+  if(!["dark","light","system"].includes(mode))mode="dark";
+  if(persist)try{localStorage.setItem("iv_theme",mode)}catch(e){}
+  const resolved=mode==="system"?(themeMedia.matches?"dark":"light"):mode;
+  document.documentElement.dataset.theme=resolved;
+  document.documentElement.dataset.themeMode=mode;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content",resolved==="dark"?"#081216":"#f5f7f6");
+  const button=document.getElementById("theme-button"),labels={dark:"Tumma teema",light:"Vaalea teema",system:"Laitteen teema"},icons={dark:"☾",light:"☀",system:"◐"};
+  if(button){button.textContent=icons[mode];button.title=labels[mode];button.setAttribute("aria-label",labels[mode]+". Vaihda teemaa")}
+}
+function cycleTheme(){const modes=["dark","light","system"],next=modes[(modes.indexOf(themeMode())+1)%modes.length];applyTheme(next,true);closeMenu();showToast(next==="dark"?"Tumma teema":next==="light"?"Vaalea teema":"Laitteen teema")}
+if(themeMedia.addEventListener)themeMedia.addEventListener("change",()=>{if(themeMode()==="system")applyTheme("system")});
+applyTheme();
 const SUPABASE_URL="https://rmyynxecliexiznswjcy.supabase.co";
 const SUPABASE_KEY="sb_publishable_mvjgftxIPbhMqn0yZ9lhHQ_OidQro8h";
 let cloudSession=null,cloudUser=null,cloudSyncTimer=null,cloudRefreshTimer=null,cloudBusy=false,cloudRestoring=false;
@@ -319,90 +348,86 @@ function makePdf(){
   save();
   const settings=getPdfSettings(),logoBytes=settings.logoData.startsWith("data:image/jpeg;base64,")?Uint8Array.from(atob(settings.logoData.split(",")[1]),c=>c.charCodeAt(0)):null;
   const pages=[[]],left=32,width=531,cols=[64,57,125,30,35,67,72,81],headers=["Tila","Tulo/poisto","Venttiili / päätelaite","Kpl","Pa","Suunn. l/s","Säädetty l/s","Asento"];
+  const C={ink:"0.09 0.14 0.18",muted:"0.38 0.44 0.48",line:"0.80 0.84 0.86",pale:"0.96 0.97 0.97",green:"0.06 0.65 0.43",supply:"0.38 0.50 0.59",exhaust:"0.54 0.50 0.46",red:"0.71 0.14 0.09"};
+  const hasCover=data.apartments.length>=3;
   let page=pages[0],y=0;
   const n=v=>Number(v).toFixed(2).replace(/\.00$/,"");
   const text=(v,x,yy,size=9,bold=false,color="0 0 0")=>page.push(color+" rg BT /F"+(bold?2:1)+" "+n(size)+" Tf "+n(x)+" "+n(yy)+" Td ("+pdfText(v)+") Tj ET");
-  const rect=(x,yy,w,h,fill=null,stroke="0.68 0.72 0.77")=>{let c="";if(fill)c+=fill+" rg ";if(stroke)c+=stroke+" RG 0.6 w ";c+=n(x)+" "+n(yy)+" "+n(w)+" "+n(h)+" re "+(fill&&stroke?"B":fill?"f":"S");page.push(c)};
-  const line=(x1,y1,x2,y2,color="0.68 0.72 0.77")=>page.push(color+" RG 0.6 w "+n(x1)+" "+n(y1)+" m "+n(x2)+" "+n(y2)+" l S");
+  const rect=(x,yy,w,h,fill=null,stroke=C.line)=>{let c="";if(fill)c+=fill+" rg ";if(stroke)c+=stroke+" RG 0.6 w ";c+=n(x)+" "+n(yy)+" "+n(w)+" "+n(h)+" re "+(fill&&stroke?"B":fill?"f":"S");page.push(c)};
+  const line=(x1,y1,x2,y2,color=C.line,lineWidth=.6)=>page.push(color+" RG "+n(lineWidth)+" w "+n(x1)+" "+n(y1)+" m "+n(x2)+" "+n(y2)+" l S");
   const image=(x,yy,w,h)=>page.push("q "+n(w)+" 0 0 "+n(h)+" "+n(x)+" "+n(yy)+" cm /Im1 Do Q");
   const fit=(v,max)=>{v=String(v||"-");return v.length>max?v.slice(0,max-3)+"...":v};
   const wrap=(v,max=90)=>{const out=[];String(v||"").split(/\r?\n/).forEach(part=>{let words=part.split(/\s+/),row="";if(!part){out.push("");return}words.forEach(word=>{if((row+" "+word).trim().length>max){if(row)out.push(row);while(word.length>max){out.push(word.slice(0,max));word=word.slice(max)}row=word}else row=(row+" "+word).trim()});if(row)out.push(row)});return out};
-  function newPage(){
-    if(page.length){page=[];pages.push(page)}
-    rect(0,790,595,52,"0.08 0.13 0.19",null);
-    text("IV-MITTAPÖYTÄKIRJA",left,815,15,true,"1 1 1");
+  function addPage(){if(page.length){page=[];pages.push(page)}}
+  function brandHeader(){
+    text("IV Mittaus",left,811,16,true,C.ink);line(left,801,left+29,801,C.green,2);
     let logoX=563;
-    if(logoBytes&&settings.logoWidth&&settings.logoHeight){const logoH=36,logoW=Math.min(78,logoH*settings.logoWidth/settings.logoHeight);logoX=563-logoW;image(logoX,798,logoW,logoH)}
-    const companyWidth=Math.max(50,logoX-342),companyChars=Math.max(8,Math.floor(companyWidth/5.2));
-    if(settings.company)text(fit(settings.company,companyChars),330,815,9,true,"1 1 1");
-    if(settings.businessId)text("Y-tunnus "+fit(settings.businessId,20),330,800,7,false,"0.82 0.87 0.92");
-    y=772;
+    if(logoBytes&&settings.logoWidth&&settings.logoHeight){const logoH=28,logoW=Math.min(70,logoH*settings.logoWidth/settings.logoHeight);logoX=563-logoW;image(logoX,795,logoW,logoH)}
+    const companyX=Math.min(485,logoX-8),companyChars=Math.max(10,Math.floor((companyX-330)/5));
+    if(settings.company)text(fit(settings.company,companyChars),330,814,8,true,C.ink);
+    if(settings.businessId)text("Y-tunnus "+fit(settings.businessId,20),330,800,6.5,false,C.muted);
   }
-  function ensure(h){if(y-h<42)newPage()}
-  function field(label,value,x,top,w,h=36){
-    rect(x,top-h,w,h,"0.97 0.98 0.99","0.72 0.76 0.81");
-    text(label.toUpperCase(),x+8,top-12,7,true,"0.35 0.40 0.46");
-    text(fit(value,Math.max(12,Math.floor(w/6.2))),x+8,top-27,10,false);
+  function newContentPage(){addPage();brandHeader();y=775}
+  function coverPage(){
+    brandHeader();
+    text("ILMAMÄÄRIEN MITTAUSPÖYTÄKIRJA",left,618,15,true,C.ink);line(left,606,563,606,C.green,1);
+    text("KOHDE",left,566,7,true,C.muted);
+    text(fit(data.kohde||"Nimetön kohde",38),left,532,25,true,C.ink);
+    rect(left,375,width,82,null,C.line);
+    const items=[{label:"MITTAUSPÄIVÄ",value:data.paiva||"-",x:left+12},{label:"MITTAAJA",value:data.mittaaja||"-",x:left+172},{label:"MITTAUSVÄLINE",value:data.valine||"-",x:left+324}];
+    items.forEach(item=>{text(item.label,item.x,431,6.5,true,C.muted);text(fit(item.value,24),item.x,411,8.5,true,C.ink)});
+    y=0;
   }
-  function apartmentBar(name,continued=false){
-    ensure(27);rect(left,y-24,width,24,"0.12 0.25 0.37",null);
-    text((name||"-")+(continued?"  (jatkuu)":""),left+9,y-16,11,true,"1 1 1");y-=31;
+  function reportIntro(){
+    text("ILMAMÄÄRIEN MITTAUSPÖYTÄKIRJA",left,y-18,15,true,C.ink);y-=30;line(left,y,563,y,C.green,1);y-=18;
+    text("KOHDE",left,y,6.5,true,C.muted);text(fit(data.kohde||"Nimetön kohde",42),left+72,y,10,true,C.ink);
+    text("MITTAUSPÄIVÄ",left+300,y,6.5,true,C.muted);text(data.paiva||"-",left+390,y,8.5,false,C.ink);y-=21;
+    text("MITTAAJA",left,y,6.5,true,C.muted);text(fit(data.mittaaja||"-",28),left+72,y,8.5,false,C.ink);
+    text("MITTAUSVÄLINE",left+300,y,6.5,true,C.muted);text(fit(data.valine||"-",23),left+390,y,8.5,false,C.ink);y-=24;
   }
-  function tableHeader(title){
-    text(title,left,y-11,8,true,"0.12 0.25 0.37");y-=17;
-    rect(left,y-22,width,22,"0.91 0.93 0.95","0.58 0.63 0.68");
-    let x=left;headers.forEach((h,i)=>{text(h,x+4,y-14,7,true,"0.18 0.22 0.27");x+=cols[i];if(i<headers.length-1)line(x,y-22,x,y)});y-=22;
-  }
-  function tableRow(values){
-    rect(left,y-20,width,20,"1 1 1","0.68 0.72 0.77");
-    const limits=[10,10,21,4,5,9,10,12];let x=left;values.forEach((v,i)=>{text(fit(v,limits[i]),x+3,y-13,7,false);x+=cols[i];if(i<values.length-1)line(x,y-20,x,y)});y-=20;
-  }
-  function drawVentTable(a){
-    const rows=a.vents||[];
-    if(!rows.length){text("Ei lisättyjä venttiilejä.",left+7,y-12,9,false,"0.35 0.40 0.46");y-=25;return}
-    if(y-(17+22+20)<42){newPage();apartmentBar(a.name,true)}
-    tableHeader("VENTTIILIT JA MITTAUKSET");
-    rows.forEach(v=>{if(y-20<42){newPage();apartmentBar(a.name,true);tableHeader("VENTTIILIT JA MITTAUKSET (jatkuu)")}tableRow([v.space,v.type==="exhaust"?"Poisto":"Tulo",v.valve,v.kpl,v.pa,v.target,v.adjusted,v.position])});
-    y-=7;
-  }
-  function drawSummary(a){
+  function ensure(h){if(y-h<42)newContentPage()}
+  function summaryItems(a){
     const t=apartmentTotals(a),items=[];
     if(t.hasSupply)items.push({label:"TULOILMA YHTEENSÄ",value:flowFormat(t.supply)+" l/s"});
     if(t.hasExhaust)items.push({label:"POISTOILMA YHTEENSÄ",value:flowFormat(t.exhaust)+" l/s"});
-    if(t.hasSupply||t.hasExhaust)items.push({label:"EROTUS (TULO - POISTO)",value:(t.difference>0?"+":"")+flowFormat(t.difference)+" l/s - "+t.status,bold:true,color:t.difference<0?"0.03 0.47 0.28":t.difference>0?"0.71 0.14 0.09":"0.10 0.17 0.24"});
+    if(t.hasSupply||t.hasExhaust)items.push({label:"EROTUS",value:(t.difference>0?"+":"")+flowFormat(t.difference)+" l/s",sub:t.status,color:t.difference<=0?C.green:C.red});
     if(a.pressureEnabled&&String(a.pressureDifference||"").trim())items.push({label:"PAINE-ERO",value:String(a.pressureDifference).trim()+" Pa"});
-    if(a.speedEnabled&&String(a.measurementSpeed||"").trim())items.push({label:"SÄÄDETTY/MITATTU NOPEUDELLA",value:String(a.measurementSpeed).trim()});
-    if(!items.length)return;
-    const rowCount=Math.ceil(items.length/3),needed=20+rowCount*39+14;if(y-needed<42){newPage();apartmentBar(a.name,true)}
-    rect(left,y-20,width,20,"0.89 0.92 0.94","0.65 0.70 0.75");text("ILMAMÄÄRIEN YHTEENVETO",left+7,y-14,8,true,"0.18 0.24 0.30");y-=20;
-    for(let start=0;start<items.length;start+=3){const chunk=items.slice(start,start+3),w=width/chunk.length;rect(left,y-39,width,39,"0.97 0.98 0.99","0.65 0.70 0.75");chunk.forEach((item,i)=>{if(i)line(left+w*i,y-39,left+w*i,y);text(item.label,left+w*i+7,y-12,7,true,"0.35 0.40 0.46");text(fit(item.value,Math.max(12,Math.floor(w/5.6))),left+w*i+7,y-29,9,!!item.bold,item.color||"0.10 0.17 0.24")});y-=39}y-=14;
+    if(a.speedEnabled&&String(a.measurementSpeed||"").trim())items.push({label:"SÄÄDETTY/MITATTU",value:String(a.measurementSpeed).trim()});
+    return items;
   }
-  newPage();
-  field("Kohde",data.kohde,left,y,width,38);y-=45;
-  field("Mittauspäivä",data.paiva,left,y,150);
-  field("Mittaaja",data.mittaaja,left+150,y,190);
-  field("Mittausväline",data.valine,left+340,y,width-340);y-=44;
-  if(!data.apartments.length){text("Ei lisättyjä asuntoja.",left,y-14,10,false,"0.35 0.40 0.46");y-=24}
-  data.apartments.forEach(a=>{
-    ensure(a.vents.length?125:75);
-    apartmentBar(a.name);
-    drawVentTable(a);
-    drawSummary(a);
-    let comments=wrap(a.comments||"",88);if(!comments.length)comments=["-"];
-    let commentIndex=0;
-    while(commentIndex<comments.length){
-      if(y-47<42){newPage();apartmentBar(a.name,true)}
-      const count=Math.max(1,Math.min(comments.length-commentIndex,Math.floor((y-42-27)/12)));
-      const chunk=comments.slice(commentIndex,commentIndex+count),boxH=27+chunk.length*12;
-      rect(left,y-boxH,width,boxH,"0.97 0.98 0.99","0.65 0.70 0.75");
-      rect(left,y-20,width,20,"0.89 0.92 0.94","0.65 0.70 0.75");
-      text("KOMMENTIT / TEHDYT KORJAUKSET JA KULUT"+(commentIndex?" (jatkuu)":""),left+7,y-14,8,true,"0.18 0.24 0.30");
-      chunk.forEach((row,i)=>text(row||" ",left+8,y-34-i*12,8,false));
-      y-=boxH+14;commentIndex+=count;
-      if(commentIndex<comments.length){newPage();apartmentBar(a.name,true)}
-    }
-  });
-  pages.forEach((p,i)=>{page=p;line(left,31,563,31,"0.72 0.76 0.80");text("Ilmamäärien mittauspöytäkirja",left,18,7,false,"0.45 0.49 0.54");text("Sivu "+(i+1)+" / "+pages.length,510,18,7,false,"0.45 0.49 0.54")});
+  function apartmentHeight(a){const commentLines=Math.max(1,wrap(a.comments||"-",76).length);return 26+18+20+(a.vents||[]).length*17+8+16+34+8+Math.max(24,10+commentLines*9)+13}
+  function apartmentBar(name,continued=false){ensure(27);text((name||"-")+(continued?"  (jatkuu)":""),left,y-15,13,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=30}
+  function tableHeader(title){
+    text(title,left,y-9,7.5,true,C.ink);y-=14;rect(left,y-20,width,20,C.pale,C.line);
+    let x=left;headers.forEach((h,i)=>{text(fit(h,[10,10,21,4,5,10,11,10][i]),x+3,y-13,6.3,true,C.ink);x+=cols[i];if(i<headers.length-1)line(x,y-20,x,y,C.line)});y-=20;
+  }
+  function tableRow(values){
+    rect(left,y-17,width,17,"1 1 1",C.line);
+    const limits=[11,10,22,4,5,9,10,12];let x=left;values.forEach((v,i)=>{const color=i===1?(v==="Poisto"?C.exhaust:C.supply):C.ink;text(fit(v,limits[i]),x+3,y-11.5,6.6,i===1,color);x+=cols[i];if(i<values.length-1)line(x,y-17,x,y,C.line)});y-=17;
+  }
+  function drawVentTable(a){
+    const rows=a.vents||[];
+    if(!rows.length){text("Ei lisättyjä venttiilejä.",left+5,y-11,8,false,C.muted);y-=22;return}
+    if(y-(14+20+17)<42){newContentPage();apartmentBar(a.name,true)}
+    tableHeader("MITTAUSTULOKSET");
+    rows.forEach(v=>{if(y-17<42){newContentPage();apartmentBar(a.name,true);tableHeader("MITTAUSTULOKSET (jatkuu)")}tableRow([v.space,v.type==="exhaust"?"Poisto":"Tulo",v.valve,v.kpl,v.pa,v.target,v.adjusted,v.position])});
+    y-=6;
+  }
+  function drawSummary(a){
+    const items=summaryItems(a);if(!items.length)return;
+    if(y-50<42){newContentPage();apartmentBar(a.name,true)}
+    text("YHTEENVETO",left,y-9,7.5,true,C.ink);y-=14;line(left,y,563,y,C.green,1);y-=3;
+    const w=width/items.length;rect(left,y-34,width,34,"1 1 1",C.line);
+    items.forEach((item,i)=>{const x=left+w*i;if(i)line(x,y-34,x,y,C.line);text(fit(item.label,Math.max(10,Math.floor(w/5.4))),x+5,y-10,5.8,false,C.muted);text(fit(item.value,Math.max(10,Math.floor(w/5.1))),x+5,y-25,8.5,true,C.ink);if(item.sub)text(item.sub,x+5,y-32,5.5,true,item.color||C.green)});y-=42;
+  }
+  function drawComments(a){
+    const rows=wrap(a.comments||"-",76),boxH=Math.max(24,10+rows.length*9);if(y-boxH-7<42){newContentPage();apartmentBar(a.name,true)}
+    const labelW=106;rect(left,y-boxH,labelW,boxH,C.pale,C.line);rect(left+labelW,y-boxH,width-labelW,boxH,"1 1 1",C.line);text("KOMMENTIT / KORJAUKSET",left+6,y-14,6.1,true,C.muted);rows.forEach((row,i)=>text(row||" ",left+labelW+7,y-14-i*9,6.7,false,C.ink));y-=boxH+12;
+  }
+  if(hasCover){coverPage();newContentPage()}else{brandHeader();y=775;reportIntro()}
+  if(!data.apartments.length){text("Ei lisättyjä asuntoja.",left,y-14,10,false,C.muted);y-=24}
+  data.apartments.forEach(a=>{ensure(apartmentHeight(a));apartmentBar(a.name);drawVentTable(a);drawSummary(a);drawComments(a)});
+  pages.forEach((p,i)=>{page=p;line(left,31,563,31,C.line);text("Ilmamäärien mittauspöytäkirja",left,18,6.5,false,C.muted);text("Sivu "+(i+1)+" / "+pages.length,510,18,6.5,false,C.muted)});
   const objects=[],pageIds=pages.map((_,i)=>5+i*2),contentIds=pages.map((_,i)=>6+i*2),imageId=logoBytes?5+pages.length*2:null;
   objects[1]="<< /Type /Catalog /Pages 2 0 R >>";
   objects[2]="<< /Type /Pages /Kids ["+pageIds.map(id=>id+" 0 R").join(" ")+"] /Count "+pages.length+" >>";
