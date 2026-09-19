@@ -290,7 +290,23 @@ function updateApartment(ai,v){data.apartments[ai].name=v;const label=document.q
 function updateApartmentComments(ai,v){data.apartments[ai].comments=v;save()}
 function addVent(ai){data.apartments[ai].vents.push(emptyVent());const vi=data.apartments[ai].vents.length-1;render();save();const apartment=document.querySelectorAll(".apartment")[ai],card=apartment?.querySelector('.vent-card[data-vent-index="'+vi+'"]');if(apartment)apartment.open=true;if(card){card.open=true;const room=card.closest(".room-group");if(room)room.open=true;card.querySelector(".field-space input")?.focus()}}
 function removeVent(ai,vi){data.apartments[ai].vents.splice(vi,1);render();save()}
-function updateVent(ai,vi,key,value){data.apartments[ai].vents[vi][key]=value;if(key==="type"){render();save();return}save();if(key==="adjusted")updateApartmentSummary(ai)}
+function updateVent(ai,vi,key,value){
+  data.apartments[ai].vents[vi][key]=value;
+  if(key==="type"){
+    const card=document.querySelector('.apartment[data-apartment-index="'+ai+'"] .vent-card[data-vent-index="'+vi+'"]');
+    if(card){
+      const isExhaust=value==="exhaust";
+      card.classList.toggle("exhaust",isExhaust);
+      card.classList.toggle("supply",!isExhaust);
+      const row=card.querySelector(".vent-row");
+      if(row){row.classList.toggle("exhaust",isExhaust);row.classList.toggle("supply",!isExhaust)}
+      const typeLabel=card.querySelector(".vent-summary-main span");
+      if(typeLabel)typeLabel.textContent=isExhaust?"Poisto":"Tulo";
+    }
+    updateApartmentSummary(ai);save();return;
+  }
+  save();if(key==="adjusted")updateApartmentSummary(ai)
+}
 function togglePositionSign(ai,vi){let x=String(data.apartments[ai].vents[vi].position||"");data.apartments[ai].vents[vi].position=x.startsWith("-")?x.slice(1):"-"+x;render();save()}
 function toggleApartmentOption(ai,key){data.apartments[ai][key]=!data.apartments[ai][key];render();save()}
 function updateApartmentOption(ai,key,value){data.apartments[ai][key]=value;save()}
