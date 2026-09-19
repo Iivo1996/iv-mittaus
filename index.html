@@ -322,8 +322,18 @@ function addVent(ai){data.apartments[ai].vents.push(emptyVent());const vi=data.a
 function removeVent(ai,vi){data.apartments[ai].vents.splice(vi,1);render();save()}
 function updateVent(ai,vi,key,value){
   data.apartments[ai].vents[vi][key]=value;
+  const card=document.querySelector('.apartment[data-apartment-index="'+ai+'"] .vent-card[data-vent-index="'+vi+'"]');
+  if(card&&key==="space"){
+    const room=card.closest(".room-group"),roomTitle=room?.querySelector(".room-group-title");
+    if(roomTitle&&room.querySelectorAll(".vent-card").length===1)roomTitle.textContent=value.trim()||"Nimetön tila";
+  }
+  if(card&&key==="valve"){
+    const valveTitle=card.querySelector(".vent-summary-main strong");if(valveTitle)valveTitle.textContent=value.trim()||"Uusi venttiili";
+  }
+  if(card&&key==="adjusted"){
+    const result=card.querySelector(".vent-summary-flow");if(result)result.textContent=value.trim()?value+" l/s":"Ei tulosta";
+  }
   if(key==="type"){
-    const card=document.querySelector('.apartment[data-apartment-index="'+ai+'"] .vent-card[data-vent-index="'+vi+'"]');
     if(card){
       const isExhaust=value==="exhaust";
       card.classList.toggle("exhaust",isExhaust);
