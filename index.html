@@ -33,17 +33,19 @@ button{border:1px solid transparent;border-radius:8px;padding:10px 13px;font:inh
 .action-card{position:static;border-color:#aabac7;box-shadow:0 2px 8px rgba(16,42,67,.08);padding:12px 14px}.bottom{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center}.bottom .save-note{margin-right:auto;color:var(--muted);font-size:12px}.muted{color:var(--muted);font-size:12px;margin:8px 0 0}
 .modal{display:none;position:fixed;inset:0;background:rgba(8,24,38,.58);z-index:50;padding:16px;align-items:center;justify-content:center}.modal.open{display:flex}.modal-card{background:#fff;border-radius:14px;width:min(680px,100%);max-height:85vh;overflow:auto;box-shadow:0 24px 70px rgba(0,0,0,.32)}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 18px;border-bottom:1px solid #d8e1e8}.modal-head h2{font-size:19px}.modal-body{padding:14px 18px 18px}.project-list{display:grid;gap:9px}.project-item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid #c8d4dd;border-radius:10px;padding:12px}.project-item strong{display:block;color:var(--navy);margin-bottom:4px}.project-item span{display:block;color:var(--muted);font-size:12px}.project-actions{display:flex;gap:6px}.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;border-radius:9px;padding:11px 15px;box-shadow:0 8px 24px rgba(16,42,67,.28);opacity:0;pointer-events:none;transition:.2s;z-index:70;font-size:14px;font-weight:700}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.pdf-frame{width:100%;height:62vh;border:1px solid #b9c8d4;border-radius:9px;background:#eef2f5}.button-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:8px;padding:10px 14px;min-height:40px;font-size:14px;font-weight:750}.button-link.primary{background:var(--navy);color:#fff}.button-link.secondary{background:#fff;border:1px solid #aebdca;color:var(--navy)}
 .settings-grid{display:grid;gap:13px}.logo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.logo-preview{width:150px;height:72px;border:1px dashed #9eb0bf;border-radius:9px;background:#f7f9fb;display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:12px}.logo-preview img{max-width:100%;max-height:100%;object-fit:contain}.file-button{display:inline-flex;align-items:center;justify-content:center;border:1px solid #aebdca;border-radius:8px;padding:10px 13px;font-size:14px;font-weight:700;color:var(--navy);cursor:pointer;background:#fff}.file-button input{display:none}
+.cloud-box{border:1px solid #c8d4dd;border-radius:10px;padding:14px;background:#f7f9fb}.cloud-box strong{display:block;color:var(--navy);margin-bottom:5px}.cloud-box p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}.cloud-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.cloud-actions button{flex:1}.sync-ok{color:var(--green)!important}.sync-error{color:var(--red)!important}
 @media(max-width:700px){header{padding:10px 12px}.tool-badge{display:none}.brand{gap:9px}.brand-mark{width:34px;height:34px}.brand-copy h1{font-size:17px}.menu-button{font-size:13px;padding:6px 9px}main{padding:12px 9px 30px}.card{padding:13px;border-radius:10px}.grid{grid-template-columns:1fr}.apartment{padding:8px}.apartment-title,.room-title{grid-template-columns:auto 1fr}.apartment-title .danger,.room-title .danger{grid-column:2;justify-self:end}.row{grid-template-columns:1fr 1fr 1fr;gap:8px}.row>div:first-child{grid-column:1/-1}.row>button{grid-column:3}.air-summary{grid-template-columns:1fr 1fr}.summary-box:last-child{grid-column:1/-1}.bottom{display:grid;grid-template-columns:1fr 1fr}.bottom .save-note{grid-column:1/-1;margin:0}.bottom .primary,.bottom .save-project{grid-column:1/-1}.bottom button{width:100%}.project-item{grid-template-columns:1fr}.project-actions{justify-content:flex-end}.project-actions button{flex:1}.toast{bottom:24px;white-space:nowrap}.pdf-frame{height:50vh}.modal-actions{display:grid;grid-template-columns:1fr 1fr}.modal-actions>*{width:100%}}
 @media print{body{background:#fff}header,.no-print,button{display:none!important}main{max-width:none;padding:0}.card{border:0;box-shadow:none;page-break-inside:avoid;padding:4px 0}input,textarea{border:0;padding:2px 0}.row{grid-template-columns:1.5fr .5fr .6fr .9fr .9fr .7fr}.row>button{display:none}}
 </style>
 </head>
 <body>
-<header><div class="brand"><div class="brand-mark">IV</div><div class="brand-copy"><h1>IV Mittaus</h1><p>Ilmamäärien mittauspöytäkirja</p></div><span class="tool-badge">AMMATTITYÖKALU</span><div class="menu-wrap no-print"><button type="button" class="menu-button" onclick="toggleMenu()">☰ Valikko</button><div id="top-menu" class="menu-panel"><button type="button" onclick="newProject()">＋ Uusi projekti</button><button type="button" onclick="saveCurrentProject()">✓ Tallenna projekti</button><button type="button" onclick="openProjects()">▤ Vanhat projektit</button><button type="button" onclick="openPdfSettings()">⚙ PDF-asetukset</button><button id="install-menu-button" type="button" onclick="installApp()">⇩ Asenna sovellus</button><small>Projektit tallentuvat tälle laitteelle.</small></div></div></div></header>
+<header><div class="brand"><div class="brand-mark">IV</div><div class="brand-copy"><h1>IV Mittaus</h1><p>Ilmamäärien mittauspöytäkirja</p></div><span class="tool-badge">AMMATTITYÖKALU</span><div class="menu-wrap no-print"><button type="button" class="menu-button" onclick="toggleMenu()">☰ Valikko</button><div id="top-menu" class="menu-panel"><button type="button" onclick="newProject()">＋ Uusi projekti</button><button type="button" onclick="saveCurrentProject()">✓ Tallenna projekti</button><button type="button" onclick="openProjects()">▤ Vanhat projektit</button><button type="button" onclick="openPdfSettings()">⚙ PDF-asetukset</button><button type="button" onclick="openCloudSettings()">☁ Pilvitallennus</button><button id="install-menu-button" type="button" onclick="installApp()">⇩ Asenna sovellus</button><small id="cloud-menu-status">Projektit tallentuvat tälle laitteelle.</small></div></div></div></header>
 <div id="projects-modal" class="modal no-print" onclick="if(event.target===this)closeProjects()"><div class="modal-card"><div class="modal-head"><h2>Vanhat projektit</h2><button type="button" class="small secondary" onclick="closeProjects()">Sulje</button></div><div class="modal-body"><div id="project-list" class="project-list"></div></div></div></div>
 <div id="new-project-modal" class="modal no-print" onclick="if(event.target===this)closeNewProject()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Aloita uusi projekti</h2><button type="button" class="small secondary" onclick="closeNewProject()">Sulje</button></div><div class="modal-body"><p style="margin-top:0;line-height:1.5">Nykyinen mittaus suljetaan ja näyttö tyhjennetään. Nykyinen projekti löytyy Vanhoista projekteista vain, jos siitä on luotu PDF.</p><div class="modal-actions"><button type="button" class="secondary" onclick="closeNewProject()">Peruuta</button><button type="button" class="primary" onclick="startNewProject()">Aloita uusi projekti</button></div></div></div></div>
 <div id="pdf-modal" class="modal no-print" onclick="if(event.target===this)closePdfPreview()"><div class="modal-card" style="width:min(900px,100%)"><div class="modal-head"><h2>PDF-esikatselu</h2><button type="button" class="small secondary" onclick="closePdfPreview()">Sulje</button></div><div class="modal-body"><iframe id="pdf-preview" class="pdf-frame" title="Mittauspöytäkirjan PDF-esikatselu"></iframe><div class="modal-actions"><a id="pdf-open" class="button-link secondary" target="_blank" rel="noopener">Avaa PDF</a><a id="pdf-download" class="button-link primary" download>Lataa tiedosto</a></div></div></div></div>
 <div id="install-modal" class="modal no-print" onclick="if(event.target===this)closeInstallHelp()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Asenna IV Mittaus</h2><button type="button" class="small secondary" onclick="closeInstallHelp()">Sulje</button></div><div class="modal-body"><div id="install-help-content" style="line-height:1.55"></div><div class="modal-actions"><button type="button" class="primary" onclick="closeInstallHelp()">Selvä</button></div></div></div></div>
 <div id="pdf-settings-modal" class="modal no-print" onclick="if(event.target===this)closePdfSettings()"><div class="modal-card" style="max-width:600px"><div class="modal-head"><h2>PDF-tiedoston asetukset</h2><button type="button" class="small secondary" onclick="closePdfSettings()">Sulje</button></div><div class="modal-body"><div class="settings-grid"><div><label>Yrityksen nimi</label><input id="setting-company" placeholder="Esim. Ilmastointi Oy"></div><div><label>Y-tunnus</label><input id="setting-business-id" inputmode="text" placeholder="1234567-8"></div><div><label>Yrityksen logo</label><div class="logo-row"><div id="logo-preview" class="logo-preview">Ei logoa</div><label class="file-button">Valitse logo<input id="setting-logo" type="file" accept="image/png,image/jpeg,image/webp" onchange="handleLogoFile(this.files[0])"></label><button type="button" class="danger small" onclick="removeLogo()">Poista logo</button></div><p class="muted">PNG-, JPG- tai WebP-kuva. Logo lisätään PDF:n ylätunnisteeseen.</p></div></div><div class="modal-actions"><button type="button" class="secondary" onclick="closePdfSettings()">Peruuta</button><button type="button" class="primary" onclick="savePdfSettings()">Tallenna asetukset</button></div></div></div></div>
+<div id="cloud-modal" class="modal no-print" onclick="if(event.target===this)closeCloudSettings()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Pilvitallennus</h2><button type="button" class="small secondary" onclick="closeCloudSettings()">Sulje</button></div><div class="modal-body"><div id="cloud-logged-out"><p style="margin-top:0;line-height:1.5">Kirjaudu sisään, jotta projektit varmuuskopioituvat automaattisesti pilveen.</p><div class="settings-grid"><div><label>Sähköposti</label><input id="cloud-email" type="email" autocomplete="email" placeholder="nimi@esimerkki.fi"></div><div><label>Salasana</label><input id="cloud-password" type="password" autocomplete="current-password" placeholder="Vähintään 6 merkkiä"></div></div><div class="cloud-actions"><button type="button" class="secondary" onclick="cloudSignUp()">Luo käyttäjä</button><button type="button" class="primary" onclick="cloudSignIn()">Kirjaudu</button></div></div><div id="cloud-logged-in" hidden><div class="cloud-box"><strong id="cloud-user-email"></strong><p id="cloud-detail">Pilvitallennus on käytössä.</p></div><div class="cloud-actions"><button type="button" class="secondary" onclick="syncCloudNow(true)">Synkronoi nyt</button><button type="button" class="danger" onclick="cloudSignOut()">Kirjaudu ulos</button></div></div></div></div></div>
 <div id="toast" class="toast no-print"></div>
 <main>
 <section class="card"><div class="card-heading"><span class="step">1</span><h2>Kohteen tiedot</h2></div>
@@ -55,12 +57,118 @@ button{border:1px solid transparent;border-radius:8px;padding:10px 13px;font:inh
 </div></section>
 <div id="apartments"></div>
 <section class="card action-card no-print"><div class="bottom">
-<span class="save-note">Tallennettu automaattisesti tälle laitteelle</span>
+<span id="save-note" class="save-note">Tallennettu automaattisesti tälle laitteelle</span>
 <button type="button" class="secondary" onclick="addApartment()">+ Lisää asunto</button><button type="button" class="save-project" onclick="saveCurrentProject()">Tallenna projekti</button><button type="button" class="danger" onclick="clearAll()">Tyhjennä</button>
 <button type="button" class="primary" onclick="generatePdf()">Luo PDF</button></div>
 </section>
 </main>
 <script>
+const SUPABASE_URL="https://rmyynxecliexiznswjcy.supabase.co";
+const SUPABASE_KEY="sb_publishable_mvjgftxIPbhMqn0yZ9lhHQ_OidQro8h";
+let cloudSession=null,cloudUser=null,cloudSyncTimer=null,cloudRefreshTimer=null,cloudBusy=false,cloudRestoring=false;
+function readCloudSession(){try{return JSON.parse(localStorage.getItem("iv_cloud_session")||"null")}catch(e){return null}}
+function jwtPayload(token){try{return JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))}catch(e){return{}}}
+function storeCloudSession(session){
+  if(!session)return;
+  if(!session.expires_at&&session.expires_in)session.expires_at=Math.floor(Date.now()/1000)+Number(session.expires_in);
+  cloudSession=session;localStorage.setItem("iv_cloud_session",JSON.stringify(session));scheduleTokenRefresh();
+}
+function clearCloudSession(){cloudSession=null;cloudUser=null;localStorage.removeItem("iv_cloud_session");clearTimeout(cloudRefreshTimer);updateCloudUi()}
+function scheduleTokenRefresh(){
+  clearTimeout(cloudRefreshTimer);if(!cloudSession?.expires_at)return;
+  const delay=Math.max(10000,cloudSession.expires_at*1000-Date.now()-60000);
+  cloudRefreshTimer=setTimeout(()=>refreshCloudSession().catch(()=>{}),delay);
+}
+async function authRequest(path,body,accessToken){
+  const headers={apikey:SUPABASE_KEY,"Content-Type":"application/json"};if(accessToken)headers.Authorization="Bearer "+accessToken;
+  const response=await fetch(SUPABASE_URL+path,{method:"POST",headers,body:JSON.stringify(body||{})});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(result.error_description||result.msg||result.message||"Yhteys pilvipalveluun epäonnistui");
+  return result;
+}
+async function refreshCloudSession(){
+  if(!cloudSession?.refresh_token)return false;
+  try{const refreshed=await authRequest("/auth/v1/token?grant_type=refresh_token",{refresh_token:cloudSession.refresh_token});storeCloudSession(refreshed);await loadCloudUser();return true}catch(e){clearCloudSession();showToast("Kirjaudu pilvitallennukseen uudelleen");return false}
+}
+async function loadCloudUser(){
+  if(!cloudSession?.access_token)return null;
+  const response=await fetch(SUPABASE_URL+"/auth/v1/user",{headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+cloudSession.access_token}});
+  if(response.status===401&&await refreshCloudSession())return cloudUser;
+  if(!response.ok){clearCloudSession();return null}
+  cloudUser=await response.json();updateCloudUi();return cloudUser;
+}
+function consumeAuthCallback(){
+  if(!location.hash.includes("access_token="))return false;
+  const values=Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
+  if(!values.access_token)return false;
+  storeCloudSession({access_token:values.access_token,refresh_token:values.refresh_token,expires_in:Number(values.expires_in||3600),token_type:values.token_type||"bearer"});
+  history.replaceState(null,"",location.pathname+location.search);return true;
+}
+function openCloudSettings(){closeMenu();updateCloudUi();document.getElementById("cloud-modal").classList.add("open")}
+function closeCloudSettings(){document.getElementById("cloud-modal").classList.remove("open")}
+function updateCloudUi(detail){
+  const signedIn=!!cloudUser,loggedOut=document.getElementById("cloud-logged-out"),loggedIn=document.getElementById("cloud-logged-in");
+  if(!loggedOut||!loggedIn)return;
+  loggedOut.hidden=signedIn;loggedIn.hidden=!signedIn;
+  if(signedIn){document.getElementById("cloud-user-email").textContent=cloudUser.email||"Kirjautunut käyttäjä";if(detail)document.getElementById("cloud-detail").textContent=detail}
+  const menu=document.getElementById("cloud-menu-status"),note=document.getElementById("save-note");
+  if(signedIn){menu.textContent="Pilvitallennus käytössä";if(!detail)note.textContent="Tallennettu automaattisesti laitteelle ja pilveen"}
+  else{menu.textContent="Projektit tallentuvat tälle laitteelle.";note.textContent="Tallennettu automaattisesti tälle laitteelle"}
+}
+function cloudCredentials(){return{email:document.getElementById("cloud-email").value.trim(),password:document.getElementById("cloud-password").value}}
+async function cloudSignUp(){
+  const {email,password}=cloudCredentials();if(!email||password.length<6){showToast("Anna sähköposti ja vähintään 6 merkin salasana");return}
+  try{const result=await authRequest("/auth/v1/signup",{email,password});if(result.access_token){storeCloudSession(result);await loadCloudUser();await initializeCloud()}else showToast("Avaa sähköpostiin tullut vahvistuslinkki")}catch(e){showToast(e.message)}
+}
+async function cloudSignIn(){
+  const {email,password}=cloudCredentials();if(!email||!password){showToast("Anna sähköposti ja salasana");return}
+  try{const result=await authRequest("/auth/v1/token?grant_type=password",{email,password});storeCloudSession(result);await loadCloudUser();await initializeCloud();showToast("Pilvitallennus yhdistetty")}catch(e){showToast(e.message)}
+}
+async function cloudSignOut(){
+  if(cloudSession?.access_token)await authRequest("/auth/v1/logout",{},cloudSession.access_token).catch(()=>{});
+  clearCloudSession();showToast("Kirjauduttu ulos")
+}
+function localUpdatedAt(){return localStorage.getItem("iv_local_updated_at")||""}
+function markLocalChange(){
+  if(cloudRestoring)return;
+  localStorage.setItem("iv_local_updated_at",new Date().toISOString());
+  if(cloudUser){const note=document.getElementById("save-note");if(note)note.textContent=navigator.onLine?"Tallennettu laitteelle – synkronoidaan…":"Tallennettu laitteelle – ei verkkoyhteyttä";clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>syncCloudNow(false),1800)}
+}
+function cloudPayload(){return{version:1,current:JSON.parse(JSON.stringify(data)),projects:getProjects(),pdfSettings:getPdfSettings(),localUpdatedAt:localUpdatedAt()}}
+async function cloudFetch(path,options={},retry=true){
+  if(!cloudSession?.access_token)throw new Error("Ei kirjautumista");
+  const headers={apikey:SUPABASE_KEY,Authorization:"Bearer "+cloudSession.access_token,...(options.headers||{})};
+  const response=await fetch(SUPABASE_URL+path,{...options,headers});
+  if(response.status===401&&retry&&await refreshCloudSession())return cloudFetch(path,options,false);
+  if(!response.ok){const error=await response.json().catch(()=>({}));throw new Error(error.message||"Pilvitallennus epäonnistui")}
+  return response;
+}
+async function fetchCloudBackup(){
+  const response=await cloudFetch("/rest/v1/app_backups?select=payload,updated_at&limit=1",{headers:{Accept:"application/json"}}),rows=await response.json();return rows[0]||null;
+}
+function restoreCloudBackup(row){
+  const payload=row?.payload;if(!payload||!payload.current)return false;
+  cloudRestoring=true;
+  try{localStorage.setItem("iv_proto",JSON.stringify(payload.current));localStorage.setItem("iv_projects",JSON.stringify(Array.isArray(payload.projects)?payload.projects:[]));localStorage.setItem("iv_pdf_settings",JSON.stringify(payload.pdfSettings||{}));localStorage.setItem("iv_local_updated_at",row.updated_at||new Date().toISOString());data=loadData();render();return true}finally{cloudRestoring=false}
+}
+async function syncCloudNow(showMessage){
+  if(!cloudUser||cloudBusy)return false;if(!navigator.onLine){updateCloudUi("Ei verkkoyhteyttä. Muutokset synkronoidaan myöhemmin.");return false}
+  cloudBusy=true;const note=document.getElementById("save-note");if(note)note.textContent="Synkronoidaan pilveen…";
+  try{
+    await cloudFetch("/rest/v1/app_backups?on_conflict=user_id",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload:cloudPayload(),updated_at:new Date().toISOString()})});
+    if(note)note.textContent="Tallennettu automaattisesti laitteelle ja pilveen";updateCloudUi("Kaikki tiedot on tallennettu pilveen.");if(showMessage)showToast("Tiedot synkronoitu");return true;
+  }catch(e){if(note)note.textContent="Tallennettu laitteelle – pilvisynkronointi epäonnistui";updateCloudUi("Pilvisynkronointi epäonnistui. Tiedot ovat turvassa tällä laitteella.");if(showMessage)showToast(e.message);return false}finally{cloudBusy=false}
+}
+async function initializeCloud(){
+  if(!cloudUser)return;
+  try{const remote=await fetchCloudBackup();if(!remote){await syncCloudNow(false);return}const remoteTime=Date.parse(remote.updated_at||0),localTime=Date.parse(localUpdatedAt()||0);if(remoteTime>localTime){restoreCloudBackup(remote);updateCloudUi("Pilveen tallennetut tiedot palautettiin.");showToast("Pilvitiedot palautettu")}else await syncCloudNow(false)}catch(e){updateCloudUi("Pilveen yhdistäminen epäonnistui. Tiedot säilyvät tällä laitteella.")}
+}
+async function initializeCloudAuth(){
+  const callback=consumeAuthCallback();cloudSession=readCloudSession();if(!cloudSession){updateCloudUi();return}
+  if(cloudSession.expires_at*1000<Date.now()+30000&&!await refreshCloudSession())return;
+  await loadCloudUser();if(cloudUser){await initializeCloud();if(callback)showToast("Sähköposti vahvistettu ja pilvitallennus yhdistetty")}
+}
+window.addEventListener("online",()=>{if(cloudUser)syncCloudNow(false)});
 const emptyData=()=>({projectId:null,kohde:"",paiva:new Date().toISOString().slice(0,10),mittaaja:"",valine:"",apartments:[]});
 function loadData(){
   try{
@@ -107,10 +215,10 @@ function handleLogoFile(file){
   const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,900/img.width,360/img.height),w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale)),canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");canvas.width=w;canvas.height=h;ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);pendingPdfSettings.logoData=canvas.toDataURL("image/jpeg",.88);pendingPdfSettings.logoWidth=w;pendingPdfSettings.logoHeight=h;renderLogoPreview()};img.onerror=()=>showToast("Logoa ei voitu lukea");img.src=reader.result};reader.readAsDataURL(file)
 }
 function removeLogo(){pendingPdfSettings.logoData="";pendingPdfSettings.logoWidth=0;pendingPdfSettings.logoHeight=0;document.getElementById("setting-logo").value="";renderLogoPreview()}
-function savePdfSettings(){pendingPdfSettings.company=document.getElementById("setting-company").value.trim();pendingPdfSettings.businessId=document.getElementById("setting-business-id").value.trim();try{localStorage.setItem("iv_pdf_settings",JSON.stringify(pendingPdfSettings));closePdfSettings();showToast("PDF-asetukset tallennettu")}catch(e){showToast("Asetuksia ei voitu tallentaa")}}
+function savePdfSettings(){pendingPdfSettings.company=document.getElementById("setting-company").value.trim();pendingPdfSettings.businessId=document.getElementById("setting-business-id").value.trim();try{localStorage.setItem("iv_pdf_settings",JSON.stringify(pendingPdfSettings));markLocalChange();closePdfSettings();showToast("PDF-asetukset tallennettu")}catch(e){showToast("Asetuksia ei voitu tallentaa")}}
 function save(){
   data.kohde=document.getElementById("kohde").value;data.paiva=document.getElementById("paiva").value;data.mittaaja=document.getElementById("mittaaja").value;data.valine=document.getElementById("valine").value;
-  try{localStorage.setItem("iv_proto",JSON.stringify(data))}catch(e){}
+  try{localStorage.setItem("iv_proto",JSON.stringify(data));markLocalChange()}catch(e){}
 }
 function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
 function getProjects(){try{const p=JSON.parse(localStorage.getItem("iv_projects")||"[]");return Array.isArray(p)?p:[]}catch(e){return[]}}
@@ -281,7 +389,7 @@ function generatePdf(){
   document.getElementById("pdf-modal").classList.add("open");
   showToast(stored?"PDF luotu ja projekti tallennettu":"PDF luotu, mutta projektia ei voitu tallentaa");
 }
-function clearAll(){if(confirm("Tyhjennetäänkö koko mittaus?")){try{localStorage.removeItem("iv_proto")}catch(e){}data=emptyData();render()}}
+function clearAll(){if(confirm("Tyhjennetäänkö koko mittaus?")){try{localStorage.removeItem("iv_proto")}catch(e){}data=emptyData();render();markLocalChange()}}
 function rows(ai,ri,type,title){
 let a=data.apartments[ai].rooms[ri][type],out='<div class="section-title '+type+'"><strong>'+title+'</strong><button type="button" class="small secondary no-print" onclick="addVent('+ai+','+ri+',\''+type+'\')">+ Lisää venttiili</button></div>';
 if(!a.length)return out+'<div class="muted">Ei venttiilejä.</div>';
@@ -301,6 +409,6 @@ data.apartments.forEach((a,ai)=>{const t=apartmentTotals(a);let apartment=docume
 let roomList=apartment.querySelector(".apartment-rooms");
 a.rooms.forEach((r,ri)=>{let c=document.createElement("section");c.className="card room";c.innerHTML='<div class="room-title"><span class="room-index">Huone '+(ri+1)+'</span><input aria-label="Huoneen nimi" value="'+esc(r.name)+'" oninput="updateRoom('+ai+','+ri+',this.value)" placeholder="Nimi, esim. OH"><span></span><button type="button" class="danger small no-print" onclick="removeRoom('+ai+','+ri+')">Poista huone</button></div>'+rows(ai,ri,"supply","Tuloilma")+rows(ai,ri,"exhaust","Poistoilma");roomList.appendChild(c)});
 e.appendChild(apartment)})}
-["kohde","paiva","mittaaja","valine"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();
+["kohde","paiva","mittaaja","valine"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();initializeCloudAuth();
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
 </script></body></html>

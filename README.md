@@ -1,5 +1,7 @@
 # IV Mittaus
 
+Ilmamäärien mittauspöytäkirjasovellus, jossa on paikallinen automaattitallennus, PDF-vienti, asennettava PWA sekä käyttäjäkohtainen Supabase-pilvivarmuuskopiointi.
+
 Puhelimella toimiva ilmanvaihdon mittauspöytäkirjasovellus (PWA).
 
 ## Käyttö
