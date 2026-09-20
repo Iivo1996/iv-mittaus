@@ -64,7 +64,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <div id="new-project-modal" class="modal no-print" onclick="if(event.target===this)closeNewProject()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Aloita uusi projekti</h2><button type="button" class="small secondary" onclick="closeNewProject()">Sulje</button></div><div class="modal-body"><p style="margin-top:0;line-height:1.5">Nykyinen mittaus suljetaan ja näyttö tyhjennetään. Nykyinen projekti löytyy Vanhoista projekteista vain, jos siitä on luotu PDF.</p><div class="modal-actions"><button type="button" class="secondary" onclick="closeNewProject()">Peruuta</button><button type="button" class="primary" onclick="startNewProject()">Aloita uusi projekti</button></div></div></div></div>
 <div id="pdf-modal" class="modal no-print" onclick="if(event.target===this)closePdfPreview()"><div class="modal-card" style="width:min(900px,100%)"><div class="modal-head"><h2>PDF-esikatselu</h2><button type="button" class="small secondary" onclick="closePdfPreview()">Sulje</button></div><div class="modal-body"><iframe id="pdf-preview" class="pdf-frame" title="Mittauspöytäkirjan PDF-esikatselu"></iframe><div class="modal-actions"><a id="pdf-open" class="button-link secondary" target="_blank" rel="noopener">Avaa PDF</a><a id="pdf-download" class="button-link secondary" download>Lataa tiedosto</a><button id="pdf-share" type="button" class="primary" onclick="sharePdf()">Jaa PDF</button></div></div></div></div>
 <div id="install-modal" class="modal no-print" onclick="if(event.target===this)closeInstallHelp()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Asenna IV Mittaus</h2><button type="button" class="small secondary" onclick="closeInstallHelp()">Sulje</button></div><div class="modal-body"><div id="install-help-content" style="line-height:1.55"></div><div class="modal-actions"><button type="button" class="primary" onclick="closeInstallHelp()">Selvä</button></div></div></div></div>
-<div id="pdf-settings-modal" class="modal no-print" onclick="if(event.target===this)closePdfSettings()"><div class="modal-card" style="max-width:600px"><div class="modal-head"><h2>PDF-tiedoston asetukset</h2><button type="button" class="small secondary" onclick="closePdfSettings()">Sulje</button></div><div class="modal-body"><div class="settings-grid"><div><label>Yrityksen nimi</label><input id="setting-company" placeholder="Esim. Ilmastointi Oy"></div><div><label>Y-tunnus</label><input id="setting-business-id" inputmode="text" placeholder="1234567-8"></div><div><label>Yrityksen yhteystiedot</label><textarea id="setting-contact-details" rows="3" placeholder="Esim. Katuosoite, puhelin, sähköposti ja verkkosivu"></textarea><p class="muted">Voit kirjoittaa tiedot yhdelle tai useammalle riville. Ne lisätään PDF:n ylätunnisteeseen.</p></div><div><label>Yrityksen logo</label><div class="logo-row"><div id="logo-preview" class="logo-preview">Ei logoa</div><label class="file-button">Valitse logo<input id="setting-logo" type="file" accept="image/png,image/jpeg,image/webp" onchange="handleLogoFile(this.files[0])"></label><button type="button" class="danger small" onclick="removeLogo()">Poista logo</button></div><p class="muted">PNG-, JPG- tai WebP-kuva. Logo lisätään PDF:n ylätunnisteeseen.</p></div></div><div class="modal-actions"><button type="button" class="secondary" onclick="closePdfSettings()">Peruuta</button><button type="button" class="primary" onclick="savePdfSettings()">Tallenna asetukset</button></div></div></div></div>
+<div id="pdf-settings-modal" class="modal no-print" onclick="if(event.target===this)closePdfSettings()"><div class="modal-card" style="max-width:600px"><div class="modal-head"><h2>PDF-tiedoston asetukset</h2><button type="button" class="small secondary" onclick="closePdfSettings()">Sulje</button></div><div class="modal-body"><div class="settings-grid"><div><label>Yrityksen nimi</label><input id="setting-company" placeholder="Esim. Ilmastointi Oy"></div><div><label>Y-tunnus</label><input id="setting-business-id" inputmode="text" placeholder="1234567-8"></div><div><label>Yrityksen yhteystiedot</label><textarea id="setting-contact-details" rows="3" placeholder="Esim. Katuosoite, puhelin, sähköposti ja verkkosivu"></textarea><p class="muted">Voit kirjoittaa tiedot yhdelle tai useammalle riville. Ne lisätään PDF:n ylätunnisteeseen.</p></div><div><label>Yrityksen logo</label><div class="logo-row"><div id="logo-preview" class="logo-preview">Ei logoa</div><label class="file-button">Valitse logo<input id="setting-logo" type="file" accept="image/png,image/jpeg,image/webp" onchange="handleLogoFile(this.files[0])"></label><button type="button" class="danger small" onclick="removeLogo()">Poista logo</button></div><p class="muted">PNG-, JPG- tai WebP-kuva. Logo lisätään PDF:n ylätunnisteeseen.</p></div><div><label>Toinen logo</label><div class="logo-row"><div id="logo-preview-2" class="logo-preview">Ei toista logoa</div><label class="file-button">Valitse logo<input id="setting-logo-2" type="file" accept="image/png,image/jpeg,image/webp" onchange="handleSecondLogoFile(this.files[0])"></label><button type="button" class="danger small" onclick="removeSecondLogo()">Poista logo</button></div><p class="muted">Toinen logo sijoitetaan PDF:ssä ensimmäisen logon alle.</p></div></div><div class="modal-actions"><button type="button" class="secondary" onclick="closePdfSettings()">Peruuta</button><button type="button" class="primary" onclick="savePdfSettings()">Tallenna asetukset</button></div></div></div></div>
 <div id="cloud-modal" class="modal no-print" onclick="if(event.target===this)closeCloudSettings()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Pilvitallennus</h2><button type="button" class="small secondary" onclick="closeCloudSettings()">Sulje</button></div><div class="modal-body"><div id="cloud-logged-out"><p style="margin-top:0;line-height:1.5">Kirjaudu sisään, jotta projektit varmuuskopioituvat automaattisesti pilveen.</p><div class="settings-grid"><div><label>Sähköposti</label><input id="cloud-email" type="email" autocomplete="email" placeholder="nimi@esimerkki.fi"></div><div><label>Salasana</label><input id="cloud-password" type="password" autocomplete="current-password" placeholder="Vähintään 6 merkkiä"></div></div><div class="cloud-actions"><button type="button" class="secondary" onclick="cloudSignUp()">Luo käyttäjä</button><button type="button" class="primary" onclick="cloudSignIn()">Kirjaudu</button></div></div><div id="cloud-logged-in" hidden><div class="cloud-box"><strong id="cloud-user-email"></strong><p id="cloud-detail">Pilvitallennus on käytössä.</p></div><div class="cloud-actions"><button type="button" class="secondary" onclick="syncCloudNow(true)">Synkronoi nyt</button><button type="button" class="danger" onclick="cloudSignOut()">Kirjaudu ulos</button></div></div></div></div></div>
 <div id="toast" class="toast no-print"></div>
 <main>
@@ -257,11 +257,12 @@ async function installApp(){
     :'<p style="margin-top:0">Avaa selaimen valikko ja valitse <strong>Asenna sovellus</strong> tai <strong>Lisää aloitusnäyttöön</strong>.</p>';
   document.getElementById("install-modal").classList.add("open");
 }
-const emptyPdfSettings=()=>({company:"",businessId:"",contactDetails:"",logoData:"",logoWidth:0,logoHeight:0});
+const emptyPdfSettings=()=>({company:"",businessId:"",contactDetails:"",logoData:"",logoWidth:0,logoHeight:0,logo2Data:"",logo2Width:0,logo2Height:0});
 function getPdfSettings(){try{return{...emptyPdfSettings(),...JSON.parse(localStorage.getItem("iv_pdf_settings")||"{}")}}catch(e){return emptyPdfSettings()}}
 let pendingPdfSettings=getPdfSettings();
 function renderLogoPreview(){const box=document.getElementById("logo-preview");box.innerHTML=pendingPdfSettings.logoData?'<img src="'+pendingPdfSettings.logoData+'" alt="Yrityksen logo">':'Ei logoa'}
-function openPdfSettings(){closeMenu();pendingPdfSettings=getPdfSettings();document.getElementById("setting-company").value=pendingPdfSettings.company;document.getElementById("setting-business-id").value=pendingPdfSettings.businessId;document.getElementById("setting-contact-details").value=pendingPdfSettings.contactDetails;document.getElementById("setting-logo").value="";renderLogoPreview();document.getElementById("pdf-settings-modal").classList.add("open")}
+function renderSecondLogoPreview(){const box=document.getElementById("logo-preview-2");box.innerHTML=pendingPdfSettings.logo2Data?'<img src="'+pendingPdfSettings.logo2Data+'" alt="Toinen logo">':'Ei toista logoa'}
+function openPdfSettings(){closeMenu();pendingPdfSettings=getPdfSettings();document.getElementById("setting-company").value=pendingPdfSettings.company;document.getElementById("setting-business-id").value=pendingPdfSettings.businessId;document.getElementById("setting-contact-details").value=pendingPdfSettings.contactDetails;document.getElementById("setting-logo").value="";document.getElementById("setting-logo-2").value="";renderLogoPreview();renderSecondLogoPreview();document.getElementById("pdf-settings-modal").classList.add("open")}
 function closePdfSettings(){document.getElementById("pdf-settings-modal").classList.remove("open")}
 function handleLogoFile(file){
   if(!file)return;
@@ -269,6 +270,12 @@ function handleLogoFile(file){
   const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,900/img.width,360/img.height),w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale)),canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");canvas.width=w;canvas.height=h;ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);pendingPdfSettings.logoData=canvas.toDataURL("image/jpeg",.88);pendingPdfSettings.logoWidth=w;pendingPdfSettings.logoHeight=h;renderLogoPreview()};img.onerror=()=>showToast("Logoa ei voitu lukea");img.src=reader.result};reader.readAsDataURL(file)
 }
 function removeLogo(){pendingPdfSettings.logoData="";pendingPdfSettings.logoWidth=0;pendingPdfSettings.logoHeight=0;document.getElementById("setting-logo").value="";renderLogoPreview()}
+function handleSecondLogoFile(file){
+  if(!file)return;
+  if(!/^image\/(png|jpeg|webp)$/.test(file.type)){showToast("Valitse PNG-, JPG- tai WebP-kuva");return}
+  const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,900/img.width,360/img.height),w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale)),canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");canvas.width=w;canvas.height=h;ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);pendingPdfSettings.logo2Data=canvas.toDataURL("image/jpeg",.88);pendingPdfSettings.logo2Width=w;pendingPdfSettings.logo2Height=h;renderSecondLogoPreview()};img.onerror=()=>showToast("Toista logoa ei voitu lukea");img.src=reader.result};reader.readAsDataURL(file)
+}
+function removeSecondLogo(){pendingPdfSettings.logo2Data="";pendingPdfSettings.logo2Width=0;pendingPdfSettings.logo2Height=0;document.getElementById("setting-logo-2").value="";renderSecondLogoPreview()}
 function savePdfSettings(){pendingPdfSettings.company=document.getElementById("setting-company").value.trim();pendingPdfSettings.businessId=document.getElementById("setting-business-id").value.trim();pendingPdfSettings.contactDetails=document.getElementById("setting-contact-details").value.trim();try{localStorage.setItem("iv_pdf_settings",JSON.stringify(pendingPdfSettings));markLocalChange();closePdfSettings();showToast("PDF-asetukset tallennettu")}catch(e){showToast("Asetuksia ei voitu tallentaa")}}
 function save(){
   data.kohde=document.getElementById("kohde").value;data.paiva=document.getElementById("paiva").value;data.mittaaja=document.getElementById("mittaaja").value;data.valine=document.getElementById("valine").value;
@@ -394,7 +401,7 @@ function updateApartmentSummary(ai){const t=apartmentTotals(data.apartments[ai])
 function pdfText(v){return String(v??"").replace(/[\\()]/g,m=>"\\"+m).replace(/[^\x20-\x7e\xa0-\xff]/g,"?")}
 function makePdf(){
   save();
-  const settings=getPdfSettings(),logoBytes=settings.logoData.startsWith("data:image/jpeg;base64,")?Uint8Array.from(atob(settings.logoData.split(",")[1]),c=>c.charCodeAt(0)):null;
+  const settings=getPdfSettings(),logoBytes=settings.logoData.startsWith("data:image/jpeg;base64,")?Uint8Array.from(atob(settings.logoData.split(",")[1]),c=>c.charCodeAt(0)):null,logo2Bytes=settings.logo2Data.startsWith("data:image/jpeg;base64,")?Uint8Array.from(atob(settings.logo2Data.split(",")[1]),c=>c.charCodeAt(0)):null;
   const pages=[[]],left=32,width=531,cols=[64,57,125,30,35,67,72,81],headers=["Tila","Tulo/poisto","Venttiili / päätelaite","Kpl","Pa","Suunn. l/s","Säädetty l/s","Asento"];
   const C={ink:"0.09 0.14 0.18",muted:"0.38 0.44 0.48",line:"0.80 0.84 0.86",pale:"0.96 0.97 0.97",green:"0.06 0.65 0.43",supply:"0.38 0.50 0.59",exhaust:"0.54 0.50 0.46",red:"0.71 0.14 0.09",redPale:"0.99 0.90 0.90"};
   const hasCover=data.apartments.length>=3;
@@ -403,16 +410,22 @@ function makePdf(){
   const text=(v,x,yy,size=9,bold=false,color="0 0 0")=>page.push(color+" rg BT /F"+(bold?2:1)+" "+n(size)+" Tf "+n(x)+" "+n(yy)+" Td ("+pdfText(v)+") Tj ET");
   const rect=(x,yy,w,h,fill=null,stroke=C.line)=>{let c="";if(fill)c+=fill+" rg ";if(stroke)c+=stroke+" RG 0.6 w ";c+=n(x)+" "+n(yy)+" "+n(w)+" "+n(h)+" re "+(fill&&stroke?"B":fill?"f":"S");page.push(c)};
   const line=(x1,y1,x2,y2,color=C.line,lineWidth=.6)=>page.push(color+" RG "+n(lineWidth)+" w "+n(x1)+" "+n(y1)+" m "+n(x2)+" "+n(y2)+" l S");
-  const image=(x,yy,w,h)=>page.push("q "+n(w)+" 0 0 "+n(h)+" "+n(x)+" "+n(yy)+" cm /Im1 Do Q");
+  const image=(x,yy,w,h,name="Im1")=>page.push("q "+n(w)+" 0 0 "+n(h)+" "+n(x)+" "+n(yy)+" cm /"+name+" Do Q");
   const fit=(v,max)=>{v=String(v||"-");return v.length>max?v.slice(0,max-3)+"...":v};
   const wrap=(v,max=90)=>{const out=[];String(v||"").split(/\r?\n/).forEach(part=>{let words=part.split(/\s+/),row="";if(!part){out.push("");return}words.forEach(word=>{if((row+" "+word).trim().length>max){if(row)out.push(row);while(word.length>max){out.push(word.slice(0,max));word=word.slice(max)}row=word}else row=(row+" "+word).trim()});if(row)out.push(row)});return out};
   function addPage(){if(page.length){page=[];pages.push(page)}}
   function brandHeader(){
-    let companyX=left;
-    if(logoBytes&&settings.logoWidth&&settings.logoHeight){
-      const logoH=38,logoW=Math.min(88,logoH*settings.logoWidth/settings.logoHeight);
-      image(left,790,logoW,logoH);companyX=left+logoW+16;
+    let companyX=left,maxLogoW=0;
+    const hasLogo1=!!(logoBytes&&settings.logoWidth&&settings.logoHeight),hasLogo2=!!(logo2Bytes&&settings.logo2Width&&settings.logo2Height);
+    if(hasLogo1){
+      const logoH=hasLogo2?20:38,logoW=Math.min(88,logoH*settings.logoWidth/settings.logoHeight);
+      image(left,hasLogo2?808:790,logoW,logoH);maxLogoW=Math.max(maxLogoW,logoW);
     }
+    if(hasLogo2){
+      const logoH=hasLogo1?20:38,logoW=Math.min(88,logoH*settings.logo2Width/settings.logo2Height);
+      image(left,hasLogo1?784:790,logoW,logoH,"Im2");maxLogoW=Math.max(maxLogoW,logoW);
+    }
+    if(maxLogoW)companyX=left+maxLogoW+16;
     const companyWidth=294-companyX;
     if(settings.company)text(fit(settings.company,Math.max(16,Math.floor(companyWidth/6.4))),companyX,816,13,true,C.ink);
     if(settings.businessId)text("Y-tunnus "+fit(settings.businessId,24),companyX,799,7.2,false,C.muted);
@@ -486,17 +499,19 @@ function makePdf(){
   if(!data.apartments.length){text("Ei lisättyjä asuntoja.",left,y-14,10,false,C.muted);y-=24}
   data.apartments.forEach(a=>{ensure(apartmentHeight(a));apartmentBar(a.name);drawVentTable(a);drawSummary(a);drawComments(a)});
   pages.forEach((p,i)=>{page=p;line(left,31,563,31,C.line);if(settings.company)text(fit(settings.company,36),left,18,6.5,false,C.muted);text("IV Mittaus",278,18,5.8,false,C.muted);text("Sivu "+(i+1)+" / "+pages.length,510,18,6.5,false,C.muted)});
-  const objects=[],pageIds=pages.map((_,i)=>5+i*2),contentIds=pages.map((_,i)=>6+i*2),imageId=logoBytes?5+pages.length*2:null;
+  const objects=[],pageIds=pages.map((_,i)=>5+i*2),contentIds=pages.map((_,i)=>6+i*2),firstImageId=5+pages.length*2,imageId=logoBytes?firstImageId:null,image2Id=logo2Bytes?firstImageId+(logoBytes?1:0):null;
+  const xobjects=[imageId?"/Im1 "+imageId+" 0 R":"",image2Id?"/Im2 "+image2Id+" 0 R":""].filter(Boolean).join(" ");
   objects[1]="<< /Type /Catalog /Pages 2 0 R >>";
   objects[2]="<< /Type /Pages /Kids ["+pageIds.map(id=>id+" 0 R").join(" ")+"] /Count "+pages.length+" >>";
   objects[3]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
   objects[4]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
   pages.forEach((commands,i)=>{
-    objects[pageIds[i]]="<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >>"+(imageId?" /XObject << /Im1 "+imageId+" 0 R >>":"")+" >> /Contents "+contentIds[i]+" 0 R >>";
+    objects[pageIds[i]]="<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >>"+(xobjects?" /XObject << "+xobjects+" >>":"")+" >> /Contents "+contentIds[i]+" 0 R >>";
     const body=commands.join("\n");
     objects[contentIds[i]]="<< /Length "+body.length+" >>\nstream\n"+body+"\nendstream";
   });
   if(imageId)objects[imageId]={dict:"<< /Type /XObject /Subtype /Image /Width "+settings.logoWidth+" /Height "+settings.logoHeight+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+logoBytes.length+" >>",bytes:logoBytes};
+  if(image2Id)objects[image2Id]={dict:"<< /Type /XObject /Subtype /Image /Width "+settings.logo2Width+" /Height "+settings.logo2Height+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+logo2Bytes.length+" >>",bytes:logo2Bytes};
   const latin1=s=>Uint8Array.from([...s],ch=>ch.charCodeAt(0)&255),chunks=[],offsets=[0];let total=0;
   const append=bytes=>{chunks.push(bytes);total+=bytes.length};append(latin1("%PDF-1.4\n%âãÏÓ\n"));
   for(let i=1;i<objects.length;i++){offsets[i]=total;append(latin1(i+" 0 obj\n"));const obj=objects[i];if(obj&&obj.bytes){append(latin1(obj.dict+"\nstream\n"));append(obj.bytes);append(latin1("\nendstream"))}else append(latin1(obj));append(latin1("\nendobj\n"))}
