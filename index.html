@@ -594,14 +594,20 @@ async function makePdf(){
   }
   function drawWorkEntries(){
     if(!workEntries.length)return;
-    if(data.apartments.length)newContentPage();
     workEntrySectionHeading();
     workEntries.forEach(drawWorkEntry);
   }
+  function measurementSectionHeading(){text("ILMANVAIHDON MITTAUSPÖYTÄKIRJA",left,y-14,14,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=38}
+  function drawMeasurements(){
+    if(!data.apartments.length)return;
+    if(workEntries.length)newContentPage();
+    measurementSectionHeading();
+    data.apartments.forEach(a=>{ensure(apartmentHeight(a));apartmentBar(a.name);drawVentTable(a);drawSummary(a);drawComments(a)});
+  }
   if(hasCover){coverPage();newContentPage()}else{brandHeader();y=758;reportIntro()}
   if(!data.apartments.length&&!workEntries.length){text("Ei lisättyjä mittaustuloksia tai työmerkintöjä.",left,y-14,10,false,C.muted);y-=24}
-  data.apartments.forEach(a=>{ensure(apartmentHeight(a));apartmentBar(a.name);drawVentTable(a);drawSummary(a);drawComments(a)});
   drawWorkEntries();
+  drawMeasurements();
   pages.forEach((p,i)=>{page=p;line(left,31,563,31,C.line);if(settings.company)text(fit(settings.company,36),left,18,6.5,false,C.muted);text("IV Mittaus",278,18,5.8,false,C.muted);text("Sivu "+(i+1)+" / "+pages.length,510,18,6.5,false,C.muted)});
   const objects=[],pageIds=pages.map((_,i)=>5+i*2),contentIds=pages.map((_,i)=>6+i*2),firstImageId=5+pages.length*2;
   let nextImageId=firstImageId;const imageId=logoBytes?nextImageId++:null,image2Id=logo2Bytes?nextImageId++:null;workImages.forEach(asset=>asset.objectId=nextImageId++);
