@@ -584,7 +584,7 @@ async function makePdf(){
     while(photoIndex<photos.length){
       let availableRows=Math.floor((y-50)/94);
       if(availableRows<1){newContentPage();workEntrySectionHeading(true);drawWorkEntryHeader(entry,true);availableRows=Math.floor((y-50)/94)}
-      const remainingRows=Math.ceil((photos.length-photoIndex)/2),rowsNow=Math.max(1,Math.min(4,remainingRows,availableRows)),boxH=rowsNow*94+8,top=y,photoW=247,photoH=82,gap=13,count=Math.min(rowsNow*2,photos.length-photoIndex);
+      const remainingRows=Math.ceil((photos.length-photoIndex)/2),rowsNow=Math.max(1,Math.min(6,remainingRows,availableRows)),boxH=rowsNow*94+8,top=y,photoW=247,photoH=82,gap=13,count=Math.min(rowsNow*2,photos.length-photoIndex);
       rect(left,top-boxH,width,boxH,"1 1 1",C.line);
       for(let offset=0;offset<count;offset++){const photo=photos[photoIndex+offset],col=offset%2,row=Math.floor(offset/2),x=left+10+col*(photoW+gap),photoY=top-4-photoH-row*94;rect(x,photoY,photoW,photoH,C.pale,C.line);imageFit(photo,x+2,photoY+2,photoW-4,photoH-4)}
       photoIndex+=count;y=top-boxH-12;
