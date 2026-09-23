@@ -83,7 +83,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
     <div><label>Päivämäärä</label><input id="work-entry-date" type="date"></div>
     <div><label>Asunto / kohde <span class="muted">(vapaaehtoinen)</span></label><input id="work-entry-target" placeholder="Esim. A 12 tai IV-konehuone"></div>
     <div class="full"><label>Kuvaus</label><textarea id="work-entry-text" maxlength="2000" placeholder="Kirjaa tehdyt työt, havainnot ja jatkotoimenpiteet..."></textarea></div>
-    <div class="full"><label>Kuvat</label><div class="work-photo-actions"><label class="file-button">Ota kuva<input id="work-entry-camera" type="file" accept="image/*" capture="environment" onchange="handleWorkPhotoFiles(this.files);this.value='' "></label><label class="file-button">Valitse kuvia<input id="work-entry-gallery" type="file" accept="image/*" multiple onchange="handleWorkPhotoFiles(this.files);this.value='' "></label></div><div id="work-photo-preview" class="work-photo-preview"></div><p class="muted">Enintään 6 kuvaa merkintää kohden. Kuvat pienennetään automaattisesti raporttia varten.</p></div>
+    <div class="full"><label>Kuvat</label><div class="work-photo-actions"><label class="file-button">Ota kuva<input id="work-entry-camera" type="file" accept="image/*" capture="environment" onchange="handleWorkPhotoFiles(this.files);this.value='' "></label><label class="file-button">Valitse kuvia<input id="work-entry-gallery" type="file" accept="image/*" multiple onchange="handleWorkPhotoFiles(this.files);this.value='' "></label></div><div id="work-photo-preview" class="work-photo-preview"></div><p class="muted">Voit lisätä merkintään useita kuvia. Kuvat pienennetään automaattisesti raporttia varten.</p></div>
   </div>
   <div class="work-editor-actions"><button type="button" class="secondary" onclick="closeWorkEntryEditor()">Peruuta</button><button type="button" class="primary" onclick="saveWorkEntry()">Tallenna merkintä</button></div>
 </div>
@@ -237,7 +237,7 @@ function normalizeData(saved){
   const result={...emptyData(),...(saved||{})};
   result.workEntries=(Array.isArray(result.workEntries)?result.workEntries:[]).map(entry=>({
     id:entry?.id||newRecordId("merkinta"),date:entry?.date||new Date().toISOString().slice(0,10),target:String(entry?.target||""),text:String(entry?.text||""),
-    photos:(Array.isArray(entry?.photos)?entry.photos:[]).filter(photo=>photo?.data).slice(0,6).map(photo=>({id:photo.id||newRecordId("kuva"),data:photo.data,width:Number(photo.width)||800,height:Number(photo.height)||600}))
+    photos:(Array.isArray(entry?.photos)?entry.photos:[]).filter(photo=>photo?.data).map(photo=>({id:photo.id||newRecordId("kuva"),data:photo.data,width:Number(photo.width)||800,height:Number(photo.height)||600}))
   }));
   result.apartments=(Array.isArray(result.apartments)?result.apartments:[]).map(normalizeApartment);
   return result;
@@ -372,9 +372,8 @@ function compressWorkPhoto(file){
   })
 }
 async function handleWorkPhotoFiles(files){
-  const selected=[...(files||[])],room=6-pendingWorkPhotos.length;if(room<=0){showToast("Yhdessä merkinnässä voi olla enintään 6 kuvaa");return}
-  if(selected.length>room)showToast("Merkintään lisättiin ensimmäiset "+room+" kuvaa");
-  for(const file of selected.slice(0,room)){try{pendingWorkPhotos.push(await compressWorkPhoto(file));renderWorkPhotoPreview()}catch(e){showToast(e.message||"Kuvaa ei voitu lisätä")}}
+  const selected=[...(files||[])];
+  for(const file of selected){try{pendingWorkPhotos.push(await compressWorkPhoto(file));renderWorkPhotoPreview()}catch(e){showToast(e.message||"Kuvaa ei voitu lisätä")}}
 }
 function renderWorkPhotoPreview(){const box=document.getElementById("work-photo-preview");if(!box)return;box.innerHTML=pendingWorkPhotos.map((photo,index)=>'<div class="work-photo"><img src="'+photo.data+'" alt="Työmerkinnän kuva '+(index+1)+'"><button type="button" onclick="removePendingWorkPhoto('+index+')" aria-label="Poista kuva">×</button></div>').join("")}
 function removePendingWorkPhoto(index){pendingWorkPhotos.splice(index,1);renderWorkPhotoPreview()}
@@ -570,15 +569,28 @@ async function makePdf(){
     const labelW=106;rect(left,y-boxH,labelW,boxH,C.pale,C.line);rect(left+labelW,y-boxH,width-labelW,boxH,"1 1 1",C.line);text("KOMMENTIT / KORJAUKSET",left+6,y-14,6.1,true,C.muted);rows.forEach((row,i)=>text(row.text,left+labelW+7,y-14-i*9,6.7,!!row.bold,row.color||C.ink));y-=boxH+12;
   }
   function workEntrySectionHeading(continued=false){text("TYÖMERKINNÄT"+(continued?" (jatkuu)":""),left,y-14,14,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=38}
-  function workEntryHeight(entry){const rows=wrap(entry.text||"",82),photos=(entry.photos||[]).filter(photo=>workImageMap.has(photo.id));return 42+rows.length*9+Math.ceil(photos.length/2)*118+(photos.length?8:0)}
-  function drawWorkEntry(entry){
-    const rows=wrap(entry.text||"",82),photos=(entry.photos||[]).filter(photo=>workImageMap.has(photo.id)),boxH=workEntryHeight(entry);
+  function drawWorkEntryHeader(entry,continued=false){
+    const rows=continued?[]:wrap(entry.text||"",82),boxH=continued?34:42+rows.length*9;
     if(y-boxH<42){newContentPage();workEntrySectionHeading(true)}
     const top=y;rect(left,top-boxH,width,boxH,"1 1 1",C.line);
     const target=String(entry.target||"").trim()||"YLEINEN",tagW=Math.min(150,Math.max(55,target.length*6+16));rect(left+10,top-29,tagW,20,C.pale,null);text(fit(target,22),left+18,top-22,7.2,true,C.green);text(displayWorkDate(entry.date),493,top-22,7,false,C.muted);
-    let cursor=top-44;rows.forEach(row=>{text(row,left+12,cursor,8,false,C.ink);cursor-=9});
-    if(photos.length){cursor-=4;const photoW=247,photoH=106,gap=13;photos.forEach((photo,index)=>{const col=index%2,row=Math.floor(index/2),x=left+10+col*(photoW+gap),photoY=cursor-photoH-row*118;rect(x,photoY,photoW,photoH,C.pale,C.line);imageFit(photo,x+2,photoY+2,photoW-4,photoH-4)});cursor-=Math.ceil(photos.length/2)*118}
-    y=top-boxH-12;
+    if(continued)text("KUVAT JATKUVAT",left+175,top-22,6.5,true,C.muted);
+    else{let cursor=top-44;rows.forEach(row=>{text(row,left+12,cursor,8,false,C.ink);cursor-=9})}
+    y=top-boxH-10;
+  }
+  function drawWorkEntry(entry){
+    const photos=(entry.photos||[]).filter(photo=>workImageMap.has(photo.id));drawWorkEntryHeader(entry);
+    let photoIndex=0;
+    while(photoIndex<photos.length){
+      let availableRows=Math.floor((y-50)/118);
+      if(availableRows<1){newContentPage();workEntrySectionHeading(true);drawWorkEntryHeader(entry,true);availableRows=Math.floor((y-50)/118)}
+      const remainingRows=Math.ceil((photos.length-photoIndex)/2),rowsNow=Math.max(1,Math.min(3,remainingRows,availableRows)),boxH=rowsNow*118+8,top=y,photoW=247,photoH=106,gap=13,count=Math.min(rowsNow*2,photos.length-photoIndex);
+      rect(left,top-boxH,width,boxH,"1 1 1",C.line);
+      for(let offset=0;offset<count;offset++){const photo=photos[photoIndex+offset],col=offset%2,row=Math.floor(offset/2),x=left+10+col*(photoW+gap),photoY=top-4-photoH-row*118;rect(x,photoY,photoW,photoH,C.pale,C.line);imageFit(photo,x+2,photoY+2,photoW-4,photoH-4)}
+      photoIndex+=count;y=top-boxH-12;
+      if(photoIndex<photos.length){newContentPage();workEntrySectionHeading(true);drawWorkEntryHeader(entry,true)}
+    }
+    y-=2;
   }
   function drawWorkEntries(){
     if(!workEntries.length)return;
