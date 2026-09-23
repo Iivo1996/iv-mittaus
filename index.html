@@ -605,12 +605,12 @@ async function makePdf(){
   }
   function workEntrySectionHeading(continued=false){text("TYÖMERKINNÄT"+(continued?" (jatkuu)":""),left,y-14,14,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=38}
   function drawWorkEntryHeader(entry,continued=false){
-    const rows=continued?[]:wrap(entry.text||"",82),boxH=continued?34:55+rows.length*9;
+    const target=String(entry.target||"").trim(),rows=continued?[]:wrap(entry.text||"",82),boxH=continued?34:(target?55:34)+rows.length*9;
     if(y-boxH<42){newContentPage();workEntrySectionHeading(true)}
     const top=y;rect(left,top-boxH,width,boxH,"1 1 1",C.line);
-    const target=String(entry.target||"").trim()||"YLEINEN",tagW=Math.min(150,Math.max(55,target.length*6+16));rect(left+10,top-29,tagW,20,C.pale,null);text(fit(target,22),left+18,top-22,7.2,true,C.green);text(displayWorkDate(entry.date),493,top-22,7,false,C.muted);
-    if(continued)text(fit(workEntryTitle(entry)+" / KUVAT JATKUVAT",44),left+175,top-22,6.5,true,C.muted);
-    else{let cursor=top-44;text(fit(workEntryTitle(entry),68),left+12,cursor,9,true,C.ink);cursor-=14;rows.forEach(row=>{text(row,left+12,cursor,8,false,C.ink);cursor-=9})}
+    if(target){const tagW=Math.min(150,Math.max(55,target.length*6+16));rect(left+10,top-29,tagW,20,C.pale,null);text(fit(target,22),left+18,top-22,7.2,true,C.green)}text(displayWorkDate(entry.date),493,top-22,7,false,C.muted);
+    if(continued)text(fit(workEntryTitle(entry)+" / KUVAT JATKUVAT",target?44:58),target?left+175:left+12,top-22,6.5,true,C.muted);
+    else{let cursor=target?top-44:top-22;text(fit(workEntryTitle(entry),target?68:58),left+12,cursor,9,true,C.ink);cursor-=14;rows.forEach(row=>{text(row,left+12,cursor,8,false,C.ink);cursor-=9})}
     y=top-boxH-10;
   }
   function drawWorkEntry(entry){
