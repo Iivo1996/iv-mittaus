@@ -75,9 +75,9 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <section class="card"><div class="card-heading"><span class="step">1</span><h2>Kohteen tiedot</h2></div>
 <div class="grid">
 <div><label>Kohde</label><input id="kohde" placeholder="Esim. Virusmäentie 27, Turku"></div>
-<div><label>Mittauspäivä</label><input id="paiva" type="date"></div>
+<div><label>Työpäivä</label><input id="paiva" type="date"></div>
 <div><label>Työn suorittaja</label><input id="mittaaja" placeholder="Nimi"></div>
-<div><label>Mittausväline</label><input id="valine" placeholder="Esim. Swema 3000md"></div>
+<div id="measurement-instrument-wrap" hidden><label>Mittausväline</label><input id="valine" placeholder="Esim. Swema 3000md"></div>
 <div class="work-type-block"><label>Työn laatu <span class="muted">(voit valita useita)</span></label><div class="work-type-grid" role="group" aria-label="Työn laatu">
 <button type="button" class="work-type-option" data-work-type="cleaning" role="checkbox" onclick="toggleWorkType('cleaning')">Puhdistus</button>
 <button type="button" class="work-type-option" data-work-type="maintenance" role="checkbox" onclick="toggleWorkType('maintenance')">Huolto</button>
@@ -274,6 +274,7 @@ function renderWorkType(){
   const selectedTypes=Array.isArray(data.workTypes)?data.workTypes:[];
   document.querySelectorAll("[data-work-type]").forEach(button=>{const selected=selectedTypes.includes(button.dataset.workType);button.classList.toggle("selected",selected);button.setAttribute("aria-checked",selected?"true":"false")});
   const wrap=document.getElementById("custom-work-type-wrap"),input=document.getElementById("custom-work-type");if(wrap)wrap.hidden=!selectedTypes.includes("other");if(input)input.value=data.customWorkType||"";
+  const instrumentWrap=document.getElementById("measurement-instrument-wrap");if(instrumentWrap)instrumentWrap.hidden=!selectedTypes.includes("measurement");
 }
 function toggleWorkType(type){if(!WORK_TYPES.includes(type))return;const selected=new Set(Array.isArray(data.workTypes)?data.workTypes:[]);if(selected.has(type))selected.delete(type);else selected.add(type);data.workTypes=WORK_TYPES.filter(item=>selected.has(item));renderWorkType();save();if(type==="other"&&selected.has(type))document.getElementById("custom-work-type")?.focus()}
 function updateCustomWorkType(value){data.customWorkType=value;save()}
@@ -548,7 +549,7 @@ async function makePdf(){
     text("KOHDE",left,566,7,true,C.muted);
     text(fit(data.kohde||"Nimetön kohde",38),left,532,25,true,C.ink);
     rect(left,375,width,82,null,C.line);
-    const hasInstrument=!!String(data.valine||"").trim(),items=[{label:workEntries.length?"TYÖPÄIVÄ":"MITTAUSPÄIVÄ",value:displayWorkDate(data.paiva)},{label:"TYÖN SUORITTAJA",value:data.mittaaja||"-"}];
+    const hasInstrument=(data.workTypes||[]).includes("measurement")&&!!String(data.valine||"").trim(),items=[{label:"TYÖPÄIVÄ",value:displayWorkDate(data.paiva)},{label:"TYÖN SUORITTAJA",value:data.mittaaja||"-"}];
     if(hasInstrument)items.push({label:"MITTAUSVÄLINE",value:data.valine});
     const itemX=hasInstrument?[left+12,left+172,left+324]:[left+12,left+278];items.forEach((item,index)=>item.x=itemX[index]);
     items.forEach(item=>{text(item.label,item.x,431,6.5,true,C.muted);text(fit(item.value,24),item.x,411,8.5,true,C.ink)});
@@ -557,9 +558,9 @@ async function makePdf(){
   function reportIntro(){
     const compactTitle=reportTitle.length>56,titleSize=compactTitle?12.5:15,titleStep=compactTitle?16:19,titleRows=wrap(reportTitle,compactTitle?70:56).slice(0,2);titleRows.forEach((row,i)=>text(row,left,y-18-i*titleStep,titleSize,true,C.ink));y-=30+(titleRows.length-1)*titleStep;line(left,y,563,y,C.green,1);y-=18;
     text("KOHDE",left,y,6.5,true,C.muted);text(fit(data.kohde||"Nimetön kohde",42),left+72,y,10,true,C.ink);
-    text("MITTAUSPÄIVÄ",left+300,y,6.5,true,C.muted);text(displayWorkDate(data.paiva),left+390,y,8.5,false,C.ink);y-=21;
+    text("TYÖPÄIVÄ",left+300,y,6.5,true,C.muted);text(displayWorkDate(data.paiva),left+390,y,8.5,false,C.ink);y-=21;
     text("TYÖN SUORITTAJA",left,y,6.5,true,C.muted);text(fit(data.mittaaja||"-",28),left+92,y,8.5,false,C.ink);
-    if(String(data.valine||"").trim()){text("MITTAUSVÄLINE",left+300,y,6.5,true,C.muted);text(fit(data.valine,23),left+390,y,8.5,false,C.ink)}y-=24;
+    if((data.workTypes||[]).includes("measurement")&&String(data.valine||"").trim()){text("MITTAUSVÄLINE",left+300,y,6.5,true,C.muted);text(fit(data.valine,23),left+390,y,8.5,false,C.ink)}y-=24;
   }
   function ensure(h){if(y-h<42)newContentPage()}
   function summaryItems(a){
