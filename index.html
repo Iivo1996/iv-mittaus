@@ -76,7 +76,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <div class="grid">
 <div><label>Kohde</label><input id="kohde" placeholder="Esim. Virusmäentie 27, Turku"></div>
 <div><label>Mittauspäivä</label><input id="paiva" type="date"></div>
-<div><label>Mittaaja</label><input id="mittaaja" placeholder="Nimi"></div>
+<div><label>Työn suorittaja</label><input id="mittaaja" placeholder="Nimi"></div>
 <div><label>Mittausväline</label><input id="valine" placeholder="Esim. Swema 3000md"></div>
 <div class="work-type-block"><label>Työn laatu <span class="muted">(voit valita useita)</span></label><div class="work-type-grid" role="group" aria-label="Työn laatu">
 <button type="button" class="work-type-option" data-work-type="cleaning" role="checkbox" onclick="toggleWorkType('cleaning')">Puhdistus</button>
@@ -558,7 +558,7 @@ async function makePdf(){
     const compactTitle=reportTitle.length>56,titleSize=compactTitle?12.5:15,titleStep=compactTitle?16:19,titleRows=wrap(reportTitle,compactTitle?70:56).slice(0,2);titleRows.forEach((row,i)=>text(row,left,y-18-i*titleStep,titleSize,true,C.ink));y-=30+(titleRows.length-1)*titleStep;line(left,y,563,y,C.green,1);y-=18;
     text("KOHDE",left,y,6.5,true,C.muted);text(fit(data.kohde||"Nimetön kohde",42),left+72,y,10,true,C.ink);
     text("MITTAUSPÄIVÄ",left+300,y,6.5,true,C.muted);text(displayWorkDate(data.paiva),left+390,y,8.5,false,C.ink);y-=21;
-    text("MITTAAJA",left,y,6.5,true,C.muted);text(fit(data.mittaaja||"-",28),left+72,y,8.5,false,C.ink);
+    text("TYÖN SUORITTAJA",left,y,6.5,true,C.muted);text(fit(data.mittaaja||"-",28),left+92,y,8.5,false,C.ink);
     if(String(data.valine||"").trim()){text("MITTAUSVÄLINE",left+300,y,6.5,true,C.muted);text(fit(data.valine,23),left+390,y,8.5,false,C.ink)}y-=24;
   }
   function ensure(h){if(y-h<42)newContentPage()}
