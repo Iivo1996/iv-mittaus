@@ -548,7 +548,9 @@ async function makePdf(){
     text("KOHDE",left,566,7,true,C.muted);
     text(fit(data.kohde||"Nimetön kohde",38),left,532,25,true,C.ink);
     rect(left,375,width,82,null,C.line);
-    const items=[{label:workEntries.length?"TYÖPÄIVÄ":"MITTAUSPÄIVÄ",value:displayWorkDate(data.paiva),x:left+12},{label:"TYÖN SUORITTAJA",value:data.mittaaja||"-",x:left+172},{label:"MITTAUSVÄLINE",value:data.valine||"-",x:left+324}];
+    const hasInstrument=!!String(data.valine||"").trim(),items=[{label:workEntries.length?"TYÖPÄIVÄ":"MITTAUSPÄIVÄ",value:displayWorkDate(data.paiva)},{label:"TYÖN SUORITTAJA",value:data.mittaaja||"-"}];
+    if(hasInstrument)items.push({label:"MITTAUSVÄLINE",value:data.valine});
+    const itemX=hasInstrument?[left+12,left+172,left+324]:[left+12,left+278];items.forEach((item,index)=>item.x=itemX[index]);
     items.forEach(item=>{text(item.label,item.x,431,6.5,true,C.muted);text(fit(item.value,24),item.x,411,8.5,true,C.ink)});
     y=0;
   }
@@ -557,7 +559,7 @@ async function makePdf(){
     text("KOHDE",left,y,6.5,true,C.muted);text(fit(data.kohde||"Nimetön kohde",42),left+72,y,10,true,C.ink);
     text("MITTAUSPÄIVÄ",left+300,y,6.5,true,C.muted);text(displayWorkDate(data.paiva),left+390,y,8.5,false,C.ink);y-=21;
     text("MITTAAJA",left,y,6.5,true,C.muted);text(fit(data.mittaaja||"-",28),left+72,y,8.5,false,C.ink);
-    text("MITTAUSVÄLINE",left+300,y,6.5,true,C.muted);text(fit(data.valine||"-",23),left+390,y,8.5,false,C.ink);y-=24;
+    if(String(data.valine||"").trim()){text("MITTAUSVÄLINE",left+300,y,6.5,true,C.muted);text(fit(data.valine,23),left+390,y,8.5,false,C.ink)}y-=24;
   }
   function ensure(h){if(y-h<42)newContentPage()}
   function summaryItems(a){
