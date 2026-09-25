@@ -54,11 +54,12 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 .vent-row input.measurement-alert{background:color-mix(in srgb,var(--ui-danger) 14%,var(--ui-surface-2));border-color:var(--ui-danger);color:var(--ui-danger);font-weight:800}.deviation-comments{margin-top:10px;padding:11px 12px;border-left:4px solid var(--ui-danger);border-radius:8px;background:color-mix(in srgb,var(--ui-danger) 10%,var(--ui-surface-2));color:var(--ui-text);font-size:13px;line-height:1.45}.deviation-comments strong{display:block;color:var(--ui-danger);margin-bottom:5px}.deviation-comments ul{margin:0;padding-left:19px}.deviation-comments li+li{margin-top:4px}.deviation-comments[hidden]{display:none}
 .work-heading{display:flex;align-items:center;gap:9px}.work-heading .secondary{margin-left:auto}.work-editor{margin-top:15px;padding:14px;border:1px solid var(--ui-border);border-radius:11px;background:var(--ui-surface-2)}.work-editor[hidden]{display:none}.work-editor-grid{display:grid;grid-template-columns:180px minmax(0,1fr);gap:12px}.work-editor .full{grid-column:1/-1}.work-photo-actions{display:flex;gap:8px;flex-wrap:wrap}.work-photo-actions .file-button{flex:1;min-width:170px}.work-photo-preview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}.work-photo{position:relative;aspect-ratio:4/3;border:1px solid var(--ui-border);border-radius:9px;overflow:hidden;background:var(--ui-surface-3)}.work-photo img{width:100%;height:100%;object-fit:cover}.work-photo button{position:absolute;right:5px;top:5px;width:28px;min-height:28px;padding:0;border-radius:999px;background:rgba(8,18,22,.82);color:#fff;border-color:rgba(255,255,255,.28)}.work-editor-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.work-entry-list{display:grid;gap:10px;margin-top:14px}.work-entry-card{border:1px solid var(--ui-border);border-radius:11px;overflow:hidden;background:var(--ui-surface-2)}.work-entry-card>summary{list-style:none;cursor:pointer;-webkit-tap-highlight-color:transparent;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 13px}.work-entry-card>summary::-webkit-details-marker{display:none}.work-entry-card>summary::before{content:"›";font-size:22px;line-height:1;transition:transform .15s}.work-entry-card[open]>summary::before{transform:rotate(90deg);color:var(--ui-accent)}.work-entry-card[open]>summary{background:var(--ui-accent-soft);border-bottom:1px solid color-mix(in srgb,var(--ui-accent) 45%,var(--ui-border))}.work-entry-summary-main{min-width:0}.work-entry-summary-main strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.work-entry-summary-main span{display:block;color:var(--ui-muted);font-size:11px;margin-top:3px}.work-entry-summary-meta{text-align:right;color:var(--ui-muted);font-size:11px;white-space:nowrap}.work-entry-summary-meta span{display:block}.work-entry-summary-meta span+span{margin-top:3px}.work-entry-body{padding:13px}.work-entry-text{white-space:pre-wrap;line-height:1.5;margin:0}.work-entry-photos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:11px}.work-entry-photos img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;border:1px solid var(--ui-border)}.work-entry-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:11px}.work-empty{margin-top:13px;padding:18px;border:1px dashed var(--ui-border);border-radius:10px;color:var(--ui-muted);text-align:center;font-size:13px}
 .work-type-block{grid-column:1/-1;margin-top:4px}.work-type-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.work-type-option{min-height:48px;background:var(--ui-surface-2);border:1px solid var(--ui-border);color:var(--ui-text)}.work-type-option.selected{background:var(--ui-accent-soft);border-color:var(--ui-accent);color:var(--ui-accent);box-shadow:inset 0 0 0 1px var(--ui-accent)}.custom-work-type{margin-top:10px;max-width:520px}.custom-work-type[hidden]{display:none}
+.cleaning-block{grid-column:1/-1;margin-top:4px;padding:13px;border:1px solid var(--ui-border);border-radius:11px;background:var(--ui-surface-2)}.cleaning-block[hidden]{display:none}.cleaning-block>label{color:var(--ui-text);font-size:14px}.cleaning-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.cleaning-option{position:relative;min-height:46px;padding:9px 10px 9px 35px;text-align:left;background:var(--ui-surface);border:1px solid var(--ui-border);color:var(--ui-text);font-size:13px}.cleaning-option::before{content:"";position:absolute;left:11px;top:50%;width:15px;height:15px;border:1px solid var(--ui-border);border-radius:4px;transform:translateY(-50%);background:var(--ui-surface-2)}.cleaning-option.selected{background:var(--ui-accent-soft);border-color:var(--ui-accent);color:var(--ui-accent)}.cleaning-option.selected::before{content:"✓";display:grid;place-items:center;border-color:var(--ui-accent);background:var(--ui-accent);color:#04130e;font-size:11px;font-weight:900}.cleaning-custom{margin-top:9px}.cleaning-custom[hidden]{display:none}.cleaning-tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 11px}.cleaning-tag{padding:5px 8px;border-radius:999px;background:var(--ui-accent-soft);color:var(--ui-accent);font-size:11px;font-weight:750}
 @media(max-width:700px){header{padding:10px 12px}.tool-badge{display:none}.brand{gap:9px}.brand-mark{width:34px;height:34px}.brand-copy h1{font-size:17px}.menu-button{font-size:13px;padding:6px 9px}main{padding:12px 9px 30px}.card{padding:13px;border-radius:10px}.grid{grid-template-columns:1fr}.apartment{padding:0}.apartment-summary{padding:12px}.apartment-body{padding:8px}.apartment-title,.room-title{grid-template-columns:auto 1fr}.apartment-title .danger,.room-title .danger{grid-column:2;justify-self:end}.row{grid-template-columns:1fr 1fr 1fr;gap:8px}.row>div:first-child{grid-column:1/-1}.row>button{grid-column:3}.air-summary{grid-template-columns:1fr 1fr}.summary-box:last-child{grid-column:1/-1}.bottom{display:grid;grid-template-columns:1fr 1fr}.bottom .save-note{grid-column:1/-1;margin:0}.bottom .primary,.bottom .save-project{grid-column:1/-1}.bottom button{width:100%}.project-item{grid-template-columns:1fr}.project-actions{justify-content:flex-end}.project-actions button{flex:1}.toast{bottom:24px;white-space:nowrap}.pdf-frame{height:50vh}.modal-actions{display:grid;grid-template-columns:1fr 1fr}.modal-actions>*{width:100%}#pdf-share{grid-column:1/-1}}
 @media(max-width:700px){.vent-row{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.vent-row .field-space{grid-column:span 3}.vent-row .field-type{grid-column:span 3}.vent-row .field-valve{grid-column:1/-1}.vent-row .field-small{grid-column:span 2}.vent-row .field-flow{grid-column:span 3}.vent-row .field-position{grid-column:span 3}.vent-row .remove-vent{grid-column:1/-1;width:100%}.optional-fields{grid-template-columns:1fr}.vent-actions{display:grid;grid-template-columns:1fr}.vent-actions button{width:100%}.room-group>summary{padding:11px 10px}.room-group-body{padding:0 7px 7px}.vent-card>summary{padding:9px 8px}}
 @media(max-width:700px){.apartment-title{grid-template-columns:1fr}.apartment-title>input{max-width:none}.apartment-title .danger{grid-column:1}}
 @media(max-width:700px){.work-editor-grid{grid-template-columns:1fr}.work-editor .full{grid-column:auto}.work-photo-preview,.work-entry-photos{grid-template-columns:repeat(2,minmax(0,1fr))}.work-editor-actions{display:grid;grid-template-columns:1fr 1fr}.work-editor-actions button{width:100%}.work-heading{align-items:flex-start}.work-heading .secondary{white-space:nowrap}}
-@media(max-width:700px){.work-type-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.work-type-option:last-child{grid-column:1/-1}}
+@media(max-width:700px){.work-type-grid,.cleaning-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.work-type-option:last-child{grid-column:1/-1}}
 @media print{body{background:#fff}header,.no-print,button{display:none!important}main{max-width:none;padding:0}.card{border:0;box-shadow:none;page-break-inside:avoid;padding:4px 0}input,textarea{border:0;padding:2px 0}.row{grid-template-columns:1.5fr .5fr .6fr .9fr .9fr .7fr}.row>button{display:none}}
 </style>
 </head>
@@ -85,6 +86,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <button type="button" class="work-type-option" data-work-type="measurement" role="checkbox" onclick="toggleWorkType('measurement')">Mittaus ja säätö</button>
 <button type="button" class="work-type-option" data-work-type="other" role="checkbox" onclick="toggleWorkType('other')">Muu, mikä?</button>
 </div><div id="custom-work-type-wrap" class="custom-work-type" hidden><label>Muu työn laatu</label><input id="custom-work-type" maxlength="50" placeholder="Esim. kanavakuvaus" oninput="updateCustomWorkType(this.value)"></div><p class="muted">Valinnat määrittävät PDF-raportin pääotsikon.</p></div>
+<div id="project-cleaning-wrap" class="cleaning-block" hidden><label>Puhdistuksen laajuus <span class="muted">(valitse puhdistetut kohteet)</span></label><div id="project-cleaning-grid" class="cleaning-grid" role="group" aria-label="Kohteessa puhdistetut osat"></div><div id="project-cleaning-custom" class="cleaning-custom" hidden><label>Muu puhdistettu kohde</label><input id="project-cleaning-custom-input" maxlength="80" placeholder="Kirjoita puhdistettu kohde" oninput="updateProjectCustomCleaningItem(this.value)"></div></div>
 </div></section>
 <section class="card no-print"><div class="work-heading"><span class="step">2</span><h2>Työmerkinnät</h2><button type="button" class="secondary" onclick="openWorkEntryEditor()">+ Lisää merkintä</button></div>
 <div id="work-entry-editor" class="work-editor" hidden>
@@ -92,6 +94,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
     <div><label>Päivämäärä</label><input id="work-entry-date" type="date"></div>
     <div><label>Asunto / kohde <span class="muted">(vapaaehtoinen)</span></label><input id="work-entry-target" placeholder="Esim. A 12 tai IV-konehuone"></div>
     <div class="full"><label>Otsikko</label><input id="work-entry-title" maxlength="100" placeholder="Esim. Poistokanavien puhdistus"></div>
+    <div id="work-entry-cleaning-wrap" class="cleaning-block full" hidden><label>Puhdistettu tässä merkinnässä <span class="muted">(valitse kaikki sopivat)</span></label><div id="work-entry-cleaning-grid" class="cleaning-grid" role="group" aria-label="Työmerkinnässä puhdistetut osat"></div><div id="work-entry-cleaning-custom" class="cleaning-custom" hidden><label>Muu puhdistettu kohde</label><input id="work-entry-cleaning-custom-input" maxlength="80" placeholder="Kirjoita puhdistettu kohde" oninput="updatePendingCustomCleaningItem(this.value)"></div></div>
     <div class="full"><label>Kuvaus</label><textarea id="work-entry-text" maxlength="2000" placeholder="Kirjaa tehdyt työt, havainnot ja jatkotoimenpiteet..."></textarea></div>
     <div class="full"><label>Kuvat</label><div class="work-photo-actions"><label class="file-button">Ota kuva<input id="work-entry-camera" type="file" accept="image/*" capture="environment" onchange="handleWorkPhotoFiles(this.files);this.value='' "></label><label class="file-button">Valitse kuvia<input id="work-entry-gallery" type="file" accept="image/*" multiple onchange="handleWorkPhotoFiles(this.files);this.value='' "></label></div><div id="work-photo-preview" class="work-photo-preview"></div><p class="muted">Voit lisätä merkintään useita kuvia. Kuvat pienennetään automaattisesti raporttia varten.</p></div>
   </div>
@@ -231,7 +234,12 @@ function newRecordId(prefix){return(globalThis.crypto?.randomUUID?.()||prefix+"-
 const emptyVent=(space="",type="supply")=>({space,type,valve:"",kpl:"1",pa:"",target:"",adjusted:"",position:""});
 const emptyApartment=()=>({name:"",comments:"",vents:[],pressureEnabled:false,pressureDifference:"",speedEnabled:false,measurementSpeed:""});
 const WORK_TYPES=["cleaning","maintenance","installation","measurement","other"];
-const emptyData=()=>({projectId:null,kohde:"",paiva:new Date().toISOString().slice(0,10),mittaaja:"",valine:"",workTypes:[],customWorkType:"",workEntries:[],apartments:[]});
+const CLEANING_ITEMS=[
+  {id:"supplyDucts",label:"Tuloilmakanavat"},{id:"exhaustDucts",label:"Poistoilmakanavat"},{id:"terminals",label:"Venttiilit ja päätelaitteet"},{id:"airUnit",label:"IV-kone"},
+  {id:"heatRecovery",label:"LTO-kenno"},{id:"fans",label:"Puhaltimet"},{id:"grilles",label:"Ulkoilma- ja jäteilmasäleiköt"},{id:"other",label:"Muu"}
+];
+const normalizeCleaningItems=items=>[...new Set((Array.isArray(items)?items:[]).filter(id=>CLEANING_ITEMS.some(item=>item.id===id)))];
+const emptyData=()=>({projectId:null,kohde:"",paiva:new Date().toISOString().slice(0,10),mittaaja:"",valine:"",workTypes:[],customWorkType:"",cleaningItems:[],customCleaningItem:"",workEntries:[],apartments:[]});
 function normalizeApartment(apartment){
   const a={...emptyApartment(),...(apartment||{})};
   if(!Array.isArray(a.vents)){
@@ -250,8 +258,10 @@ function normalizeData(saved){
   result.workTypes=[...new Set((Array.isArray(saved?.workTypes)?saved.workTypes:legacyType?[legacyType]:[]).filter(type=>WORK_TYPES.includes(type)))];
   delete result.workType;
   result.customWorkType=String(result.customWorkType||"");
+  result.cleaningItems=normalizeCleaningItems(result.cleaningItems);result.customCleaningItem=String(result.customCleaningItem||"");
   result.workEntries=(Array.isArray(result.workEntries)?result.workEntries:[]).map(entry=>({
     id:entry?.id||newRecordId("merkinta"),date:entry?.date||new Date().toISOString().slice(0,10),target:String(entry?.target||""),title:String(entry?.title||""),text:String(entry?.text||""),
+    cleaningItems:normalizeCleaningItems(entry?.cleaningItems),customCleaningItem:String(entry?.customCleaningItem||""),
     photos:(Array.isArray(entry?.photos)?entry.photos:[]).filter(photo=>photo?.data).map(photo=>({id:photo.id||newRecordId("kuva"),data:photo.data,width:Number(photo.width)||800,height:Number(photo.height)||600}))
   }));
   result.apartments=(Array.isArray(result.apartments)?result.apartments:[]).map(normalizeApartment);
@@ -270,13 +280,24 @@ function loadData(){
   return emptyData();
 }
 let data=loadData();
+function cleaningLabels(items,custom=""){
+  const selected=normalizeCleaningItems(items),labels=CLEANING_ITEMS.filter(item=>selected.includes(item.id)&&item.id!=="other").map(item=>item.label),other=String(custom||"").trim();
+  if(selected.includes("other")&&other)labels.push(other);return labels;
+}
+function cleaningOptionsHtml(selected,handler){const chosen=new Set(normalizeCleaningItems(selected));return CLEANING_ITEMS.map(item=>'<button type="button" class="cleaning-option'+(chosen.has(item.id)?' selected':'')+'" role="checkbox" aria-checked="'+(chosen.has(item.id)?'true':'false')+'" onclick="'+handler+'(\''+item.id+'\')">'+esc(item.label)+'</button>').join("")}
+function renderProjectCleaning(){
+  const grid=document.getElementById("project-cleaning-grid"),custom=document.getElementById("project-cleaning-custom"),input=document.getElementById("project-cleaning-custom-input");if(grid)grid.innerHTML=cleaningOptionsHtml(data.cleaningItems,"toggleProjectCleaningItem");if(custom)custom.hidden=!data.cleaningItems.includes("other");if(input)input.value=data.customCleaningItem||"";
+}
+function toggleProjectCleaningItem(id){const selected=new Set(normalizeCleaningItems(data.cleaningItems));if(selected.has(id))selected.delete(id);else selected.add(id);data.cleaningItems=CLEANING_ITEMS.map(item=>item.id).filter(item=>selected.has(item));renderProjectCleaning();save()}
+function updateProjectCustomCleaningItem(value){data.customCleaningItem=value;save()}
 function renderWorkType(){
   const selectedTypes=Array.isArray(data.workTypes)?data.workTypes:[];
   document.querySelectorAll("[data-work-type]").forEach(button=>{const selected=selectedTypes.includes(button.dataset.workType);button.classList.toggle("selected",selected);button.setAttribute("aria-checked",selected?"true":"false")});
   const wrap=document.getElementById("custom-work-type-wrap"),input=document.getElementById("custom-work-type");if(wrap)wrap.hidden=!selectedTypes.includes("other");if(input)input.value=data.customWorkType||"";
   const instrumentWrap=document.getElementById("measurement-instrument-wrap");if(instrumentWrap)instrumentWrap.hidden=!selectedTypes.includes("measurement");
+  const projectCleaningWrap=document.getElementById("project-cleaning-wrap");if(projectCleaningWrap)projectCleaningWrap.hidden=!selectedTypes.includes("cleaning");renderProjectCleaning();renderWorkEntryCleaning();
 }
-function toggleWorkType(type){if(!WORK_TYPES.includes(type))return;const selected=new Set(Array.isArray(data.workTypes)?data.workTypes:[]);if(selected.has(type))selected.delete(type);else selected.add(type);data.workTypes=WORK_TYPES.filter(item=>selected.has(item));renderWorkType();save();if(type==="other"&&selected.has(type))document.getElementById("custom-work-type")?.focus()}
+function toggleWorkType(type){if(!WORK_TYPES.includes(type))return;const selected=new Set(Array.isArray(data.workTypes)?data.workTypes:[]);if(selected.has(type))selected.delete(type);else selected.add(type);data.workTypes=WORK_TYPES.filter(item=>selected.has(item));renderWorkType();if(type==="cleaning")renderWorkEntries();save();if(type==="other"&&selected.has(type))document.getElementById("custom-work-type")?.focus()}
 function updateCustomWorkType(value){data.customWorkType=value;save()}
 let deferredInstallPrompt=null;
 const isStandalone=()=>window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
@@ -374,20 +395,25 @@ async function sharePdf(){
   document.getElementById("pdf-download").click();
   showToast("PDF ladattu – jaa se Tiedostot-sovelluksesta");
 }
-let editingWorkEntryId=null,pendingWorkPhotos=[];
+let editingWorkEntryId=null,pendingWorkPhotos=[],pendingWorkCleaningItems=[],pendingWorkCustomCleaningItem="";
 function displayWorkDate(value){if(!value)return"-";const date=new Date(value+"T00:00:00");return Number.isNaN(date.getTime())?value:date.toLocaleDateString("fi-FI")}
 function workEntryTitle(entry){const title=String(entry?.title||"").trim();if(title)return title;const text=String(entry?.text||"").trim().replace(/\s+/g," ");if(text)return text.length>60?text.slice(0,57)+"...":text;return String(entry?.target||"").trim()||"Työmerkintä"}
 function openWorkEntryEditor(id=null){
   const entry=id?data.workEntries.find(item=>item.id===id):null;
-  editingWorkEntryId=entry?.id||null;pendingWorkPhotos=(entry?.photos||[]).map(photo=>({...photo}));
+  editingWorkEntryId=entry?.id||null;pendingWorkPhotos=(entry?.photos||[]).map(photo=>({...photo}));pendingWorkCleaningItems=normalizeCleaningItems(entry?.cleaningItems);pendingWorkCustomCleaningItem=String(entry?.customCleaningItem||"");
   document.getElementById("work-entry-date").value=entry?.date||new Date().toISOString().slice(0,10);
   document.getElementById("work-entry-target").value=entry?.target||"";
   document.getElementById("work-entry-title").value=entry?(entry.title||workEntryTitle(entry)):"";
   document.getElementById("work-entry-text").value=entry?.text||"";
-  const editor=document.getElementById("work-entry-editor");editor.hidden=false;renderWorkPhotoPreview();
+  const editor=document.getElementById("work-entry-editor");editor.hidden=false;renderWorkEntryCleaning();renderWorkPhotoPreview();
   requestAnimationFrame(()=>editor.scrollIntoView({behavior:"smooth",block:"nearest"}));
 }
-function closeWorkEntryEditor(){editingWorkEntryId=null;pendingWorkPhotos=[];const editor=document.getElementById("work-entry-editor");if(editor)editor.hidden=true;const preview=document.getElementById("work-photo-preview");if(preview)preview.innerHTML=""}
+function closeWorkEntryEditor(){editingWorkEntryId=null;pendingWorkPhotos=[];pendingWorkCleaningItems=[];pendingWorkCustomCleaningItem="";const editor=document.getElementById("work-entry-editor");if(editor)editor.hidden=true;const preview=document.getElementById("work-photo-preview");if(preview)preview.innerHTML=""}
+function renderWorkEntryCleaning(){
+  const wrap=document.getElementById("work-entry-cleaning-wrap"),grid=document.getElementById("work-entry-cleaning-grid"),custom=document.getElementById("work-entry-cleaning-custom"),input=document.getElementById("work-entry-cleaning-custom-input"),cleaningSelected=(data.workTypes||[]).includes("cleaning");if(wrap)wrap.hidden=!cleaningSelected;if(grid)grid.innerHTML=cleaningOptionsHtml(pendingWorkCleaningItems,"togglePendingCleaningItem");if(custom)custom.hidden=!pendingWorkCleaningItems.includes("other");if(input)input.value=pendingWorkCustomCleaningItem;
+}
+function togglePendingCleaningItem(id){const selected=new Set(normalizeCleaningItems(pendingWorkCleaningItems));if(selected.has(id))selected.delete(id);else selected.add(id);pendingWorkCleaningItems=CLEANING_ITEMS.map(item=>item.id).filter(item=>selected.has(item));renderWorkEntryCleaning()}
+function updatePendingCustomCleaningItem(value){pendingWorkCustomCleaningItem=value}
 function compressWorkPhoto(file){
   return new Promise((resolve,reject)=>{
     if(!file?.type?.startsWith("image/")){reject(new Error("Valitse kuvatiedosto"));return}
@@ -405,8 +431,8 @@ function removePendingWorkPhoto(index){pendingWorkPhotos.splice(index,1);renderW
 function saveWorkEntry(){
   const date=document.getElementById("work-entry-date").value||new Date().toISOString().slice(0,10),target=document.getElementById("work-entry-target").value.trim(),title=document.getElementById("work-entry-title").value.trim(),textValue=document.getElementById("work-entry-text").value.trim();
   if(!title){showToast("Anna työmerkinnälle otsikko");document.getElementById("work-entry-title").focus();return}
-  if(!textValue&&!pendingWorkPhotos.length){showToast("Kirjoita kuvaus tai lisää vähintään yksi kuva");return}
-  const entry={id:editingWorkEntryId||newRecordId("merkinta"),date,target,title,text:textValue,photos:pendingWorkPhotos.map(photo=>({...photo}))},before=data.workEntries.map(item=>({...item,photos:(item.photos||[]).map(photo=>({...photo}))})),index=data.workEntries.findIndex(item=>item.id===entry.id);
+  if(!textValue&&!pendingWorkPhotos.length&&!pendingWorkCleaningItems.length){showToast("Kirjoita kuvaus, valitse puhdistettu kohde tai lisää kuva");return}
+  const entry={id:editingWorkEntryId||newRecordId("merkinta"),date,target,title,text:textValue,cleaningItems:normalizeCleaningItems(pendingWorkCleaningItems),customCleaningItem:pendingWorkCustomCleaningItem.trim(),photos:pendingWorkPhotos.map(photo=>({...photo}))},before=data.workEntries.map(item=>({...item,cleaningItems:[...(item.cleaningItems||[])],photos:(item.photos||[]).map(photo=>({...photo}))})),index=data.workEntries.findIndex(item=>item.id===entry.id);
   if(index>=0)data.workEntries[index]=entry;else data.workEntries.push(entry);
   if(!save()){data.workEntries=before;renderWorkEntries();return}
   closeWorkEntryEditor();renderWorkEntries();const savedCard=[...document.querySelectorAll(".work-entry-card")].find(card=>card.dataset.workEntryId===entry.id);if(savedCard){savedCard.open=true;requestAnimationFrame(()=>savedCard.scrollIntoView({behavior:"smooth",block:"nearest"}))}showToast(index>=0?"Merkintä päivitetty":"Työmerkintä tallennettu");
@@ -420,7 +446,8 @@ function renderWorkEntries(){
   const list=document.getElementById("work-entry-list");if(!list)return;
   const entries=[...(data.workEntries||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   if(!entries.length){list.innerHTML='<div class="work-empty">Ei vielä työmerkintöjä. Lisää yleinen tai asunto-/kohdekohtainen merkintä.</div>';return}
-  list.innerHTML=entries.map(entry=>{const photos=entry.photos||[],photoLabel=photos.length===1?"1 kuva":photos.length+" kuvaa";return '<details class="work-entry-card" data-work-entry-id="'+esc(entry.id)+'"><summary><span class="work-entry-summary-main"><strong>'+esc(workEntryTitle(entry))+'</strong><span>'+esc(entry.target||"Yleinen")+'</span></span><span class="work-entry-summary-meta"><span>'+esc(displayWorkDate(entry.date))+'</span><span>'+photoLabel+'</span></span></summary><div class="work-entry-body">'+(entry.text?'<p class="work-entry-text">'+esc(entry.text)+'</p>':'')+(photos.length?'<div class="work-entry-photos">'+photos.map((photo,index)=>'<img src="'+photo.data+'" alt="'+esc(workEntryTitle(entry))+', kuva '+(index+1)+'">').join("")+'</div>':'')+'<div class="work-entry-actions"><button type="button" class="secondary small" onclick="editWorkEntry(\''+entry.id+'\')">Muokkaa</button><button type="button" class="danger small" onclick="deleteWorkEntry(\''+entry.id+'\')">Poista</button></div></div></details>'}).join("");
+  const cleaningActive=(data.workTypes||[]).includes("cleaning");
+  list.innerHTML=entries.map(entry=>{const photos=entry.photos||[],labels=cleaningActive?cleaningLabels(entry.cleaningItems,entry.customCleaningItem):[],photoLabel=photos.length===1?"1 kuva":photos.length+" kuvaa";return '<details class="work-entry-card" data-work-entry-id="'+esc(entry.id)+'"><summary><span class="work-entry-summary-main"><strong>'+esc(workEntryTitle(entry))+'</strong><span>'+esc(entry.target||"Yleinen")+'</span></span><span class="work-entry-summary-meta"><span>'+esc(displayWorkDate(entry.date))+'</span><span>'+photoLabel+'</span></span></summary><div class="work-entry-body">'+(labels.length?'<div class="cleaning-tags">'+labels.map(label=>'<span class="cleaning-tag">✓ '+esc(label)+'</span>').join("")+'</div>':'')+(entry.text?'<p class="work-entry-text">'+esc(entry.text)+'</p>':'')+(photos.length?'<div class="work-entry-photos">'+photos.map((photo,index)=>'<img src="'+photo.data+'" alt="'+esc(workEntryTitle(entry))+', kuva '+(index+1)+'">').join("")+'</div>':'')+'<div class="work-entry-actions"><button type="button" class="secondary small" onclick="editWorkEntry(\''+entry.id+'\')">Muokkaa</button><button type="button" class="danger small" onclick="deleteWorkEntry(\''+entry.id+'\')">Poista</button></div></div></details>'}).join("");
 }
 function addApartment(){data.apartments.push(emptyApartment());render();save();const apartment=document.querySelectorAll(".apartment")[data.apartments.length-1];if(apartment){apartment.open=true;apartment.querySelector(".apartment-title input")?.focus()}}
 function removeApartment(ai){if(confirm("Poistetaanko tämä asunto mittauksineen?")){data.apartments.splice(ai,1);render();save()}}
@@ -608,13 +635,18 @@ async function makePdf(){
   }
   function workEntrySectionHeading(continued=false){text("TYÖMERKINNÄT"+(continued?" (jatkuu)":""),left,y-14,14,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=38}
   function drawWorkEntryHeader(entry,continued=false){
-    const target=String(entry.target||"").trim(),rows=continued?[]:wrap(entry.text||"",82),boxH=continued?34:(target?55:34)+rows.length*9;
+    const target=String(entry.target||"").trim(),rows=continued?[]:wrap(entry.text||"",82),cleaningRows=continued||!(data.workTypes||[]).includes("cleaning")?[]:wrap(cleaningLabels(entry.cleaningItems,entry.customCleaningItem).join(", "),74),boxH=continued?34:(target?55:34)+rows.length*9+cleaningRows.length*9;
     if(y-boxH<42){newContentPage();workEntrySectionHeading(true)}
     const top=y;rect(left,top-boxH,width,boxH,"1 1 1",C.line);
     if(target){const tagW=Math.min(150,Math.max(55,target.length*6+16));rect(left+10,top-29,tagW,20,C.pale,null);text(fit(target,22),left+18,top-22,7.2,true,C.green)}text(displayWorkDate(entry.date),493,top-22,7,false,C.muted);
     if(continued)text(fit(workEntryTitle(entry)+" / KUVAT JATKUVAT",target?44:58),target?left+175:left+12,top-22,6.5,true,C.muted);
-    else{let cursor=target?top-44:top-22;text(fit(workEntryTitle(entry),target?68:58),left+12,cursor,9,true,C.ink);cursor-=14;rows.forEach(row=>{text(row,left+12,cursor,8,false,C.ink);cursor-=9})}
+    else{let cursor=target?top-44:top-22;text(fit(workEntryTitle(entry),target?68:58),left+12,cursor,9,true,C.ink);cursor-=14;cleaningRows.forEach((row,index)=>{text((index?"":"PUHDISTETTU: ")+row,left+12,cursor,7,true,C.green);cursor-=9});rows.forEach(row=>{text(row,left+12,cursor,8,false,C.ink);cursor-=9})}
     y=top-boxH-10;
+  }
+  function drawProjectCleaning(){
+    const labels=(data.workTypes||[]).includes("cleaning")?cleaningLabels(data.cleaningItems,data.customCleaningItem):[];if(!labels.length)return;
+    const rows=wrap(labels.join(", "),82),boxH=18+rows.length*10;if(y-boxH-38<42)newContentPage();
+    text("PUHDISTUKSEN LAAJUUS",left,y-14,14,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=38;rect(left,y-boxH,width,boxH,"1 1 1",C.line);rows.forEach((row,index)=>text((index?"":"PUHDISTETTU: ")+row,left+12,y-17-index*10,7.5,index===0,C.ink));y-=boxH+14;
   }
   function drawWorkEntry(entry){
     const photos=(entry.photos||[]).filter(photo=>workImageMap.has(photo.id));drawWorkEntryHeader(entry);
@@ -644,6 +676,7 @@ async function makePdf(){
   }
   if(hasCover){coverPage();newContentPage()}else{brandHeader();y=758;reportIntro()}
   if(!data.apartments.length&&!workEntries.length){text("Ei lisättyjä mittaustuloksia tai työmerkintöjä.",left,y-14,10,false,C.muted);y-=24}
+  drawProjectCleaning();
   drawWorkEntries();
   drawMeasurements();
   pages.forEach((p,i)=>{page=p;line(left,31,563,31,C.line);if(settings.company)text(fit(settings.company,36),left,18,6.5,false,C.muted);text("IV Mittaus",278,18,5.8,false,C.muted);text("Sivu "+(i+1)+" / "+pages.length,510,18,6.5,false,C.muted)});
