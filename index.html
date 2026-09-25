@@ -497,7 +497,6 @@ function updateVent(ai,vi,key,value){
   }
   save();if(key==="adjusted")updateApartmentSummary(ai);updateVentDeviation(ai,vi);updateApartmentDeviationNotes(ai)
 }
-function togglePositionSign(ai,vi){let x=String(data.apartments[ai].vents[vi].position||"");data.apartments[ai].vents[vi].position=x.startsWith("-")?x.slice(1):"-"+x;render();save()}
 function togglePressureSign(ai){
   const apartment=data.apartments[ai];let x=String(apartment.pressureDifference||"").trim();
   apartment.pressureDifference=x.startsWith("-")?x.slice(1):"-"+x;
@@ -745,7 +744,7 @@ function ventRows(ai){
   '<div class="field-small"><label>Pa</label><input inputmode="decimal" value="'+esc(v.pa)+'" oninput="updateVent('+ai+','+vi+',\'pa\',this.value)"></div>'+
   '<div class="field-flow"><label>Suunn. l/s</label><input inputmode="decimal" value="'+esc(v.target)+'" oninput="updateVent('+ai+','+vi+',\'target\',this.value)"></div>'+
   '<div class="field-flow"><label>Säädetty l/s</label><input data-adjusted-result inputmode="decimal" class="'+(alert?'measurement-alert':'')+'" value="'+esc(v.adjusted)+'" oninput="updateVent('+ai+','+vi+',\'adjusted\',this.value)"></div>'+
-  '<div class="field-position"><label>Asento</label><div class="signed-input"><input value="'+esc(v.position)+'" oninput="updateVent('+ai+','+vi+',\'position\',this.value)" placeholder="-7 tai kiinni"><button type="button" class="small no-print" onclick="togglePositionSign('+ai+','+vi+')" aria-label="Vaihda etumerkki">±</button></div></div>'+
+  '<div class="field-position"><label>Asento</label><input value="'+esc(v.position)+'" oninput="updateVent('+ai+','+vi+',\'position\',this.value)" placeholder="-7 tai kiinni"></div>'+
   '<button type="button" class="danger small no-print remove-vent" onclick="removeVent('+ai+','+vi+')">Poista</button></div></details>'};
   return '<div class="vent-list">'+groups.map(group=>'<details class="room-group"><summary><span class="room-group-title">'+esc(group.name)+'</span><span class="room-group-count">'+group.items.length+' '+(group.items.length===1?'venttiili':'venttiiliä')+'</span></summary><div class="room-group-body">'+group.items.map(item=>ventCard(item.v,item.vi)).join('')+'</div></details>').join('')+'</div>'
 }
