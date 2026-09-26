@@ -66,7 +66,8 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 </style>
 </head>
 <body>
-<header><div class="brand"><div class="brand-mark">IV</div><div class="brand-copy"><h1>IV Mittaus</h1><p>Ilmamäärien mittauspöytäkirja</p></div><span class="tool-badge">AMMATTITYÖKALU</span><button id="theme-button" type="button" class="theme-button no-print" onclick="cycleTheme()" aria-label="Vaihda teemaa">☾</button><div class="menu-wrap no-print"><button type="button" class="menu-button" onclick="toggleMenu()">☰ Valikko</button><div id="top-menu" class="menu-panel"><button type="button" onclick="newProject()">＋ Uusi projekti</button><button type="button" onclick="saveCurrentProject()">✓ Tallenna projekti</button><button type="button" onclick="openProjects()">▤ Vanhat projektit</button><button type="button" onclick="openPdfSettings()">⚙ PDF-asetukset</button><button type="button" onclick="openCloudSettings()">☁ Pilvitallennus</button><button type="button" onclick="cycleTheme()">◐ Vaihda teemaa</button><button id="install-menu-button" type="button" onclick="installApp()">⇩ Asenna sovellus</button><small id="cloud-menu-status">Projektit tallentuvat tälle laitteelle.</small></div></div></div></header>
+<header><div class="brand"><div class="brand-mark">IV</div><div class="brand-copy"><h1>IV Mittaus</h1><p>Ilmamäärien mittauspöytäkirja</p></div><span class="tool-badge">AMMATTITYÖKALU</span><button id="theme-button" type="button" class="theme-button no-print" onclick="cycleTheme()" aria-label="Vaihda teemaa">☾</button><div class="menu-wrap no-print"><button type="button" class="menu-button" onclick="toggleMenu()">☰ Valikko</button><div id="top-menu" class="menu-panel"><button type="button" onclick="newProject()">＋ Uusi projekti</button><button type="button" onclick="saveCurrentProject()">✓ Tallenna projekti</button><button type="button" onclick="openProjects()">▤ Vanhat projektit</button><button type="button" onclick="document.getElementById('project-import-file').click();closeMenu()">↥ Tuo projektitiedosto</button><button type="button" onclick="openPdfSettings()">⚙ PDF-asetukset</button><button type="button" onclick="openCloudSettings()">☁ Pilvitallennus</button><button type="button" onclick="cycleTheme()">◐ Vaihda teemaa</button><button id="install-menu-button" type="button" onclick="installApp()">⇩ Asenna sovellus</button><small id="cloud-menu-status">Projektit tallentuvat tälle laitteelle.</small></div></div></div></header>
+<input id="project-import-file" class="no-print" type="file" accept="application/json,.json,.ivprojekti" hidden onchange="importProjectFile(this.files[0]);this.value=''">
 <div id="projects-modal" class="modal no-print" onclick="if(event.target===this)closeProjects()"><div class="modal-card"><div class="modal-head"><h2>Vanhat projektit</h2><button type="button" class="small secondary" onclick="closeProjects()">Sulje</button></div><div class="modal-body"><div id="project-list" class="project-list"></div></div></div></div>
 <div id="new-project-modal" class="modal no-print" onclick="if(event.target===this)closeNewProject()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Aloita uusi projekti</h2><button type="button" class="small secondary" onclick="closeNewProject()">Sulje</button></div><div class="modal-body"><p style="margin-top:0;line-height:1.5">Nykyinen mittaus suljetaan ja näyttö tyhjennetään. Nykyinen projekti löytyy Vanhoista projekteista vain, jos siitä on luotu PDF.</p><div class="modal-actions"><button type="button" class="secondary" onclick="closeNewProject()">Peruuta</button><button type="button" class="primary" onclick="startNewProject()">Aloita uusi projekti</button></div></div></div></div>
 <div id="pdf-modal" class="modal no-print" onclick="if(event.target===this)closePdfPreview()"><div class="modal-card" style="width:min(900px,100%)"><div class="modal-head"><h2>PDF-esikatselu</h2><button type="button" class="small secondary" onclick="closePdfPreview()">Sulje</button></div><div class="modal-body"><iframe id="pdf-preview" class="pdf-frame" title="Mittauspöytäkirjan PDF-esikatselu"></iframe><div class="modal-actions"><a id="pdf-open" class="button-link secondary" target="_blank" rel="noopener">Avaa PDF</a><a id="pdf-download" class="button-link secondary" download>Lataa tiedosto</a><button id="pdf-share" type="button" class="primary" onclick="sharePdf()">Jaa PDF</button></div></div></div></div>
@@ -418,6 +419,21 @@ function saveProjectSnapshot(){
   const ok=setProjects(projects.slice(0,100));save();return ok;
 }
 function saveCurrentProject(){closeMenu();const ok=saveProjectSnapshot();showToast(ok?"Projekti tallennettu":"Projektia ei voitu tallentaa")}
+async function importProjectFile(file){
+  if(!file)return;
+  try{
+    const parsed=JSON.parse(await file.text());
+    if(parsed?.format!=="iv-mittaus-project"||parsed?.version!==1||!parsed.project||!Array.isArray(parsed.project.apartments)||!Array.isArray(parsed.project.workEntries))throw new Error("Tiedosto ei ole IV Mittaus -projektitiedosto");
+    if(projectHasContent()&&!saveProjectSnapshot())throw new Error("Nykyistä projektia ei voitu turvata ennen tuontia");
+    const imported=normalizeData(parsed.project);imported.projectId=newRecordId("projekti");
+    let uploadFailures=0;
+    for(const record of projectPhotoRecords(imported,imported.projectId)){try{await migratePhotoRecord(record,true)}catch(e){uploadFailures++}}
+    data=imported;render();
+    if(!saveProjectSnapshot())throw new Error("Palautettua projektia ei voitu tallentaa");
+    window.scrollTo({top:0,behavior:"smooth"});
+    showToast(uploadFailures?"Projekti palautettu – osa kuvista odottaa pilvilatausta":"Projekti palautettu onnistuneesti");
+  }catch(e){showToast(e.message||"Projektitiedoston tuonti epäonnistui")}
+}
 function newProject(){
   closeMenu();
   if(!projectHasContent()){startNewProject();return}
