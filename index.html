@@ -131,6 +131,7 @@ applyTheme();
 const SUPABASE_URL="https://rmyynxecliexiznswjcy.supabase.co";
 const SUPABASE_KEY="sb_publishable_mvjgftxIPbhMqn0yZ9lhHQ_OidQro8h";
 let cloudSession=null,cloudUser=null,cloudSyncTimer=null,cloudRefreshTimer=null,cloudBusy=false,cloudRestoring=false;
+const CLOUD_DATA_SYNC_PAUSED=true;
 function readCloudSession(){try{return JSON.parse(localStorage.getItem("iv_cloud_session")||"null")}catch(e){return null}}
 function jwtPayload(token){try{return JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))}catch(e){return{}}}
 function storeCloudSession(session){
@@ -197,7 +198,7 @@ function localUpdatedAt(){return localStorage.getItem("iv_local_updated_at")||""
 function markLocalChange(){
   if(cloudRestoring)return;
   localStorage.setItem("iv_local_updated_at",new Date().toISOString());
-  if(cloudUser){const note=document.getElementById("save-note");if(note)note.textContent=navigator.onLine?"Tallennettu laitteelle – synkronoidaan…":"Tallennettu laitteelle – ei verkkoyhteyttä";clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>syncCloudNow(false),1800)}
+  if(cloudUser){const note=document.getElementById("save-note");if(note)note.textContent=CLOUD_DATA_SYNC_PAUSED?"Tallennettu laitteelle – pilvisynkronointi tauolla":navigator.onLine?"Tallennettu laitteelle – synkronoidaan…":"Tallennettu laitteelle – ei verkkoyhteyttä";if(!CLOUD_DATA_SYNC_PAUSED){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>syncCloudNow(false),1800)}}
 }
 function cloudPayload(){return{version:1,current:JSON.parse(JSON.stringify(data)),projects:getProjects(),pdfSettings:getPdfSettings(),localUpdatedAt:localUpdatedAt()}}
 async function cloudFetch(path,options={},retry=true){
@@ -242,6 +243,7 @@ function restoreCloudBackup(row){
   try{localStorage.setItem("iv_proto",JSON.stringify(payload.current));localStorage.setItem("iv_projects",JSON.stringify(Array.isArray(payload.projects)?payload.projects:[]));localStorage.setItem("iv_pdf_settings",JSON.stringify(payload.pdfSettings||{}));localStorage.setItem("iv_local_updated_at",row.updated_at||new Date().toISOString());data=loadData();render();return true}finally{cloudRestoring=false}
 }
 async function syncCloudNow(showMessage){
+  if(CLOUD_DATA_SYNC_PAUSED){updateCloudUi("Projektitietojen pilvisynkronointi on tilapäisesti tauolla tietojen suojaamiseksi.");if(showMessage)showToast("Pilvisynkronointi on tauolla");return false}
   if(!cloudUser||cloudBusy)return false;if(!navigator.onLine){updateCloudUi("Ei verkkoyhteyttä. Muutokset synkronoidaan myöhemmin.");return false}
   cloudBusy=true;const note=document.getElementById("save-note");if(note)note.textContent="Synkronoidaan pilveen…";
   try{
@@ -251,14 +253,14 @@ async function syncCloudNow(showMessage){
 }
 async function initializeCloud(){
   if(!cloudUser)return;
-  try{const remote=await fetchCloudBackup(),remoteTime=Date.parse(remote?.updated_at||0),localTime=Date.parse(localUpdatedAt()||0);if(remote&&remoteTime>localTime){restoreCloudBackup(remote);updateCloudUi("Pilveen tallennetut tiedot palautettiin.");showToast("Pilvitiedot palautettu")}await migrateLegacyPhotoStorage(true);await syncPendingPhotoUploads();await syncCloudNow(false)}catch(e){updateCloudUi("Pilveen yhdistäminen epäonnistui. Tiedot säilyvät tällä laitteella.")}
+  try{await migrateLegacyPhotoStorage(true);await syncPendingPhotoUploads();updateCloudUi("Kuvat tallennetaan pilveen. Projektitietojen synkronointi on tilapäisesti tauolla tietojen suojaamiseksi.")}catch(e){updateCloudUi("Pilveen yhdistäminen epäonnistui. Tiedot säilyvät tällä laitteella.")}
 }
 async function initializeCloudAuth(){
   const callback=consumeAuthCallback();cloudSession=readCloudSession();if(!cloudSession){updateCloudUi();return}
   if(cloudSession.expires_at*1000<Date.now()+30000&&!await refreshCloudSession())return;
   await loadCloudUser();if(cloudUser){await initializeCloud();if(callback)showToast("Sähköposti vahvistettu ja pilvitallennus yhdistetty")}
 }
-window.addEventListener("online",async()=>{if(cloudUser){await syncPendingPhotoUploads().catch(()=>false);await syncCloudNow(false)}});
+window.addEventListener("online",async()=>{if(cloudUser)await syncPendingPhotoUploads().catch(()=>false)});
 function newRecordId(prefix){return(globalThis.crypto?.randomUUID?.()||prefix+"-"+Date.now()+"-"+Math.random().toString(36).slice(2))}
 const emptyVent=(space="",type="supply")=>({space,type,valve:"",kpl:"1",pa:"",target:"",adjusted:"",position:""});
 const emptyApartment=()=>({name:"",comments:"",vents:[],pressureEnabled:false,pressureDifference:"",speedEnabled:false,measurementSpeed:""});
@@ -273,10 +275,11 @@ const CONDITION_STATES=[{id:"good",label:"Hyvä"},{id:"attention",label:"Huomioi
 function normalizeConditionRatings(ratings){const result={};if(!ratings||typeof ratings!=="object"||Array.isArray(ratings))return result;CONDITION_ITEMS.forEach(item=>{if(CONDITION_STATES.some(state=>state.id===ratings[item.id]))result[item.id]=ratings[item.id]});return result}
 const emptyData=()=>({projectId:null,kohde:"",paiva:new Date().toISOString().slice(0,10),mittaaja:"",valine:"",workTypes:[],customWorkType:"",cleaningItems:[],customCleaningItem:"",conditionRatings:{},workEntries:[],apartments:[]});
 function normalizeApartment(apartment){
-  const a={...emptyApartment(),...(apartment||{})};
-  if(!Array.isArray(a.vents)){
+  const source=apartment||{},a={...emptyApartment(),...source};
+  const legacyRooms=Array.isArray(source.rooms)?source.rooms:[];
+  if(legacyRooms.length&&(!Array.isArray(source.vents)||!source.vents.length)){
     a.vents=[];
-    (Array.isArray(a.rooms)?a.rooms:[]).forEach(room=>{
+    legacyRooms.forEach(room=>{
       (Array.isArray(room.supply)?room.supply:[]).forEach(v=>a.vents.push({...emptyVent(room.name,"supply"),...v,space:room.name||"",type:"supply"}));
       (Array.isArray(room.exhaust)?room.exhaust:[]).forEach(v=>a.vents.push({...emptyVent(room.name,"exhaust"),...v,space:room.name||"",type:"exhaust"}));
     });
@@ -316,8 +319,8 @@ let data=loadData();
 function projectPhotoRecords(projectData,fallbackProjectId){const projectId=projectData?.projectId||fallbackProjectId||newRecordId("projekti"),records=[];if(projectData&&!projectData.projectId)projectData.projectId=projectId;(projectData?.workEntries||[]).forEach(entry=>{if(!entry.id)entry.id=newRecordId("merkinta");(entry.photos||[]).forEach(photo=>records.push({photo,projectId,entryId:entry.id}))});return records}
 async function migratePhotoRecord(record,upload=true){
   const {photo,projectId,entryId}=record;let changed=false;photo.id=photo.id||newRecordId("kuva");photo.localKey=photo.localKey||photo.id;
-  if(photo.data){const blob=dataUrlBlob(photo.data);if(blob){await cachePhotoBlob(photo.localKey,blob);delete photo.data;changed=true}}
-  if(upload&&!photo.storagePath&&cloudUser&&navigator.onLine){const blob=await cachedPhotoBlob(photo.localKey);if(blob&&await uploadPhotoBlob(photo,blob,projectId,entryId))changed=true}
+  if(photo.data){const blob=dataUrlBlob(photo.data);if(blob)await cachePhotoBlob(photo.localKey,blob)}
+  if(upload&&!photo.storagePath&&cloudUser&&navigator.onLine){const blob=photo.data?dataUrlBlob(photo.data):await cachedPhotoBlob(photo.localKey);if(blob&&await uploadPhotoBlob(photo,blob,projectId,entryId))changed=true}
   return changed;
 }
 async function migrateLegacyPhotoStorage(upload=true){
