@@ -426,8 +426,8 @@ async function importProjectFile(file){
     const parsed=JSON.parse(await file.text());
     if(parsed?.format!=="iv-mittaus-project"||parsed?.version!==1||!parsed.project||!Array.isArray(parsed.project.apartments)||!Array.isArray(parsed.project.workEntries))throw new Error("Tiedosto ei ole IV Mittaus -projektitiedosto");
     await migrateLegacyPhotoStorage(true);
-    if(projectHasContent()&&!saveProjectSnapshot())throw new Error("Nykyistä projektia ei voitu turvata ennen tuontia");
-    const imported=normalizeData(parsed.project);imported.projectId=newRecordId("projekti");
+    const imported=normalizeData(parsed.project),projects=getProjects(),sameProject=projects.find(item=>String(item?.data?.kohde||item?.name||"").trim().toLocaleLowerCase("fi")===String(imported.kohde||"").trim().toLocaleLowerCase("fi"));
+    imported.projectId=sameProject?.id||newRecordId("projekti");
     let uploadFailures=0;
     for(const record of projectPhotoRecords(imported,imported.projectId)){try{await migratePhotoRecord(record,true)}catch(e){uploadFailures++}}
     data=imported;render();
