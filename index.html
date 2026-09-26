@@ -73,7 +73,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <div id="pdf-modal" class="modal no-print" onclick="if(event.target===this)closePdfPreview()"><div class="modal-card" style="width:min(900px,100%)"><div class="modal-head"><h2>PDF-esikatselu</h2><button type="button" class="small secondary" onclick="closePdfPreview()">Sulje</button></div><div class="modal-body"><iframe id="pdf-preview" class="pdf-frame" title="Mittauspöytäkirjan PDF-esikatselu"></iframe><div class="modal-actions"><a id="pdf-open" class="button-link secondary" target="_blank" rel="noopener">Avaa PDF</a><a id="pdf-download" class="button-link secondary" download>Lataa tiedosto</a><button id="pdf-share" type="button" class="primary" onclick="sharePdf()">Jaa PDF</button></div></div></div></div>
 <div id="install-modal" class="modal no-print" onclick="if(event.target===this)closeInstallHelp()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Asenna IV Mittaus</h2><button type="button" class="small secondary" onclick="closeInstallHelp()">Sulje</button></div><div class="modal-body"><div id="install-help-content" style="line-height:1.55"></div><div class="modal-actions"><button type="button" class="primary" onclick="closeInstallHelp()">Selvä</button></div></div></div></div>
 <div id="pdf-settings-modal" class="modal no-print" onclick="if(event.target===this)closePdfSettings()"><div class="modal-card" style="max-width:600px"><div class="modal-head"><h2>PDF-tiedoston asetukset</h2><button type="button" class="small secondary" onclick="closePdfSettings()">Sulje</button></div><div class="modal-body"><div class="settings-grid"><div><label>Yrityksen nimi</label><input id="setting-company" placeholder="Esim. Ilmastointi Oy"></div><div><label>Y-tunnus</label><input id="setting-business-id" inputmode="text" placeholder="1234567-8"></div><div><label>Yrityksen yhteystiedot</label><textarea id="setting-contact-details" rows="3" placeholder="Esim. Katuosoite, puhelin, sähköposti ja verkkosivu"></textarea><p class="muted">Voit kirjoittaa tiedot yhdelle tai useammalle riville. Ne lisätään PDF:n ylätunnisteeseen.</p></div><div><label>Yrityksen logo</label><div class="logo-row"><div id="logo-preview" class="logo-preview">Ei logoa</div><label class="file-button">Valitse logo<input id="setting-logo" type="file" accept="image/png,image/jpeg,image/webp" onchange="handleLogoFile(this.files[0])"></label><button type="button" class="danger small" onclick="removeLogo()">Poista logo</button></div><p class="muted">PNG-, JPG- tai WebP-kuva. Logo lisätään PDF:n ylätunnisteeseen.</p></div><div><label>Toinen logo</label><div class="logo-row"><div id="logo-preview-2" class="logo-preview">Ei toista logoa</div><label class="file-button">Valitse logo<input id="setting-logo-2" type="file" accept="image/png,image/jpeg,image/webp" onchange="handleSecondLogoFile(this.files[0])"></label><button type="button" class="danger small" onclick="removeSecondLogo()">Poista logo</button></div><p class="muted">Toinen logo sijoitetaan PDF:ssä ensimmäisen logon alle.</p></div></div><div class="modal-actions"><button type="button" class="secondary" onclick="closePdfSettings()">Peruuta</button><button type="button" class="primary" onclick="savePdfSettings()">Tallenna asetukset</button></div></div></div></div>
-<div id="cloud-modal" class="modal no-print" onclick="if(event.target===this)closeCloudSettings()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Pilvitallennus</h2><button type="button" class="small secondary" onclick="closeCloudSettings()">Sulje</button></div><div class="modal-body"><div id="cloud-logged-out"><p style="margin-top:0;line-height:1.5">Kirjaudu sisään, jotta projektit varmuuskopioituvat automaattisesti pilveen.</p><div class="settings-grid"><div><label>Sähköposti</label><input id="cloud-email" type="email" autocomplete="email" placeholder="nimi@esimerkki.fi"></div><div><label>Salasana</label><input id="cloud-password" type="password" autocomplete="current-password" placeholder="Vähintään 6 merkkiä"></div></div><div class="cloud-actions"><button type="button" class="secondary" onclick="cloudSignUp()">Luo käyttäjä</button><button type="button" class="primary" onclick="cloudSignIn()">Kirjaudu</button></div></div><div id="cloud-logged-in" hidden><div class="cloud-box"><strong id="cloud-user-email"></strong><p id="cloud-detail">Pilvitallennus on käytössä.</p></div><div class="cloud-actions"><button type="button" class="secondary" onclick="syncCloudNow(true)">Synkronoi nyt</button><button type="button" class="danger" onclick="cloudSignOut()">Kirjaudu ulos</button></div></div></div></div></div>
+<div id="cloud-modal" class="modal no-print" onclick="if(event.target===this)closeCloudSettings()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Pilvitallennus</h2><button type="button" class="small secondary" onclick="closeCloudSettings()">Sulje</button></div><div class="modal-body"><div id="cloud-logged-out"><p style="margin-top:0;line-height:1.5">Kirjaudu sisään, jotta projektit varmuuskopioituvat automaattisesti pilveen.</p><div class="settings-grid"><div><label>Sähköposti</label><input id="cloud-email" type="email" autocomplete="email" placeholder="nimi@esimerkki.fi"></div><div><label>Salasana</label><input id="cloud-password" type="password" autocomplete="current-password" placeholder="Vähintään 6 merkkiä"></div></div><div class="cloud-actions"><button type="button" class="secondary" onclick="cloudSignUp()">Luo käyttäjä</button><button type="button" class="primary" onclick="cloudSignIn()">Kirjaudu</button></div></div><div id="cloud-logged-in" hidden><div class="cloud-box"><strong id="cloud-user-email"></strong><p id="cloud-detail">Pilvitallennus on käytössä.</p></div><div class="cloud-actions"><button type="button" class="primary" onclick="syncCloudNow(true)">Synkronoi nyt</button><button type="button" class="secondary" onclick="loadCloudVersions()">Palautuspisteet</button><button type="button" class="danger" onclick="cloudSignOut()">Kirjaudu ulos</button></div><div id="cloud-version-list" class="project-list" style="margin-top:12px" hidden></div></div></div></div></div>
 <div id="toast" class="toast no-print"></div>
 <main>
 <section class="card"><div class="card-heading"><span class="step">1</span><h2>Kohteen tiedot</h2></div>
@@ -132,7 +132,8 @@ applyTheme();
 const SUPABASE_URL="https://rmyynxecliexiznswjcy.supabase.co";
 const SUPABASE_KEY="sb_publishable_mvjgftxIPbhMqn0yZ9lhHQ_OidQro8h";
 let cloudSession=null,cloudUser=null,cloudSyncTimer=null,cloudRefreshTimer=null,cloudBusy=false,cloudRestoring=false;
-const CLOUD_DATA_SYNC_PAUSED=true;
+const CLOUD_DATA_SYNC_PAUSED=false;
+let cloudVersionRows=[];
 function readCloudSession(){try{return JSON.parse(localStorage.getItem("iv_cloud_session")||"null")}catch(e){return null}}
 function jwtPayload(token){try{return JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))}catch(e){return{}}}
 function storeCloudSession(session){
@@ -238,6 +239,29 @@ async function deletePhotoAsset(photo){await deleteCachedPhoto(photoCacheKey(pho
 async function fetchCloudBackup(){
   const response=await cloudFetch("/rest/v1/app_backups?select=payload,updated_at&limit=1",{headers:{Accept:"application/json"}}),rows=await response.json();return rows[0]||null;
 }
+async function insertCloudVersion(payload,createdAt){
+  if(!payload||!cloudUser)return false;
+  await cloudFetch("/rest/v1/app_backup_versions",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload,created_at:createdAt||new Date().toISOString()})});return true;
+}
+async function trimCloudVersions(){
+  const response=await cloudFetch("/rest/v1/app_backup_versions?select=id&order=created_at.desc&offset=20",{headers:{Accept:"application/json"}}),rows=await response.json();
+  if(!rows.length)return;const ids=rows.map(row=>Number(row.id)).filter(Number.isFinite);if(ids.length)await cloudFetch("/rest/v1/app_backup_versions?id=in.("+ids.join(",")+")",{method:"DELETE",headers:{Prefer:"return=minimal"}});
+}
+function cloudPayloadMatches(a,b){try{return JSON.stringify(a)===JSON.stringify(b)}catch(e){return false}}
+function cloudVersionDescription(payload){const current=payload?.current||{},name=String(current.kohde||current.apartments?.[0]?.name||"Nimetön projekti").trim(),count=Array.isArray(payload?.projects)?payload.projects.length:0;return{name:name||"Nimetön projekti",count}}
+async function loadCloudVersions(){
+  if(!cloudUser)return;const list=document.getElementById("cloud-version-list");list.hidden=false;list.innerHTML='<div class="work-empty">Haetaan palautuspisteitä…</div>';
+  try{
+    const [currentResponse,historyResponse]=await Promise.all([fetchCloudBackup(),cloudFetch("/rest/v1/app_backup_versions?select=id,created_at,payload&order=created_at.desc&limit=20",{headers:{Accept:"application/json"}}).then(response=>response.json())]);
+    cloudVersionRows=[];if(currentResponse?.payload)cloudVersionRows.push({id:"current",created_at:currentResponse.updated_at,payload:currentResponse.payload,current:true});cloudVersionRows.push(...historyResponse.map(row=>({...row,current:false})));
+    if(!cloudVersionRows.length){list.innerHTML='<div class="work-empty">Ei vielä palautuspisteitä.</div>';return}
+    list.innerHTML=cloudVersionRows.map((row,index)=>{const info=cloudVersionDescription(row.payload),date=new Date(row.created_at).toLocaleString("fi-FI");return '<div class="project-item"><div><strong>'+(row.current?'Nykyinen pilvikopio':'Palautuspiste')+'</strong><span>'+esc(date)+' · '+esc(info.name)+' · '+info.count+' tallennettua projektia</span></div><div class="project-actions"><button type="button" class="secondary small" onclick="restoreCloudVersion('+index+')">Palauta</button></div></div>'}).join("");
+  }catch(e){list.innerHTML='<div class="work-empty">Palautuspisteitä ei voitu hakea.</div>'}
+}
+async function restoreCloudVersion(index){
+  const row=cloudVersionRows[index];if(!row||!confirm("Palautetaanko valittu pilviversio? Nykyinen tila tallennetaan ensin omaksi palautuspisteekseen."))return;
+  try{await insertCloudVersion(cloudPayload(),localUpdatedAt()||new Date().toISOString());restoreCloudBackup({payload:row.payload,updated_at:new Date().toISOString()});await syncCloudNow(false);await loadCloudVersions();showToast("Pilviversio palautettu")}catch(e){showToast(e.message||"Palautus epäonnistui")}
+}
 function restoreCloudBackup(row){
   const payload=row?.payload;if(!payload||!payload.current)return false;
   cloudRestoring=true;
@@ -248,20 +272,21 @@ async function syncCloudNow(showMessage){
   if(!cloudUser||cloudBusy)return false;if(!navigator.onLine){updateCloudUi("Ei verkkoyhteyttä. Muutokset synkronoidaan myöhemmin.");return false}
   cloudBusy=true;const note=document.getElementById("save-note");if(note)note.textContent="Synkronoidaan pilveen…";
   try{
-    await cloudFetch("/rest/v1/app_backups?on_conflict=user_id",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload:cloudPayload(),updated_at:new Date().toISOString()})});
+    const outgoing=cloudPayload(),remote=await fetchCloudBackup();if(remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing))await insertCloudVersion(remote.payload,remote.updated_at);
+    await cloudFetch("/rest/v1/app_backups?on_conflict=user_id",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload:outgoing,updated_at:new Date().toISOString()})});await trimCloudVersions();
     if(note)note.textContent="Tallennettu automaattisesti laitteelle ja pilveen";updateCloudUi("Kaikki tiedot on tallennettu pilveen.");if(showMessage)showToast("Tiedot synkronoitu");return true;
   }catch(e){if(note)note.textContent="Tallennettu laitteelle – pilvisynkronointi epäonnistui";updateCloudUi("Pilvisynkronointi epäonnistui. Tiedot ovat turvassa tällä laitteella.");if(showMessage)showToast(e.message);return false}finally{cloudBusy=false}
 }
 async function initializeCloud(){
   if(!cloudUser)return;
-  try{await migrateLegacyPhotoStorage(true);await syncPendingPhotoUploads();updateCloudUi("Kuvat tallennetaan pilveen. Projektitietojen synkronointi on tilapäisesti tauolla tietojen suojaamiseksi.")}catch(e){updateCloudUi("Pilveen yhdistäminen epäonnistui. Tiedot säilyvät tällä laitteella.")}
+  try{await migrateLegacyPhotoStorage(true);await syncPendingPhotoUploads();const remote=await fetchCloudBackup();if(!remote||Date.parse(localUpdatedAt()||0)>=Date.parse(remote.updated_at||0))await syncCloudNow(false);else updateCloudUi("Pilvessä on uudempi kopio. Paikallisia tietoja ei korvattu. Voit tarkistaa kopion Palautuspisteistä.")}catch(e){updateCloudUi("Pilveen yhdistäminen epäonnistui. Tiedot säilyvät tällä laitteella.")}
 }
 async function initializeCloudAuth(){
   const callback=consumeAuthCallback();cloudSession=readCloudSession();if(!cloudSession){updateCloudUi();return}
   if(cloudSession.expires_at*1000<Date.now()+30000&&!await refreshCloudSession())return;
   await loadCloudUser();if(cloudUser){await initializeCloud();if(callback)showToast("Sähköposti vahvistettu ja pilvitallennus yhdistetty")}
 }
-window.addEventListener("online",async()=>{if(cloudUser)await syncPendingPhotoUploads().catch(()=>false)});
+window.addEventListener("online",async()=>{if(cloudUser){await syncPendingPhotoUploads().catch(()=>false);await syncCloudNow(false)}});
 function newRecordId(prefix){return(globalThis.crypto?.randomUUID?.()||prefix+"-"+Date.now()+"-"+Math.random().toString(36).slice(2))}
 const emptyVent=(space="",type="supply")=>({space,type,valve:"",kpl:"1",pa:"",target:"",adjusted:"",position:""});
 const emptyApartment=()=>({name:"",comments:"",vents:[],pressureEnabled:false,pressureDifference:"",speedEnabled:false,measurementSpeed:""});
