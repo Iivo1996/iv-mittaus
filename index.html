@@ -320,18 +320,19 @@ let data=loadData();
 function projectPhotoRecords(projectData,fallbackProjectId){const projectId=projectData?.projectId||fallbackProjectId||newRecordId("projekti"),records=[];if(projectData&&!projectData.projectId)projectData.projectId=projectId;(projectData?.workEntries||[]).forEach(entry=>{if(!entry.id)entry.id=newRecordId("merkinta");(entry.photos||[]).forEach(photo=>records.push({photo,projectId,entryId:entry.id}))});return records}
 async function migratePhotoRecord(record,upload=true){
   const {photo,projectId,entryId}=record;let changed=false;photo.id=photo.id||newRecordId("kuva");photo.localKey=photo.localKey||photo.id;
-  if(photo.data){const blob=dataUrlBlob(photo.data);if(blob)await cachePhotoBlob(photo.localKey,blob)}
-  if(upload&&!photo.storagePath&&cloudUser&&navigator.onLine){const blob=photo.data?dataUrlBlob(photo.data):await cachedPhotoBlob(photo.localKey);if(blob&&await uploadPhotoBlob(photo,blob,projectId,entryId))changed=true}
+  if(photo.data){const blob=dataUrlBlob(photo.data);if(blob){await cachePhotoBlob(photo.localKey,blob);delete photo.data;changed=true}}
+  if(upload&&!photo.storagePath&&cloudUser&&navigator.onLine){const blob=await cachedPhotoBlob(photo.localKey);if(blob&&await uploadPhotoBlob(photo,blob,projectId,entryId))changed=true}
   return changed;
 }
 async function migrateLegacyPhotoStorage(upload=true){
-  let currentChanged=false;for(const record of projectPhotoRecords(data,data.projectId)){if(await migratePhotoRecord(record,upload))currentChanged=true}
-  const projects=getProjects();let projectsChanged=false;for(const item of projects){for(const record of projectPhotoRecords(item.data,item.id)){if(await migratePhotoRecord(record,upload))projectsChanged=true}}
+  let currentChanged=false;for(const record of projectPhotoRecords(data,data.projectId)){try{if(await migratePhotoRecord(record,upload))currentChanged=true}catch(e){}}
+  if(currentChanged)save();
+  const projects=getProjects();let projectsChanged=false;for(const item of projects){let itemChanged=false;for(const record of projectPhotoRecords(item.data,item.id)){try{if(await migratePhotoRecord(record,upload)){itemChanged=true;projectsChanged=true}}catch(e){}}if(itemChanged)setProjects(projects)}
   if(projectsChanged&&!setProjects(projects))showToast("Vanhojen kuvien paikallinen siirto epäonnistui");if(currentChanged)save();if(currentChanged||projectsChanged)renderWorkEntries();return currentChanged||projectsChanged;
 }
 async function syncPendingPhotoUploads(){
-  if(!cloudUser||!navigator.onLine)return false;let changed=false;for(const record of projectPhotoRecords(data,data.projectId)){if(!record.photo.storagePath&&await migratePhotoRecord(record,true))changed=true}
-  const projects=getProjects();let projectsChanged=false;for(const item of projects){for(const record of projectPhotoRecords(item.data,item.id)){if(!record.photo.storagePath&&await migratePhotoRecord(record,true))projectsChanged=true}}
+  if(!cloudUser||!navigator.onLine)return false;let changed=false;for(const record of projectPhotoRecords(data,data.projectId)){try{if(!record.photo.storagePath&&await migratePhotoRecord(record,true))changed=true}catch(e){}}
+  const projects=getProjects();let projectsChanged=false;for(const item of projects){for(const record of projectPhotoRecords(item.data,item.id)){try{if(!record.photo.storagePath&&await migratePhotoRecord(record,true))projectsChanged=true}catch(e){}}}
   if(projectsChanged)setProjects(projects);if(changed)save();if(changed||projectsChanged)renderWorkEntries();return changed||projectsChanged;
 }
 function cleaningLabels(items,custom=""){
@@ -424,6 +425,7 @@ async function importProjectFile(file){
   try{
     const parsed=JSON.parse(await file.text());
     if(parsed?.format!=="iv-mittaus-project"||parsed?.version!==1||!parsed.project||!Array.isArray(parsed.project.apartments)||!Array.isArray(parsed.project.workEntries))throw new Error("Tiedosto ei ole IV Mittaus -projektitiedosto");
+    await migrateLegacyPhotoStorage(true);
     if(projectHasContent()&&!saveProjectSnapshot())throw new Error("Nykyistä projektia ei voitu turvata ennen tuontia");
     const imported=normalizeData(parsed.project);imported.projectId=newRecordId("projekti");
     let uploadFailures=0;
