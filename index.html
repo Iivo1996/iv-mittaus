@@ -208,6 +208,31 @@ async function cloudFetch(path,options={},retry=true){
   if(!response.ok){const error=await response.json().catch(()=>({}));throw new Error(error.message||"Pilvitallennus epäonnistui")}
   return response;
 }
+const PHOTO_BUCKET="project-photos",PHOTO_DB_NAME="iv-mittaus-files",PHOTO_STORE="photos";
+let photoDbPromise=null;const photoMemoryFallback=new Map(),photoUrlCache=new Map();
+function openPhotoDb(){
+  if(!globalThis.indexedDB)return Promise.resolve(null);if(photoDbPromise)return photoDbPromise;
+  photoDbPromise=new Promise((resolve,reject)=>{const request=indexedDB.open(PHOTO_DB_NAME,1);request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains(PHOTO_STORE))request.result.createObjectStore(PHOTO_STORE)};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)});return photoDbPromise;
+}
+async function cachePhotoBlob(key,blob){if(!key||!blob)return;const db=await openPhotoDb().catch(()=>null);if(!db){photoMemoryFallback.set(key,blob);return}await new Promise((resolve,reject)=>{const tx=db.transaction(PHOTO_STORE,"readwrite");tx.objectStore(PHOTO_STORE).put(blob,key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
+async function cachedPhotoBlob(key){if(!key)return null;const db=await openPhotoDb().catch(()=>null);if(!db)return photoMemoryFallback.get(key)||null;return new Promise(resolve=>{const request=db.transaction(PHOTO_STORE,"readonly").objectStore(PHOTO_STORE).get(key);request.onsuccess=()=>resolve(request.result||null);request.onerror=()=>resolve(null)})}
+async function deleteCachedPhoto(key){if(!key)return;photoMemoryFallback.delete(key);const cached=photoUrlCache.get(key);if(cached&&globalThis.URL?.revokeObjectURL)URL.revokeObjectURL(cached);photoUrlCache.delete(key);const db=await openPhotoDb().catch(()=>null);if(!db)return;await new Promise(resolve=>{const tx=db.transaction(PHOTO_STORE,"readwrite");tx.objectStore(PHOTO_STORE).delete(key);tx.oncomplete=resolve;tx.onerror=resolve})}
+function dataUrlBlob(source){try{const [header,payload]=String(source||"").split(","),mime=(header.match(/^data:([^;]+)/)||[])[1]||"image/jpeg",binary=atob(payload||""),bytes=Uint8Array.from(binary,char=>char.charCodeAt(0));return new Blob([bytes],{type:mime})}catch(e){return null}}
+const encodedStoragePath=path=>String(path||"").split("/").map(encodeURIComponent).join("/");
+const photoCacheKey=photo=>photo?.localKey||photo?.id||"";
+function photoStoragePath(projectId,entryId,photoId){return[cloudUser?.id,projectId,entryId,photoId+".jpg"].map(part=>String(part||"tuntematon").replaceAll("/","_")).join("/")}
+async function uploadPhotoBlob(photo,blob,projectId,entryId){
+  if(!cloudUser||!navigator.onLine||!blob)return false;const path=photo.storagePath||photoStoragePath(projectId,entryId,photo.id);
+  await cloudFetch("/storage/v1/object/"+PHOTO_BUCKET+"/"+encodedStoragePath(path),{method:"POST",headers:{"Content-Type":"image/jpeg","x-upsert":"true"},body:blob});photo.storagePath=path;photo.localKey=photoCacheKey(photo)||photo.id;delete photo.data;return true;
+}
+async function fetchStoragePhoto(path){if(!path||!cloudUser)return null;const response=await cloudFetch("/storage/v1/object/authenticated/"+PHOTO_BUCKET+"/"+encodedStoragePath(path),{headers:{Accept:"image/jpeg"}});return response.blob()}
+async function resolvePhotoBlob(photo){
+  if(!photo)return null;const key=photoCacheKey(photo)||photo.id;if(photo.data){const blob=dataUrlBlob(photo.data);if(blob&&key)await cachePhotoBlob(key,blob);return blob}
+  let blob=await cachedPhotoBlob(key);if(!blob&&photo.storagePath&&cloudUser&&navigator.onLine){blob=await fetchStoragePhoto(photo.storagePath).catch(()=>null);if(blob&&key)await cachePhotoBlob(key,blob)}return blob;
+}
+async function photoDisplayUrl(photo){if(photo?.data)return photo.data;const key=photoCacheKey(photo)||photo?.id;if(!key)return"";if(photoUrlCache.has(key))return photoUrlCache.get(key);const blob=await resolvePhotoBlob(photo);if(!blob||!globalThis.URL?.createObjectURL)return"";const url=URL.createObjectURL(blob);photoUrlCache.set(key,url);return url}
+async function hydratePhotoImages(root,photos){if(!root)return;const byId=new Map((photos||[]).map(photo=>[photo.id,photo]));for(const image of root.querySelectorAll("img[data-photo-id]")){const photo=byId.get(image.dataset.photoId);if(!photo)continue;const url=await photoDisplayUrl(photo);if(url&&image.isConnected)image.src=url}}
+async function deletePhotoAsset(photo){await deleteCachedPhoto(photoCacheKey(photo)||photo?.id);if(photo?.storagePath&&cloudUser&&navigator.onLine)await cloudFetch("/storage/v1/object/"+PHOTO_BUCKET,{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({prefixes:[photo.storagePath]})}).catch(()=>{})}
 async function fetchCloudBackup(){
   const response=await cloudFetch("/rest/v1/app_backups?select=payload,updated_at&limit=1",{headers:{Accept:"application/json"}}),rows=await response.json();return rows[0]||null;
 }
@@ -226,14 +251,14 @@ async function syncCloudNow(showMessage){
 }
 async function initializeCloud(){
   if(!cloudUser)return;
-  try{const remote=await fetchCloudBackup();if(!remote){await syncCloudNow(false);return}const remoteTime=Date.parse(remote.updated_at||0),localTime=Date.parse(localUpdatedAt()||0);if(remoteTime>localTime){restoreCloudBackup(remote);updateCloudUi("Pilveen tallennetut tiedot palautettiin.");showToast("Pilvitiedot palautettu")}else await syncCloudNow(false)}catch(e){updateCloudUi("Pilveen yhdistäminen epäonnistui. Tiedot säilyvät tällä laitteella.")}
+  try{const remote=await fetchCloudBackup(),remoteTime=Date.parse(remote?.updated_at||0),localTime=Date.parse(localUpdatedAt()||0);if(remote&&remoteTime>localTime){restoreCloudBackup(remote);updateCloudUi("Pilveen tallennetut tiedot palautettiin.");showToast("Pilvitiedot palautettu")}await migrateLegacyPhotoStorage(true);await syncPendingPhotoUploads();await syncCloudNow(false)}catch(e){updateCloudUi("Pilveen yhdistäminen epäonnistui. Tiedot säilyvät tällä laitteella.")}
 }
 async function initializeCloudAuth(){
   const callback=consumeAuthCallback();cloudSession=readCloudSession();if(!cloudSession){updateCloudUi();return}
   if(cloudSession.expires_at*1000<Date.now()+30000&&!await refreshCloudSession())return;
   await loadCloudUser();if(cloudUser){await initializeCloud();if(callback)showToast("Sähköposti vahvistettu ja pilvitallennus yhdistetty")}
 }
-window.addEventListener("online",()=>{if(cloudUser)syncCloudNow(false)});
+window.addEventListener("online",async()=>{if(cloudUser){await syncPendingPhotoUploads().catch(()=>false);await syncCloudNow(false)}});
 function newRecordId(prefix){return(globalThis.crypto?.randomUUID?.()||prefix+"-"+Date.now()+"-"+Math.random().toString(36).slice(2))}
 const emptyVent=(space="",type="supply")=>({space,type,valve:"",kpl:"1",pa:"",target:"",adjusted:"",position:""});
 const emptyApartment=()=>({name:"",comments:"",vents:[],pressureEnabled:false,pressureDifference:"",speedEnabled:false,measurementSpeed:""});
@@ -259,6 +284,7 @@ function normalizeApartment(apartment){
   a.vents=a.vents.map(v=>({...emptyVent(),...v,type:v?.type==="exhaust"?"exhaust":"supply"}));
   delete a.rooms;return a;
 }
+function normalizePhoto(photo){const id=photo?.id||newRecordId("kuva");return{id,...(photo?.data?{data:photo.data}:{}),...(photo?.storagePath?{storagePath:String(photo.storagePath)}:{}),localKey:String(photo?.localKey||id),width:Number(photo?.width)||800,height:Number(photo?.height)||600}}
 function normalizeData(saved){
   const result={...emptyData(),...(saved||{})};
   const legacyType=WORK_TYPES.includes(result.workType)?result.workType:"";
@@ -269,7 +295,7 @@ function normalizeData(saved){
   result.workEntries=(Array.isArray(result.workEntries)?result.workEntries:[]).map(entry=>({
     id:entry?.id||newRecordId("merkinta"),date:entry?.date||new Date().toISOString().slice(0,10),target:String(entry?.target||""),title:String(entry?.title||""),text:String(entry?.text||""),
     cleaningItems:normalizeCleaningItems(entry?.cleaningItems),customCleaningItem:String(entry?.customCleaningItem||""),conditionRatings:normalizeConditionRatings(entry?.conditionRatings),
-    photos:(Array.isArray(entry?.photos)?entry.photos:[]).filter(photo=>photo?.data).map(photo=>({id:photo.id||newRecordId("kuva"),data:photo.data,width:Number(photo.width)||800,height:Number(photo.height)||600}))
+    photos:(Array.isArray(entry?.photos)?entry.photos:[]).filter(photo=>photo&&(photo.data||photo.storagePath||photo.localKey)).map(normalizePhoto)
   }));
   result.apartments=(Array.isArray(result.apartments)?result.apartments:[]).map(normalizeApartment);
   return result;
@@ -287,6 +313,23 @@ function loadData(){
   return emptyData();
 }
 let data=loadData();
+function projectPhotoRecords(projectData,fallbackProjectId){const projectId=projectData?.projectId||fallbackProjectId||newRecordId("projekti"),records=[];if(projectData&&!projectData.projectId)projectData.projectId=projectId;(projectData?.workEntries||[]).forEach(entry=>{if(!entry.id)entry.id=newRecordId("merkinta");(entry.photos||[]).forEach(photo=>records.push({photo,projectId,entryId:entry.id}))});return records}
+async function migratePhotoRecord(record,upload=true){
+  const {photo,projectId,entryId}=record;let changed=false;photo.id=photo.id||newRecordId("kuva");photo.localKey=photo.localKey||photo.id;
+  if(photo.data){const blob=dataUrlBlob(photo.data);if(blob){await cachePhotoBlob(photo.localKey,blob);delete photo.data;changed=true}}
+  if(upload&&!photo.storagePath&&cloudUser&&navigator.onLine){const blob=await cachedPhotoBlob(photo.localKey);if(blob&&await uploadPhotoBlob(photo,blob,projectId,entryId))changed=true}
+  return changed;
+}
+async function migrateLegacyPhotoStorage(upload=true){
+  let currentChanged=false;for(const record of projectPhotoRecords(data,data.projectId)){if(await migratePhotoRecord(record,upload))currentChanged=true}
+  const projects=getProjects();let projectsChanged=false;for(const item of projects){for(const record of projectPhotoRecords(item.data,item.id)){if(await migratePhotoRecord(record,upload))projectsChanged=true}}
+  if(projectsChanged&&!setProjects(projects))showToast("Vanhojen kuvien paikallinen siirto epäonnistui");if(currentChanged)save();if(currentChanged||projectsChanged)renderWorkEntries();return currentChanged||projectsChanged;
+}
+async function syncPendingPhotoUploads(){
+  if(!cloudUser||!navigator.onLine)return false;let changed=false;for(const record of projectPhotoRecords(data,data.projectId)){if(!record.photo.storagePath&&await migratePhotoRecord(record,true))changed=true}
+  const projects=getProjects();let projectsChanged=false;for(const item of projects){for(const record of projectPhotoRecords(item.data,item.id)){if(!record.photo.storagePath&&await migratePhotoRecord(record,true))projectsChanged=true}}
+  if(projectsChanged)setProjects(projects);if(changed)save();if(changed||projectsChanged)renderWorkEntries();return changed||projectsChanged;
+}
 function cleaningLabels(items,custom=""){
   const selected=normalizeCleaningItems(items),labels=CLEANING_ITEMS.filter(item=>selected.includes(item.id)&&item.id!=="other").map(item=>item.label),other=String(custom||"").trim();
   if(selected.includes("other")&&other)labels.push(other);return labels;
@@ -392,7 +435,7 @@ function loadProject(id){
 }
 function deleteProject(id){
   const projects=getProjects(),p=projects.find(x=>x.id===id);if(!p||!confirm('Poistetaanko projekti "'+(p.name||"Nimetön projekti")+'"?'))return;
-  setProjects(projects.filter(x=>x.id!==id));if(data.projectId===id)data.projectId=null;save();renderProjectList();showToast("Projekti poistettu");
+  setProjects(projects.filter(x=>x.id!==id));if(data.projectId===id)data.projectId=null;else projectPhotoRecords(p.data,id).forEach(record=>deletePhotoAsset(record.photo));save();renderProjectList();showToast("Projekti poistettu");
 }
 let pdfObjectUrl=null,pdfShareFile=null;
 function closePdfPreview(){document.getElementById("pdf-modal").classList.remove("open")}
@@ -407,12 +450,12 @@ async function sharePdf(){
   document.getElementById("pdf-download").click();
   showToast("PDF ladattu – jaa se Tiedostot-sovelluksesta");
 }
-let editingWorkEntryId=null,pendingWorkPhotos=[],pendingWorkCleaningItems=[],pendingWorkCustomCleaningItem="",pendingWorkConditionRatings={};
+let editingWorkEntryId=null,pendingWorkPhotos=[],pendingOriginalPhotoIds=new Set(),pendingWorkCleaningItems=[],pendingWorkCustomCleaningItem="",pendingWorkConditionRatings={};
 function displayWorkDate(value){if(!value)return"-";const date=new Date(value+"T00:00:00");return Number.isNaN(date.getTime())?value:date.toLocaleDateString("fi-FI")}
 function workEntryTitle(entry){const title=String(entry?.title||"").trim();if(title)return title;const text=String(entry?.text||"").trim().replace(/\s+/g," ");if(text)return text.length>60?text.slice(0,57)+"...":text;return String(entry?.target||"").trim()||"Työmerkintä"}
 function openWorkEntryEditor(id=null){
   const entry=id?data.workEntries.find(item=>item.id===id):null;
-  editingWorkEntryId=entry?.id||null;pendingWorkPhotos=(entry?.photos||[]).map(photo=>({...photo}));pendingWorkCleaningItems=normalizeCleaningItems(entry?.cleaningItems);pendingWorkCustomCleaningItem=String(entry?.customCleaningItem||"");pendingWorkConditionRatings=normalizeConditionRatings(entry?.conditionRatings);
+  editingWorkEntryId=entry?.id||newRecordId("merkinta");pendingWorkPhotos=(entry?.photos||[]).map(photo=>({...photo}));pendingOriginalPhotoIds=new Set(pendingWorkPhotos.map(photo=>photo.id));pendingWorkCleaningItems=normalizeCleaningItems(entry?.cleaningItems);pendingWorkCustomCleaningItem=String(entry?.customCleaningItem||"");pendingWorkConditionRatings=normalizeConditionRatings(entry?.conditionRatings);
   ["work-entry-cleaning-wrap","work-entry-condition-wrap"].forEach(elementId=>{const section=document.getElementById(elementId);if(section)section.open=false});
   document.getElementById("work-entry-date").value=entry?.date||new Date().toISOString().slice(0,10);
   document.getElementById("work-entry-target").value=entry?.target||"";
@@ -421,7 +464,7 @@ function openWorkEntryEditor(id=null){
   const editor=document.getElementById("work-entry-editor");editor.hidden=false;renderWorkEntryCleaning();renderWorkEntryConditions();renderWorkPhotoPreview();
   requestAnimationFrame(()=>editor.scrollIntoView({behavior:"smooth",block:"nearest"}));
 }
-function closeWorkEntryEditor(){editingWorkEntryId=null;pendingWorkPhotos=[];pendingWorkCleaningItems=[];pendingWorkCustomCleaningItem="";pendingWorkConditionRatings={};const editor=document.getElementById("work-entry-editor");if(editor)editor.hidden=true;const preview=document.getElementById("work-photo-preview");if(preview)preview.innerHTML=""}
+function closeWorkEntryEditor(keepNewPhotos=false){if(!keepNewPhotos)pendingWorkPhotos.filter(photo=>!pendingOriginalPhotoIds.has(photo.id)).forEach(photo=>deletePhotoAsset(photo));editingWorkEntryId=null;pendingWorkPhotos=[];pendingOriginalPhotoIds=new Set();pendingWorkCleaningItems=[];pendingWorkCustomCleaningItem="";pendingWorkConditionRatings={};const editor=document.getElementById("work-entry-editor");if(editor)editor.hidden=true;const preview=document.getElementById("work-photo-preview");if(preview)preview.innerHTML=""}
 function renderWorkEntryCleaning(){
   const selected=normalizeCleaningItems(pendingWorkCleaningItems),wrap=document.getElementById("work-entry-cleaning-wrap"),grid=document.getElementById("work-entry-cleaning-grid"),custom=document.getElementById("work-entry-cleaning-custom"),input=document.getElementById("work-entry-cleaning-custom-input"),count=document.getElementById("work-entry-cleaning-count"),cleaningSelected=(data.workTypes||[]).includes("cleaning");if(wrap)wrap.hidden=!cleaningSelected;if(grid)grid.innerHTML=cleaningOptionsHtml(selected,"togglePendingCleaningItem");if(custom)custom.hidden=!selected.includes("other");if(input)input.value=pendingWorkCustomCleaningItem;if(count)count.textContent=selected.length?selected.length+" valittu":"Ei valintoja";
 }
@@ -433,36 +476,37 @@ function compressWorkPhoto(file){
   return new Promise((resolve,reject)=>{
     if(!file?.type?.startsWith("image/")){reject(new Error("Valitse kuvatiedosto"));return}
     const url=URL.createObjectURL(file),img=new Image();
-    img.onload=()=>{try{const scale=Math.min(1,800/Math.max(img.naturalWidth,img.naturalHeight)),width=Math.max(1,Math.round(img.naturalWidth*scale)),height=Math.max(1,Math.round(img.naturalHeight*scale)),canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");canvas.width=width;canvas.height=height;ctx.fillStyle="#fff";ctx.fillRect(0,0,width,height);ctx.drawImage(img,0,0,width,height);resolve({id:newRecordId("kuva"),data:canvas.toDataURL("image/jpeg",.72),width,height})}catch(error){reject(error)}finally{URL.revokeObjectURL(url)}};
+    img.onload=()=>{try{const scale=Math.min(1,800/Math.max(img.naturalWidth,img.naturalHeight)),width=Math.max(1,Math.round(img.naturalWidth*scale)),height=Math.max(1,Math.round(img.naturalHeight*scale)),canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");canvas.width=width;canvas.height=height;ctx.fillStyle="#fff";ctx.fillRect(0,0,width,height);ctx.drawImage(img,0,0,width,height);canvas.toBlob(blob=>blob?resolve({blob,width,height}):reject(new Error("Kuvaa ei voitu pakata")),"image/jpeg",.72)}catch(error){reject(error)}finally{URL.revokeObjectURL(url)}};
     img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Kuvaa ei voitu lukea"))};img.src=url;
   })
 }
 async function handleWorkPhotoFiles(files){
   const selected=[...(files||[])];
-  for(const file of selected){try{pendingWorkPhotos.push(await compressWorkPhoto(file));renderWorkPhotoPreview()}catch(e){showToast(e.message||"Kuvaa ei voitu lisätä")}}
+  if(!data.projectId)data.projectId=newRecordId("projekti");
+  for(const file of selected){try{const compressed=await compressWorkPhoto(file),id=newRecordId("kuva"),photo={id,localKey:id,width:compressed.width,height:compressed.height};await cachePhotoBlob(id,compressed.blob);pendingWorkPhotos.push(photo);renderWorkPhotoPreview();if(cloudUser&&navigator.onLine){await uploadPhotoBlob(photo,compressed.blob,data.projectId,editingWorkEntryId);renderWorkPhotoPreview()}else showToast("Kuva tallennettu lähetysjonoon")}catch(e){showToast(e.message||"Kuvaa ei voitu lisätä")}}
 }
-function renderWorkPhotoPreview(){const box=document.getElementById("work-photo-preview");if(!box)return;box.innerHTML=pendingWorkPhotos.map((photo,index)=>'<div class="work-photo"><img src="'+photo.data+'" alt="Työmerkinnän kuva '+(index+1)+'"><button type="button" onclick="removePendingWorkPhoto('+index+')" aria-label="Poista kuva">×</button></div>').join("")}
-function removePendingWorkPhoto(index){pendingWorkPhotos.splice(index,1);renderWorkPhotoPreview()}
+function renderWorkPhotoPreview(){const box=document.getElementById("work-photo-preview");if(!box)return;box.innerHTML=pendingWorkPhotos.map((photo,index)=>'<div class="work-photo"><img data-photo-id="'+esc(photo.id)+'" alt="Työmerkinnän kuva '+(index+1)+'"><button type="button" onclick="removePendingWorkPhoto('+index+')" aria-label="Poista kuva">×</button></div>').join("");hydratePhotoImages(box,pendingWorkPhotos)}
+function removePendingWorkPhoto(index){const [removed]=pendingWorkPhotos.splice(index,1);if(removed&&!pendingOriginalPhotoIds.has(removed.id))deletePhotoAsset(removed);renderWorkPhotoPreview()}
 function saveWorkEntry(){
   const date=document.getElementById("work-entry-date").value||new Date().toISOString().slice(0,10),target=document.getElementById("work-entry-target").value.trim(),title=document.getElementById("work-entry-title").value.trim(),textValue=document.getElementById("work-entry-text").value.trim();
   if(!title){showToast("Anna työmerkinnälle otsikko");document.getElementById("work-entry-title").focus();return}
   if(!textValue&&!pendingWorkPhotos.length&&!pendingWorkCleaningItems.length&&!conditionEntries(pendingWorkConditionRatings).length){showToast("Kirjoita kuvaus, tee valinta tai lisää kuva");return}
-  const entry={id:editingWorkEntryId||newRecordId("merkinta"),date,target,title,text:textValue,cleaningItems:normalizeCleaningItems(pendingWorkCleaningItems),customCleaningItem:pendingWorkCustomCleaningItem.trim(),conditionRatings:normalizeConditionRatings(pendingWorkConditionRatings),photos:pendingWorkPhotos.map(photo=>({...photo}))},before=data.workEntries.map(item=>({...item,cleaningItems:[...(item.cleaningItems||[])],conditionRatings:{...(item.conditionRatings||{})},photos:(item.photos||[]).map(photo=>({...photo}))})),index=data.workEntries.findIndex(item=>item.id===entry.id);
+  const entry={id:editingWorkEntryId||newRecordId("merkinta"),date,target,title,text:textValue,cleaningItems:normalizeCleaningItems(pendingWorkCleaningItems),customCleaningItem:pendingWorkCustomCleaningItem.trim(),conditionRatings:normalizeConditionRatings(pendingWorkConditionRatings),photos:pendingWorkPhotos.map(photo=>({...photo}))},before=data.workEntries.map(item=>({...item,cleaningItems:[...(item.cleaningItems||[])],conditionRatings:{...(item.conditionRatings||{})},photos:(item.photos||[]).map(photo=>({...photo}))})),index=data.workEntries.findIndex(item=>item.id===entry.id),previousPhotos=index>=0?(data.workEntries[index].photos||[]):[],removedPhotos=previousPhotos.filter(photo=>!entry.photos.some(next=>next.id===photo.id));
   if(index>=0)data.workEntries[index]=entry;else data.workEntries.push(entry);
   if(!save()){data.workEntries=before;renderWorkEntries();return}
-  closeWorkEntryEditor();renderWorkEntries();const savedCard=[...document.querySelectorAll(".work-entry-card")].find(card=>card.dataset.workEntryId===entry.id);if(savedCard){savedCard.open=true;requestAnimationFrame(()=>savedCard.scrollIntoView({behavior:"smooth",block:"nearest"}))}showToast(index>=0?"Merkintä päivitetty":"Työmerkintä tallennettu");
+  removedPhotos.forEach(photo=>deletePhotoAsset(photo));closeWorkEntryEditor(true);renderWorkEntries();syncPendingPhotoUploads().catch(()=>false);const savedCard=[...document.querySelectorAll(".work-entry-card")].find(card=>card.dataset.workEntryId===entry.id);if(savedCard){savedCard.open=true;requestAnimationFrame(()=>savedCard.scrollIntoView({behavior:"smooth",block:"nearest"}))}showToast(index>=0?"Merkintä päivitetty":"Työmerkintä tallennettu");
 }
 function editWorkEntry(id){openWorkEntryEditor(id)}
 function deleteWorkEntry(id){
   const entry=data.workEntries.find(item=>item.id===id);if(!entry||!confirm("Poistetaanko tämä työmerkintä kuvineen?"))return;
-  data.workEntries=data.workEntries.filter(item=>item.id!==id);if(editingWorkEntryId===id)closeWorkEntryEditor();renderWorkEntries();save();showToast("Työmerkintä poistettu");
+  data.workEntries=data.workEntries.filter(item=>item.id!==id);(entry.photos||[]).forEach(photo=>deletePhotoAsset(photo));if(editingWorkEntryId===id)closeWorkEntryEditor();renderWorkEntries();save();showToast("Työmerkintä poistettu");
 }
 function renderWorkEntries(){
   const list=document.getElementById("work-entry-list");if(!list)return;
   const entries=[...(data.workEntries||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   if(!entries.length){list.innerHTML='<div class="work-empty">Ei vielä työmerkintöjä. Lisää yleinen tai asunto-/kohdekohtainen merkintä.</div>';return}
   const types=data.workTypes||[],cleaningActive=types.includes("cleaning"),conditionActive=cleaningActive||types.includes("maintenance");
-  list.innerHTML=entries.map(entry=>{const photos=entry.photos||[],labels=cleaningActive?cleaningLabels(entry.cleaningItems,entry.customCleaningItem):[],conditions=conditionActive?conditionEntries(entry.conditionRatings):[],photoLabel=photos.length===1?"1 kuva":photos.length+" kuvaa";return '<details class="work-entry-card" data-work-entry-id="'+esc(entry.id)+'"><summary><span class="work-entry-summary-main"><strong>'+esc(workEntryTitle(entry))+'</strong><span>'+esc(entry.target||"Yleinen")+'</span></span><span class="work-entry-summary-meta"><span>'+esc(displayWorkDate(entry.date))+'</span><span>'+photoLabel+'</span></span></summary><div class="work-entry-body">'+(labels.length?'<div class="cleaning-tags">'+labels.map(label=>'<span class="cleaning-tag">✓ '+esc(label)+'</span>').join("")+'</div>':'')+(conditions.length?'<div class="condition-tags">'+conditions.map(item=>'<span class="condition-tag '+item.state+'">'+esc(item.label)+': '+esc(item.stateLabel)+'</span>').join("")+'</div>':'')+(entry.text?'<p class="work-entry-text">'+esc(entry.text)+'</p>':'')+(photos.length?'<div class="work-entry-photos">'+photos.map((photo,index)=>'<img src="'+photo.data+'" alt="'+esc(workEntryTitle(entry))+', kuva '+(index+1)+'">').join("")+'</div>':'')+'<div class="work-entry-actions"><button type="button" class="secondary small" onclick="editWorkEntry(\''+entry.id+'\')">Muokkaa</button><button type="button" class="danger small" onclick="deleteWorkEntry(\''+entry.id+'\')">Poista</button></div></div></details>'}).join("");
+  const allPhotos=[];list.innerHTML=entries.map(entry=>{const photos=entry.photos||[],labels=cleaningActive?cleaningLabels(entry.cleaningItems,entry.customCleaningItem):[],conditions=conditionActive?conditionEntries(entry.conditionRatings):[],photoLabel=photos.length===1?"1 kuva":photos.length+" kuvaa";allPhotos.push(...photos);return '<details class="work-entry-card" data-work-entry-id="'+esc(entry.id)+'"><summary><span class="work-entry-summary-main"><strong>'+esc(workEntryTitle(entry))+'</strong><span>'+esc(entry.target||"Yleinen")+'</span></span><span class="work-entry-summary-meta"><span>'+esc(displayWorkDate(entry.date))+'</span><span>'+photoLabel+'</span></span></summary><div class="work-entry-body">'+(labels.length?'<div class="cleaning-tags">'+labels.map(label=>'<span class="cleaning-tag">✓ '+esc(label)+'</span>').join("")+'</div>':'')+(conditions.length?'<div class="condition-tags">'+conditions.map(item=>'<span class="condition-tag '+item.state+'">'+esc(item.label)+': '+esc(item.stateLabel)+'</span>').join("")+'</div>':'')+(entry.text?'<p class="work-entry-text">'+esc(entry.text)+'</p>':'')+(photos.length?'<div class="work-entry-photos">'+photos.map((photo,index)=>'<img data-photo-id="'+esc(photo.id)+'" alt="'+esc(workEntryTitle(entry))+', kuva '+(index+1)+'">').join("")+'</div>':'')+'<div class="work-entry-actions"><button type="button" class="secondary small" onclick="editWorkEntry(\''+entry.id+'\')">Muokkaa</button><button type="button" class="danger small" onclick="deleteWorkEntry(\''+entry.id+'\')">Poista</button></div></div></details>'}).join("");hydratePhotoImages(list,allPhotos);
 }
 function addApartment(){data.apartments.push(emptyApartment());render();save();const apartment=document.querySelectorAll(".apartment")[data.apartments.length-1];if(apartment){apartment.open=true;apartment.querySelector(".apartment-title input")?.focus()}}
 function removeApartment(ai){if(confirm("Poistetaanko tämä asunto mittauksineen?")){data.apartments.splice(ai,1);render();save()}}
@@ -544,11 +588,12 @@ async function jpegBytes(source){
   if(source.startsWith("data:image/jpeg;base64,"))return Uint8Array.from(atob(source.split(",")[1]),c=>c.charCodeAt(0));
   try{const response=await fetch(source);return response.ok?new Uint8Array(await response.arrayBuffer()):null}catch(e){return null}
 }
+async function workPhotoBytes(photo){const blob=await resolvePhotoBlob(photo);return blob?new Uint8Array(await blob.arrayBuffer()):null}
 async function makePdf(){
   save();
   const settings=getPdfSettings(),workEntries=Array.isArray(data.workEntries)?data.workEntries:[],photoRecords=[];
   workEntries.forEach(entry=>(entry.photos||[]).forEach(photo=>photoRecords.push({entryId:entry.id,...photo})));
-  const [logoBytes,logo2Bytes,...photoBytes]=await Promise.all([jpegBytes(settings.logoData),jpegBytes(settings.logo2Data),...photoRecords.map(photo=>jpegBytes(photo.data))]);
+  const [logoBytes,logo2Bytes,...photoBytes]=await Promise.all([jpegBytes(settings.logoData),jpegBytes(settings.logo2Data),...photoRecords.map(workPhotoBytes)]);
   const workImages=photoRecords.map((photo,index)=>({...photo,name:"W"+(index+1),bytes:photoBytes[index]})).filter(photo=>photo.bytes),workImageMap=new Map(workImages.map(photo=>[photo.id,photo]));
   const pages=[[]],left=32,width=531,cols=[64,57,125,30,35,67,72,81],headers=["Tila","Tulo/poisto","Venttiili / päätelaite","Kpl","Pa","Suunn. l/s","Säädetty l/s","Asento"];
   const C={ink:"0.09 0.14 0.18",muted:"0.38 0.44 0.48",line:"0.80 0.84 0.86",pale:"0.96 0.97 0.97",green:"0.06 0.65 0.43",amber:"0.72 0.43 0.04",supply:"0.38 0.50 0.59",exhaust:"0.54 0.50 0.46",red:"0.71 0.14 0.09",redPale:"0.99 0.90 0.90"};
@@ -756,6 +801,6 @@ let e=document.getElementById("apartments"),openApartments=new Set([...e.querySe
 if(!data.apartments.length)e.innerHTML='<div class="empty-state no-print"><strong>Aloita lisäämällä asunto tai mittauskohde</strong>Lisää sen alle venttiilit ja valitse jokaiselle tulo tai poisto.<br><button type="button" class="primary" onclick="addApartment()">+ Lisää ensimmäinen kohde</button></div>';
 data.apartments.forEach((a,ai)=>{const t=apartmentTotals(a),deviationNotes=apartmentDeviationComments(a);let apartment=document.createElement("details");apartment.className="card apartment";apartment.dataset.apartmentIndex=ai;if(openApartments.has(ai))apartment.open=true;apartment.innerHTML='<summary class="apartment-summary"><span class="apartment-summary-name">'+esc(a.name||"Nimetön kohde")+'</span></summary><div class="apartment-body"><div class="apartment-title"><input aria-label="Kohteen tunnus" value="'+esc(a.name)+'" oninput="updateApartment('+ai+',this.value)" placeholder="Tunnus, esim. A1"><button type="button" class="danger small no-print" onclick="removeApartment('+ai+')">Poista kohde</button></div>'+ventRows(ai)+'<div class="vent-actions no-print"><button type="button" class="secondary" onclick="addVent('+ai+')">+ Lisää venttiili</button>'+(!a.pressureEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">+ Paine-ero</button>':'')+(!a.speedEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">+ Säädetty/mitattu nopeudella</button>':'')+'</div><div class="optional-fields">'+(a.pressureEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Paine-ero</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">Poista</button></div><div class="signed-input"><input data-pressure-index="'+ai+'" inputmode="decimal" value="'+esc(a.pressureDifference)+'" oninput="updateApartmentOption('+ai+',\'pressureDifference\',this.value)" placeholder="Esim. 5"><button type="button" class="small no-print" onclick="togglePressureSign('+ai+')" aria-label="Vaihda paine-eron etumerkki">±</button></div></div>':'')+(a.speedEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Säädetty/mitattu nopeudella</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">Poista</button></div><input value="'+esc(a.measurementSpeed)+'" oninput="updateApartmentOption('+ai+',\'measurementSpeed\',this.value)" placeholder="Esim. teho 2 / 60 %"></div>':'')+'</div><div class="air-summary"><div class="summary-box"><span>Tuloilma yhteensä</span><strong id="summary-supply-'+ai+'">'+flowFormat(t.supply)+' l/s</strong></div><div class="summary-box"><span>Poistoilma yhteensä</span><strong id="summary-exhaust-'+ai+'">'+flowFormat(t.exhaust)+' l/s</strong></div><div id="summary-difference-'+ai+'" class="summary-box '+t.statusClass+'"><span>Erotus (tulo − poisto)</span><strong>'+(t.difference>0?"+":"")+flowFormat(t.difference)+' l/s</strong><em>'+t.status+'</em></div></div><div style="margin-top:15px"><label>Kommentit / tehdyt korjaukset ja kulut</label><textarea oninput="updateApartmentComments('+ai+',this.value)" placeholder="Kirjaa tehdyt korjaukset, havainnot ja kulut...">'+esc(a.comments||"")+'</textarea><div id="deviation-comments-'+ai+'" class="deviation-comments"'+(deviationNotes.length?'':' hidden')+'>'+(deviationNotes.length?'<strong>Automaattinen huomio</strong><ul>'+deviationNotes.map(note=>'<li>'+esc(note)+'</li>').join("")+'</ul>':'')+'</div></div></div>';
 e.appendChild(apartment)})}
-["kohde","paiva","mittaaja","valine"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();initializeCloudAuth();
+["kohde","paiva","mittaaja","valine"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();initializeCloudAuth().then(async()=>{if(!cloudUser)await migrateLegacyPhotoStorage(false)}).catch(()=>migrateLegacyPhotoStorage(false));
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
 </script></body></html>
