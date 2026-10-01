@@ -66,7 +66,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 </style>
 </head>
 <body>
-<header><div class="brand"><div class="brand-mark">IV</div><div class="brand-copy"><h1>IV Mittaus</h1><p>Ilmamäärien mittauspöytäkirja</p></div><span class="tool-badge">AMMATTITYÖKALU</span><button id="theme-button" type="button" class="theme-button no-print" onclick="cycleTheme()" aria-label="Vaihda teemaa">☾</button><div class="menu-wrap no-print"><button type="button" class="menu-button" onclick="toggleMenu()">☰ Valikko</button><div id="top-menu" class="menu-panel"><button type="button" onclick="newProject()">＋ Uusi projekti</button><button type="button" onclick="saveCurrentProject()">✓ Tallenna projekti</button><button type="button" onclick="openProjects()">▤ Vanhat projektit</button><button type="button" onclick="document.getElementById('project-import-file').click();closeMenu()">↥ Tuo projektitiedosto</button><button type="button" onclick="openPdfSettings()">⚙ PDF-asetukset</button><button type="button" onclick="openCloudSettings()">☁ Pilvitallennus</button><button type="button" onclick="cycleTheme()">◐ Vaihda teemaa</button><button id="install-menu-button" type="button" onclick="installApp()">⇩ Asenna sovellus</button><small id="cloud-menu-status">Projektit tallentuvat tälle laitteelle.</small></div></div></div></header>
+<header><div class="brand"><div class="brand-mark">IV</div><div class="brand-copy"><h1>IV Mittaus</h1><p>Ilmamäärien mittauspöytäkirja</p></div><span class="tool-badge">AMMATTITYÖKALU</span><button id="theme-button" type="button" class="theme-button no-print" onclick="cycleTheme()" aria-label="Vaihda teemaa">☾</button><div class="menu-wrap no-print"><button type="button" class="menu-button" onclick="toggleMenu()">☰ Valikko</button><div id="top-menu" class="menu-panel"><button type="button" onclick="newProject()">＋ Uusi projekti</button><button type="button" onclick="saveCurrentProject()">✓ Tallenna projekti</button><button type="button" onclick="exportCurrentProject()">↓ Lataa projektin varmuuskopio</button><button type="button" onclick="openProjects()">▤ Vanhat projektit</button><button type="button" onclick="document.getElementById('project-import-file').click();closeMenu()">↥ Tuo projektitiedosto</button><button type="button" onclick="openPdfSettings()">⚙ PDF-asetukset</button><button type="button" onclick="openCloudSettings()">☁ Pilvitallennus</button><button type="button" onclick="cycleTheme()">◐ Vaihda teemaa</button><button id="install-menu-button" type="button" onclick="installApp()">⇩ Asenna sovellus</button><small id="cloud-menu-status">Projektit tallentuvat tälle laitteelle.</small></div></div></div></header>
 <input id="project-import-file" class="no-print" type="file" accept="application/json,.json,.ivprojekti" hidden onchange="importProjectFile(this.files[0]);this.value=''">
 <div id="projects-modal" class="modal no-print" onclick="if(event.target===this)closeProjects()"><div class="modal-card"><div class="modal-head"><h2>Vanhat projektit</h2><button type="button" class="small secondary" onclick="closeProjects()">Sulje</button></div><div class="modal-body"><div id="project-list" class="project-list"></div></div></div></div>
 <div id="new-project-modal" class="modal no-print" onclick="if(event.target===this)closeNewProject()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Aloita uusi projekti</h2><button type="button" class="small secondary" onclick="closeNewProject()">Sulje</button></div><div class="modal-body"><p style="margin-top:0;line-height:1.5">Nykyinen mittaus suljetaan ja näyttö tyhjennetään. Nykyinen projekti löytyy Vanhoista projekteista vain, jos siitä on luotu PDF.</p><div class="modal-actions"><button type="button" class="secondary" onclick="closeNewProject()">Peruuta</button><button type="button" class="primary" onclick="startNewProject()">Aloita uusi projekti</button></div></div></div></div>
@@ -82,6 +82,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <div><label>Työpäivä</label><input id="paiva" type="date"></div>
 <div><label>Työn suorittaja</label><input id="mittaaja" placeholder="Nimi"></div>
 <div id="measurement-instrument-wrap" hidden><label>Mittausväline</label><input id="valine" placeholder="Esim. Swema 3000md"></div>
+<div><label>Oletusventtiili</label><input id="default-valve" placeholder="Esim. KSO-125"><p class="muted">Täytetään automaattisesti uusiin venttiileihin. Jo lisättyjä venttiilejä ei muuteta.</p></div>
 <div class="work-type-block"><label>Työn laatu <span class="muted">(voit valita useita)</span></label><div class="work-type-grid" role="group" aria-label="Työn laatu">
 <button type="button" class="work-type-option" data-work-type="cleaning" role="checkbox" onclick="toggleWorkType('cleaning')">Puhdistus</button>
 <button type="button" class="work-type-option" data-work-type="maintenance" role="checkbox" onclick="toggleWorkType('maintenance')">Huolto</button>
@@ -206,10 +207,13 @@ function cloudPayload(){return{version:1,current:JSON.parse(JSON.stringify(data)
 async function cloudFetch(path,options={},retry=true){
   if(!cloudSession?.access_token)throw new Error("Ei kirjautumista");
   const headers={apikey:SUPABASE_KEY,Authorization:"Bearer "+cloudSession.access_token,...(options.headers||{})};
-  const response=await fetch(SUPABASE_URL+path,{...options,headers});
-  if(response.status===401&&retry&&await refreshCloudSession())return cloudFetch(path,options,false);
-  if(!response.ok){const error=await response.json().catch(()=>({}));throw new Error(error.message||"Pilvitallennus epäonnistui")}
-  return response;
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),45000);
+  try{
+    const response=await fetch(SUPABASE_URL+path,{...options,headers,signal:controller.signal});
+    if(response.status===401&&retry&&await refreshCloudSession())return cloudFetch(path,options,false);
+    if(!response.ok){const error=await response.json().catch(()=>({}));throw new Error(error.message||"Pilvitallennus epäonnistui")}
+    return response;
+  }catch(error){if(error?.name==="AbortError")throw new Error("Pilvipalvelu ei vastannut 45 sekunnissa");throw error}finally{clearTimeout(timeout)}
 }
 const PHOTO_BUCKET="project-photos",PHOTO_DB_NAME="iv-mittaus-files",PHOTO_STORE="photos";
 let photoDbPromise=null;const photoMemoryFallback=new Map(),photoUrlCache=new Map();
@@ -269,13 +273,13 @@ function restoreCloudBackup(row){
 }
 async function syncCloudNow(showMessage){
   if(CLOUD_DATA_SYNC_PAUSED){updateCloudUi("Projektitietojen pilvisynkronointi on tilapäisesti tauolla tietojen suojaamiseksi.");if(showMessage)showToast("Pilvisynkronointi on tauolla");return false}
-  if(!cloudUser||cloudBusy)return false;if(!navigator.onLine){updateCloudUi("Ei verkkoyhteyttä. Muutokset synkronoidaan myöhemmin.");return false}
-  cloudBusy=true;const note=document.getElementById("save-note");if(note)note.textContent="Synkronoidaan pilveen…";
+  if(!cloudUser){if(showMessage)showToast("Kirjaudu ensin pilvitallennukseen");return false}if(cloudBusy){if(showMessage)showToast("Synkronointi on jo käynnissä");return false}if(!navigator.onLine){updateCloudUi("Ei verkkoyhteyttä. Muutokset synkronoidaan myöhemmin.");if(showMessage)showToast("Ei verkkoyhteyttä");return false}
+  cloudBusy=true;const note=document.getElementById("save-note");if(note)note.textContent="Synkronoidaan pilveen…";updateCloudUi("Synkronoidaan pilveen…");
   try{
     const outgoing=cloudPayload(),remote=await fetchCloudBackup();if(remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing))await insertCloudVersion(remote.payload,remote.updated_at);
     await cloudFetch("/rest/v1/app_backups?on_conflict=user_id",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload:outgoing,updated_at:new Date().toISOString()})});await trimCloudVersions();
     if(note)note.textContent="Tallennettu automaattisesti laitteelle ja pilveen";updateCloudUi("Kaikki tiedot on tallennettu pilveen.");if(showMessage)showToast("Tiedot synkronoitu");return true;
-  }catch(e){if(note)note.textContent="Tallennettu laitteelle – pilvisynkronointi epäonnistui";updateCloudUi("Pilvisynkronointi epäonnistui. Tiedot ovat turvassa tällä laitteella.");if(showMessage)showToast(e.message);return false}finally{cloudBusy=false}
+  }catch(e){if(note)note.textContent="Tallennettu laitteelle – pilvisynkronointi epäonnistui";updateCloudUi("Pilvisynkronointi epäonnistui: "+(e.message||"tuntematon virhe")+". Tiedot ovat turvassa tällä laitteella.");if(showMessage)showToast(e.message||"Pilvisynkronointi epäonnistui");return false}finally{cloudBusy=false}
 }
 async function initializeCloud(){
   if(!cloudUser)return;
@@ -288,7 +292,7 @@ async function initializeCloudAuth(){
 }
 window.addEventListener("online",async()=>{if(cloudUser){await syncPendingPhotoUploads().catch(()=>false);await syncCloudNow(false)}});
 function newRecordId(prefix){return(globalThis.crypto?.randomUUID?.()||prefix+"-"+Date.now()+"-"+Math.random().toString(36).slice(2))}
-const emptyVent=(space="",type="supply")=>({space,type,valve:"",kpl:"1",pa:"",target:"",adjusted:"",position:""});
+const emptyVent=(space="",type="exhaust")=>({space,type,valve:"",kpl:"1",pa:"",target:"",adjusted:"",position:""});
 const emptyApartment=()=>({name:"",comments:"",vents:[],pressureEnabled:false,pressureDifference:"",speedEnabled:false,measurementSpeed:""});
 const WORK_TYPES=["cleaning","maintenance","installation","measurement","other"];
 const CLEANING_ITEMS=[
@@ -299,7 +303,14 @@ const normalizeCleaningItems=items=>[...new Set((Array.isArray(items)?items:[]).
 const CONDITION_ITEMS=[{id:"airUnit",label:"IV-koneen yleiskunto"},{id:"fans",label:"Puhaltimien kunto"},{id:"seals",label:"Tiivisteiden kunto"},{id:"filters",label:"Suodattimien kunto"},{id:"heatRecovery",label:"LTO-kennon kunto"},{id:"condensate",label:"Kondenssiveden poisto"}];
 const CONDITION_STATES=[{id:"good",label:"Hyvä"},{id:"attention",label:"Huomioitava"},{id:"repair",label:"Korjattava"}];
 function normalizeConditionRatings(ratings){const result={};if(!ratings||typeof ratings!=="object"||Array.isArray(ratings))return result;CONDITION_ITEMS.forEach(item=>{if(CONDITION_STATES.some(state=>state.id===ratings[item.id]))result[item.id]=ratings[item.id]});return result}
-const emptyData=()=>({projectId:null,kohde:"",paiva:new Date().toISOString().slice(0,10),mittaaja:"",valine:"",workTypes:[],customWorkType:"",cleaningItems:[],customCleaningItem:"",conditionRatings:{},workEntries:[],apartments:[]});
+const emptyData=()=>({projectId:null,kohde:"",paiva:new Date().toISOString().slice(0,10),mittaaja:"",valine:"",defaultValve:"",workTypes:[],customWorkType:"",cleaningItems:[],customCleaningItem:"",conditionRatings:{},workEntries:[],apartments:[]});
+function sortedApartments(apartments){
+  return (Array.isArray(apartments)?apartments:[]).map((apartment,index)=>({apartment,index})).sort((a,b)=>{
+    const left=String(a.apartment?.name||"").trim(),right=String(b.apartment?.name||"").trim();
+    if(!left&&!right)return a.index-b.index;if(!left)return 1;if(!right)return-1;
+    return left.localeCompare(right,"fi",{numeric:true,sensitivity:"base"})||a.index-b.index;
+  }).map(item=>item.apartment);
+}
 function normalizeApartment(apartment){
   const source=apartment||{},a={...emptyApartment(),...source};
   const legacyRooms=Array.isArray(source.rooms)?source.rooms:[];
@@ -320,13 +331,14 @@ function normalizeData(saved){
   result.workTypes=[...new Set((Array.isArray(saved?.workTypes)?saved.workTypes:legacyType?[legacyType]:[]).filter(type=>WORK_TYPES.includes(type)))];
   delete result.workType;
   result.customWorkType=String(result.customWorkType||"");
+  result.defaultValve=String(result.defaultValve||"");
   result.cleaningItems=normalizeCleaningItems(result.cleaningItems);result.customCleaningItem=String(result.customCleaningItem||"");result.conditionRatings=normalizeConditionRatings(result.conditionRatings);
   result.workEntries=(Array.isArray(result.workEntries)?result.workEntries:[]).map(entry=>({
     id:entry?.id||newRecordId("merkinta"),date:entry?.date||new Date().toISOString().slice(0,10),target:String(entry?.target||""),title:String(entry?.title||""),text:String(entry?.text||""),
     cleaningItems:normalizeCleaningItems(entry?.cleaningItems),customCleaningItem:String(entry?.customCleaningItem||""),conditionRatings:normalizeConditionRatings(entry?.conditionRatings),
     photos:(Array.isArray(entry?.photos)?entry.photos:[]).filter(photo=>photo&&(photo.data||photo.storagePath||photo.localKey)).map(normalizePhoto)
   }));
-  result.apartments=(Array.isArray(result.apartments)?result.apartments:[]).map(normalizeApartment);
+  result.apartments=sortedApartments((Array.isArray(result.apartments)?result.apartments:[]).map(normalizeApartment));
   return result;
 }
 function loadData(){
@@ -426,7 +438,7 @@ function handleSecondLogoFile(file){
 function removeSecondLogo(){pendingPdfSettings.logo2Data="";pendingPdfSettings.logo2Width=0;pendingPdfSettings.logo2Height=0;document.getElementById("setting-logo-2").value="";renderSecondLogoPreview()}
 function savePdfSettings(){pendingPdfSettings.company=document.getElementById("setting-company").value.trim();pendingPdfSettings.businessId=document.getElementById("setting-business-id").value.trim();pendingPdfSettings.contactDetails=document.getElementById("setting-contact-details").value.trim();try{localStorage.setItem("iv_pdf_settings",JSON.stringify(pendingPdfSettings));markLocalChange();closePdfSettings();showToast("PDF-asetukset tallennettu")}catch(e){showToast("Asetuksia ei voitu tallentaa")}}
 function save(){
-  data.kohde=document.getElementById("kohde").value;data.paiva=document.getElementById("paiva").value;data.mittaaja=document.getElementById("mittaaja").value;data.valine=document.getElementById("valine").value;
+  data.kohde=document.getElementById("kohde").value;data.paiva=document.getElementById("paiva").value;data.mittaaja=document.getElementById("mittaaja").value;data.valine=document.getElementById("valine").value;data.defaultValve=document.getElementById("default-valve").value;
   try{localStorage.setItem("iv_proto",JSON.stringify(data));markLocalChange();return true}catch(e){showToast("Tallennustila on täynnä. Poista kuvia tai vanhoja projekteja.");return false}
 }
 function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
@@ -445,6 +457,20 @@ function saveProjectSnapshot(){
   const ok=setProjects(projects.slice(0,100));save();return ok;
 }
 function saveCurrentProject(){closeMenu();const ok=saveProjectSnapshot();showToast(ok?"Projekti tallennettu":"Projektia ei voitu tallentaa")}
+function blobDataUrl(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error||new Error("Kuvaa ei voitu lukea"));reader.readAsDataURL(blob)})}
+async function exportCurrentProject(){
+  closeMenu();if(!save()){showToast("Projektia ei voitu varmistaa");return}
+  const project=JSON.parse(JSON.stringify(data));let missingPhotos=0;
+  for(const entry of project.workEntries||[])for(const photo of entry.photos||[]){
+    if(photo.data)continue;
+    const blob=await cachedPhotoBlob(photo.localKey||photo.id).catch(()=>null);
+    if(blob)photo.data=await blobDataUrl(blob).catch(()=>"");
+    if(!photo.data)missingPhotos++;
+  }
+  const payload={format:"iv-mittaus-project",version:1,exportedAt:new Date().toISOString(),project},base=(data.kohde||"iv-mittaus-projekti").replace(/[^a-zA-Z0-9äöåÄÖÅ_-]+/g,"_"),blob=new Blob([JSON.stringify(payload)],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a");
+  link.href=url;link.download=base+".ivprojekti.json";document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+  showToast(missingPhotos?"Varmuuskopio ladattu – "+missingPhotos+" kuvaa jäi vain pilviviitteiksi":"Projektin varmuuskopio ladattu");
+}
 async function importProjectFile(file){
   if(!file)return;
   try{
@@ -557,8 +583,13 @@ function renderWorkEntries(){
 function addApartment(){data.apartments.push(emptyApartment());render();save();const apartment=document.querySelectorAll(".apartment")[data.apartments.length-1];if(apartment){apartment.open=true;apartment.querySelector(".apartment-title input")?.focus()}}
 function removeApartment(ai){if(confirm("Poistetaanko tämä asunto mittauksineen?")){data.apartments.splice(ai,1);render();save()}}
 function updateApartment(ai,v){data.apartments[ai].name=v;const label=document.querySelector('.apartment[data-apartment-index="'+ai+'"] .apartment-summary-name');if(label)label.textContent=v.trim()||"Nimetön kohde";save()}
+function finishApartmentNameEdit(ai){
+  const apartment=data.apartments[ai];if(!apartment)return;
+  data.apartments=sortedApartments(data.apartments);render();save();
+  const nextIndex=data.apartments.indexOf(apartment),element=document.querySelector('.apartment[data-apartment-index="'+nextIndex+'"]');if(element)element.open=true;
+}
 function updateApartmentComments(ai,v){data.apartments[ai].comments=v;save()}
-function addVent(ai){data.apartments[ai].vents.push(emptyVent());const vi=data.apartments[ai].vents.length-1;render();save();const apartment=document.querySelectorAll(".apartment")[ai],card=apartment?.querySelector('.vent-card[data-vent-index="'+vi+'"]');if(apartment)apartment.open=true;if(card){card.open=true;const room=card.closest(".room-group");if(room)room.open=true;card.querySelector(".field-space input")?.focus()}}
+function addVent(ai){data.apartments[ai].vents.push({...emptyVent(),valve:String(data.defaultValve||"")});const vi=data.apartments[ai].vents.length-1;render();save();const apartment=document.querySelectorAll(".apartment")[ai],card=apartment?.querySelector('.vent-card[data-vent-index="'+vi+'"]');if(apartment)apartment.open=true;if(card){card.open=true;const room=card.closest(".room-group");if(room)room.open=true;card.querySelector(".field-space input")?.focus()}}
 function removeVent(ai,vi){data.apartments[ai].vents.splice(vi,1);render();save()}
 function updateVent(ai,vi,key,value){
   data.apartments[ai].vents[vi][key]=value;
@@ -593,7 +624,7 @@ function togglePressureSign(ai){
   const input=document.querySelector('input[data-pressure-index="'+ai+'"]');if(input){input.value=apartment.pressureDifference;input.focus()}
   save();
 }
-function toggleApartmentOption(ai,key){data.apartments[ai][key]=!data.apartments[ai][key];render();save()}
+function toggleApartmentOption(ai,key){const apartment=data.apartments[ai],enabled=!apartment[key];apartment[key]=enabled;if(key==="pressureEnabled"&&enabled&&!String(apartment.pressureDifference||"").trim())apartment.pressureDifference="-";render();save()}
 function updateApartmentOption(ai,key,value){data.apartments[ai][key]=value;save()}
 function flowNumber(v){const n=Number(String(v??"").replace(",","."));return Number.isFinite(n)?n:0}
 function flowFormat(v){return (Math.round(v*10)/10).toLocaleString("fi-FI",{maximumFractionDigits:1}).replace("−","-")}
@@ -637,7 +668,7 @@ async function jpegBytes(source){
 async function workPhotoBytes(photo){const blob=await resolvePhotoBlob(photo);return blob?new Uint8Array(await blob.arrayBuffer()):null}
 async function makePdf(){
   save();
-  const settings=getPdfSettings(),workEntries=Array.isArray(data.workEntries)?data.workEntries:[],photoRecords=[];
+  const settings=getPdfSettings(),workEntries=Array.isArray(data.workEntries)?data.workEntries:[],pdfApartments=sortedApartments(data.apartments),photoRecords=[];
   workEntries.forEach(entry=>(entry.photos||[]).forEach(photo=>photoRecords.push({entryId:entry.id,...photo})));
   const [logoBytes,logo2Bytes,...photoBytes]=await Promise.all([jpegBytes(settings.logoData),jpegBytes(settings.logo2Data),...photoRecords.map(workPhotoBytes)]);
   const workImages=photoRecords.map((photo,index)=>({...photo,name:"W"+(index+1),bytes:photoBytes[index]})).filter(photo=>photo.bytes),workImageMap=new Map(workImages.map(photo=>[photo.id,photo]));
@@ -782,7 +813,7 @@ async function makePdf(){
     if(!data.apartments.length)return;
     if(workEntries.length)newContentPage();
     measurementSectionHeading();
-    data.apartments.forEach(a=>{ensure(apartmentHeight(a));apartmentBar(a.name);drawVentTable(a);drawSummary(a);drawComments(a)});
+    pdfApartments.forEach(a=>{ensure(apartmentHeight(a));apartmentBar(a.name);drawVentTable(a);drawSummary(a);drawComments(a)});
   }
   if(hasCover){coverPage();newContentPage()}else{brandHeader();y=758;reportIntro()}
   if(!data.apartments.length&&!workEntries.length){text("Ei lisättyjä mittaustuloksia tai työmerkintöjä.",left,y-14,10,false,C.muted);y-=24}
@@ -840,13 +871,13 @@ function ventRows(ai){
   return '<div class="vent-list">'+groups.map(group=>'<details class="room-group"><summary><span class="room-group-title">'+esc(group.name)+'</span><span class="room-group-count">'+group.items.length+' '+(group.items.length===1?'venttiili':'venttiiliä')+'</span></summary><div class="room-group-body">'+group.items.map(item=>ventCard(item.v,item.vi)).join('')+'</div></details>').join('')+'</div>'
 }
 function render(){
-document.getElementById("kohde").value=data.kohde;document.getElementById("paiva").value=data.paiva;document.getElementById("mittaaja").value=data.mittaaja;document.getElementById("valine").value=data.valine;
+document.getElementById("kohde").value=data.kohde;document.getElementById("paiva").value=data.paiva;document.getElementById("mittaaja").value=data.mittaaja;document.getElementById("valine").value=data.valine;document.getElementById("default-valve").value=data.defaultValve;
 renderWorkType();
 renderWorkEntries();
 let e=document.getElementById("apartments"),openApartments=new Set([...e.querySelectorAll(".apartment[open]")].map(x=>Number(x.dataset.apartmentIndex)));e.innerHTML="";
 if(!data.apartments.length)e.innerHTML='<div class="empty-state no-print"><strong>Aloita lisäämällä asunto tai mittauskohde</strong>Lisää sen alle venttiilit ja valitse jokaiselle tulo tai poisto.<br><button type="button" class="primary" onclick="addApartment()">+ Lisää ensimmäinen kohde</button></div>';
-data.apartments.forEach((a,ai)=>{const t=apartmentTotals(a),deviationNotes=apartmentDeviationComments(a);let apartment=document.createElement("details");apartment.className="card apartment";apartment.dataset.apartmentIndex=ai;if(openApartments.has(ai))apartment.open=true;apartment.innerHTML='<summary class="apartment-summary"><span class="apartment-summary-name">'+esc(a.name||"Nimetön kohde")+'</span></summary><div class="apartment-body"><div class="apartment-title"><input aria-label="Kohteen tunnus" value="'+esc(a.name)+'" oninput="updateApartment('+ai+',this.value)" placeholder="Tunnus, esim. A1"><button type="button" class="danger small no-print" onclick="removeApartment('+ai+')">Poista kohde</button></div>'+ventRows(ai)+'<div class="vent-actions no-print"><button type="button" class="secondary" onclick="addVent('+ai+')">+ Lisää venttiili</button>'+(!a.pressureEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">+ Paine-ero</button>':'')+(!a.speedEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">+ Säädetty/mitattu nopeudella</button>':'')+'</div><div class="optional-fields">'+(a.pressureEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Paine-ero</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">Poista</button></div><div class="signed-input"><input data-pressure-index="'+ai+'" inputmode="decimal" value="'+esc(a.pressureDifference)+'" oninput="updateApartmentOption('+ai+',\'pressureDifference\',this.value)" placeholder="Esim. 5"><button type="button" class="small no-print" onclick="togglePressureSign('+ai+')" aria-label="Vaihda paine-eron etumerkki">±</button></div></div>':'')+(a.speedEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Säädetty/mitattu nopeudella</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">Poista</button></div><input value="'+esc(a.measurementSpeed)+'" oninput="updateApartmentOption('+ai+',\'measurementSpeed\',this.value)" placeholder="Esim. teho 2 / 60 %"></div>':'')+'</div><div class="air-summary"><div class="summary-box"><span>Tuloilma yhteensä</span><strong id="summary-supply-'+ai+'">'+flowFormat(t.supply)+' l/s</strong></div><div class="summary-box"><span>Poistoilma yhteensä</span><strong id="summary-exhaust-'+ai+'">'+flowFormat(t.exhaust)+' l/s</strong></div><div id="summary-difference-'+ai+'" class="summary-box '+t.statusClass+'"><span>Erotus (tulo − poisto)</span><strong>'+(t.difference>0?"+":"")+flowFormat(t.difference)+' l/s</strong><em>'+t.status+'</em></div></div><div style="margin-top:15px"><label>Kommentit / tehdyt korjaukset ja kulut</label><textarea oninput="updateApartmentComments('+ai+',this.value)" placeholder="Kirjaa tehdyt korjaukset, havainnot ja kulut...">'+esc(a.comments||"")+'</textarea><div id="deviation-comments-'+ai+'" class="deviation-comments"'+(deviationNotes.length?'':' hidden')+'>'+(deviationNotes.length?'<strong>Automaattinen huomio</strong><ul>'+deviationNotes.map(note=>'<li>'+esc(note)+'</li>').join("")+'</ul>':'')+'</div></div></div>';
+data.apartments.forEach((a,ai)=>{const t=apartmentTotals(a),deviationNotes=apartmentDeviationComments(a);let apartment=document.createElement("details");apartment.className="card apartment";apartment.dataset.apartmentIndex=ai;if(openApartments.has(ai))apartment.open=true;apartment.innerHTML='<summary class="apartment-summary"><span class="apartment-summary-name">'+esc(a.name||"Nimetön kohde")+'</span></summary><div class="apartment-body"><div class="apartment-title"><input aria-label="Kohteen tunnus" value="'+esc(a.name)+'" oninput="updateApartment('+ai+',this.value)" onchange="finishApartmentNameEdit('+ai+')" placeholder="Tunnus, esim. A1"><button type="button" class="danger small no-print" onclick="removeApartment('+ai+')">Poista kohde</button></div>'+ventRows(ai)+'<div class="vent-actions no-print"><button type="button" class="secondary" onclick="addVent('+ai+')">+ Lisää venttiili</button>'+(!a.pressureEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">+ Paine-ero</button>':'')+(!a.speedEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">+ Säädetty/mitattu nopeudella</button>':'')+'</div><div class="optional-fields">'+(a.pressureEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Paine-ero</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">Poista</button></div><div class="signed-input"><input data-pressure-index="'+ai+'" inputmode="decimal" value="'+esc(a.pressureDifference)+'" oninput="updateApartmentOption('+ai+',\'pressureDifference\',this.value)" placeholder="Esim. -5"></div></div>':'')+(a.speedEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Säädetty/mitattu nopeudella</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">Poista</button></div><input value="'+esc(a.measurementSpeed)+'" oninput="updateApartmentOption('+ai+',\'measurementSpeed\',this.value)" placeholder="Esim. teho 2 / 60 %"></div>':'')+'</div><div class="air-summary"><div class="summary-box"><span>Tuloilma yhteensä</span><strong id="summary-supply-'+ai+'">'+flowFormat(t.supply)+' l/s</strong></div><div class="summary-box"><span>Poistoilma yhteensä</span><strong id="summary-exhaust-'+ai+'">'+flowFormat(t.exhaust)+' l/s</strong></div><div id="summary-difference-'+ai+'" class="summary-box '+t.statusClass+'"><span>Erotus (tulo − poisto)</span><strong>'+(t.difference>0?"+":"")+flowFormat(t.difference)+' l/s</strong><em>'+t.status+'</em></div></div><div style="margin-top:15px"><label>Kommentit / tehdyt korjaukset ja kulut</label><textarea oninput="updateApartmentComments('+ai+',this.value)" placeholder="Kirjaa tehdyt korjaukset, havainnot ja kulut...">'+esc(a.comments||"")+'</textarea><div id="deviation-comments-'+ai+'" class="deviation-comments"'+(deviationNotes.length?'':' hidden')+'>'+(deviationNotes.length?'<strong>Automaattinen huomio</strong><ul>'+deviationNotes.map(note=>'<li>'+esc(note)+'</li>').join("")+'</ul>':'')+'</div></div></div>';
 e.appendChild(apartment)})}
-["kohde","paiva","mittaaja","valine"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();initializeCloudAuth().then(async()=>{if(!cloudUser)await migrateLegacyPhotoStorage(false)}).catch(()=>migrateLegacyPhotoStorage(false));
+["kohde","paiva","mittaaja","valine","default-valve"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();initializeCloudAuth().then(async()=>{if(!cloudUser)await migrateLegacyPhotoStorage(false)}).catch(()=>migrateLegacyPhotoStorage(false));
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
 </script></body></html>
