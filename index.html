@@ -248,8 +248,16 @@ async function insertCloudVersion(payload,createdAt){
   await cloudFetch("/rest/v1/app_backup_versions",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload,created_at:createdAt||new Date().toISOString()})});return true;
 }
 async function trimCloudVersions(){
-  const response=await cloudFetch("/rest/v1/app_backup_versions?select=id&order=created_at.desc&offset=20",{headers:{Accept:"application/json"}}),rows=await response.json();
+  // Keep maintenance bounded: a large history must never hold up a measurement save.
+  const response=await cloudFetch("/rest/v1/app_backup_versions?select=id&order=created_at.desc&offset=20&limit=10",{headers:{Accept:"application/json"}}),rows=await response.json();
   if(!rows.length)return;const ids=rows.map(row=>Number(row.id)).filter(Number.isFinite);if(ids.length)await cloudFetch("/rest/v1/app_backup_versions?id=in.("+ids.join(",")+")",{method:"DELETE",headers:{Prefer:"return=minimal"}});
+}
+function scheduleCloudVersionMaintenance(){
+  const key="iv_cloud_maintenance_at";let last=0;
+  try{last=Number(localStorage.getItem(key)||0)}catch(e){}
+  if(Date.now()-last<3600000)return;
+  try{localStorage.setItem(key,String(Date.now()))}catch(e){}
+  setTimeout(()=>trimCloudVersions().catch(()=>{}),1000);
 }
 function cloudPayloadMatches(a,b){try{return JSON.stringify(a)===JSON.stringify(b)}catch(e){return false}}
 function cloudVersionDescription(payload){const current=payload?.current||{},name=String(current.kohde||current.apartments?.[0]?.name||"Nimetön projekti").trim(),count=Array.isArray(payload?.projects)?payload.projects.length:0;return{name:name||"Nimetön projekti",count}}
@@ -274,12 +282,16 @@ function restoreCloudBackup(row){
 async function syncCloudNow(showMessage){
   if(CLOUD_DATA_SYNC_PAUSED){updateCloudUi("Projektitietojen pilvisynkronointi on tilapäisesti tauolla tietojen suojaamiseksi.");if(showMessage)showToast("Pilvisynkronointi on tauolla");return false}
   if(!cloudUser){if(showMessage)showToast("Kirjaudu ensin pilvitallennukseen");return false}if(cloudBusy){if(showMessage)showToast("Synkronointi on jo käynnissä");return false}if(!navigator.onLine){updateCloudUi("Ei verkkoyhteyttä. Muutokset synkronoidaan myöhemmin.");if(showMessage)showToast("Ei verkkoyhteyttä");return false}
-  cloudBusy=true;const note=document.getElementById("save-note");if(note)note.textContent="Synkronoidaan pilveen…";updateCloudUi("Synkronoidaan pilveen…");
+  cloudBusy=true;let stage="pilvikopion haku";const note=document.getElementById("save-note");if(note)note.textContent="Synkronoidaan pilveen…";updateCloudUi("Synkronoidaan pilveen…");
   try{
-    const outgoing=cloudPayload(),remote=await fetchCloudBackup();if(remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing))await insertCloudVersion(remote.payload,remote.updated_at);
-    await cloudFetch("/rest/v1/app_backups?on_conflict=user_id",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload:outgoing,updated_at:new Date().toISOString()})});await trimCloudVersions();
+    const outgoing=cloudPayload(),remote=await fetchCloudBackup();
+    if(remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing)){stage="palautuspisteen tallennus";await insertCloudVersion(remote.payload,remote.updated_at)}
+    stage="projektin tallennus";
+    await cloudFetch("/rest/v1/app_backups?on_conflict=user_id",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload:outgoing,updated_at:new Date().toISOString()})});
+    scheduleCloudVersionMaintenance();
+    if(localUpdatedAt()!==outgoing.localUpdatedAt){if(note)note.textContent="Tallennettu laitteelle – synkronoidaan uusimmat muutokset…";updateCloudUi("Uusia muutoksia odottaa pilvitallennusta.");clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>syncCloudNow(false),100);if(showMessage)showToast("Uusimmat muutokset synkronoidaan");return true}
     if(note)note.textContent="Tallennettu automaattisesti laitteelle ja pilveen";updateCloudUi("Kaikki tiedot on tallennettu pilveen.");if(showMessage)showToast("Tiedot synkronoitu");return true;
-  }catch(e){if(note)note.textContent="Tallennettu laitteelle – pilvisynkronointi epäonnistui";updateCloudUi("Pilvisynkronointi epäonnistui: "+(e.message||"tuntematon virhe")+". Tiedot ovat turvassa tällä laitteella.");if(showMessage)showToast(e.message||"Pilvisynkronointi epäonnistui");return false}finally{cloudBusy=false}
+  }catch(e){if(note)note.textContent="Tallennettu laitteelle – pilvisynkronointi epäonnistui";updateCloudUi("Pilvisynkronointi epäonnistui ("+stage+"): "+(e.message||"tuntematon virhe")+". Tiedot säilyvät tällä laitteella.");if(showMessage)showToast(stage+": "+(e.message||"Pilvisynkronointi epäonnistui"));return false}finally{cloudBusy=false}
 }
 async function initializeCloud(){
   if(!cloudUser)return;
