@@ -22,7 +22,7 @@ header{background:var(--navy);color:#fff;padding:13px 16px;position:sticky;top:0
 main{max-width:1040px;margin:auto;padding:18px 14px 30px}.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(16,42,67,.06)}
 .card-heading{display:flex;align-items:center;gap:9px;margin-bottom:15px}.step{width:27px;height:27px;border-radius:7px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:800}h2{font-size:17px;margin:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 label{font-size:13px;font-weight:650;color:#43586a;display:block;margin-bottom:6px}input,textarea{width:100%;padding:11px 12px;border:1px solid #b9c7d3;border-radius:8px;font:inherit;font-size:16px;background:#fff;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(23,105,170,.14)}textarea{min-height:104px;resize:vertical;line-height:1.45}
-input[type="date"]{display:block;min-width:0;max-width:100%;height:42px;min-height:0;line-height:23px}input[type="date"]::-webkit-date-and-time-value{text-align:left;min-height:0}
+.date-field{position:relative;width:100%;height:42px;overflow:hidden;border:1px solid var(--ui-border);border-radius:8px;background:var(--ui-surface-2);color:var(--ui-text)}.date-field:focus-within{border-color:var(--ui-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--ui-accent) 18%,transparent)}.date-field-display{display:flex;align-items:center;height:100%;padding:0 12px;font-size:16px;pointer-events:none}.date-field input[type="date"]{position:absolute;inset:0;width:100%;height:100%;min-width:0;max-width:100%;margin:0;padding:0;border:0;opacity:0;cursor:pointer}
 button{border:1px solid transparent;border-radius:8px;padding:10px 13px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;background:#e8eef3;color:var(--ink);min-height:40px}button:active{transform:translateY(1px)}button.primary{background:var(--navy);color:#fff;padding:11px 17px}button.save-project{background:var(--blue);color:#fff}button.secondary{background:#fff;border-color:#aebdca;color:var(--navy)}button.danger{background:#fff5f4;border-color:#f2c7c3;color:var(--red)}button.small{padding:6px 9px;font-size:12px;min-height:32px}
 .apartment{background:#dfe8ef;border-color:#b8c8d5;padding:0;border-radius:14px;overflow:hidden}.apartment>summary{list-style:none;cursor:pointer;-webkit-tap-highlight-color:transparent}.apartment>summary::-webkit-details-marker{display:none}.apartment-summary{display:flex;align-items:center;gap:11px;padding:13px 15px;background:var(--navy);color:#fff;font-weight:800}.apartment-summary::before{content:"›";font-size:24px;line-height:1;transition:transform .15s}.apartment[open]>.apartment-summary::before{transform:rotate(90deg)}.apartment-summary-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px}.apartment-body{padding:12px}.apartment-title{display:grid;grid-template-columns:auto minmax(150px,300px) 1fr auto;gap:10px;align-items:center;margin-bottom:12px}.apartment-index{background:var(--navy);color:#fff;border-radius:7px;padding:8px 10px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.apartment-title input{font-weight:750;background:#fff}.apartment-title .danger{justify-self:end}
 .room{margin:12px 0 0;background:#fff;border-left:5px solid var(--blue);box-shadow:none}.room-title{display:grid;grid-template-columns:auto minmax(140px,260px) 1fr auto;gap:9px;align-items:center;padding-bottom:12px;border-bottom:1px solid #e1e7ec}.room-index{color:var(--navy);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.room-title input{font-weight:700}.room-title .danger{justify-self:end}
@@ -80,7 +80,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <section class="card"><div class="card-heading"><span class="step">1</span><h2>Kohteen tiedot</h2></div>
 <div class="grid">
 <div><label>Kohde</label><input id="kohde" placeholder="Esim. Virusmäentie 27, Turku"></div>
-<div><label>Työpäivä</label><input id="paiva" type="date"></div>
+<div><label for="paiva">Työpäivä</label><div class="date-field"><span id="paiva-display" class="date-field-display" aria-hidden="true"></span><input id="paiva" type="date" oninput="updateDateDisplay('paiva')" onchange="updateDateDisplay('paiva')"></div></div>
 <div><label>Työn suorittaja</label><input id="mittaaja" placeholder="Nimi"></div>
 <div id="measurement-instrument-wrap" hidden><label>Mittausväline</label><input id="valine" placeholder="Esim. Swema 3000md"></div>
 <div><label>Oletusventtiili</label><input id="default-valve" placeholder="Esim. KSO-125"><p class="muted">Täytetään automaattisesti uusiin venttiileihin. Jo lisättyjä venttiilejä ei muuteta.</p></div>
@@ -97,7 +97,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <section class="card no-print"><div class="work-heading"><span class="step">2</span><h2>Työmerkinnät</h2><button type="button" class="secondary" onclick="openWorkEntryEditor()">+ Lisää merkintä</button></div>
 <div id="work-entry-editor" class="work-editor" hidden>
   <div class="work-editor-grid">
-    <div><label>Päivämäärä</label><input id="work-entry-date" type="date"></div>
+    <div><label for="work-entry-date">Päivämäärä</label><div class="date-field"><span id="work-entry-date-display" class="date-field-display" aria-hidden="true"></span><input id="work-entry-date" type="date" oninput="updateDateDisplay('work-entry-date')" onchange="updateDateDisplay('work-entry-date')"></div></div>
     <div><label>Asunto / kohde <span class="muted">(vapaaehtoinen)</span></label><input id="work-entry-target" placeholder="Esim. A 12 tai IV-konehuone"></div>
     <div class="full"><label>Otsikko</label><input id="work-entry-title" maxlength="100" placeholder="Esim. Poistokanavien puhdistus"></div>
     <details id="work-entry-cleaning-wrap" class="cleaning-block compact-section full" hidden><summary class="compact-summary"><span>Puhdistettu tässä merkinnässä</span><span id="work-entry-cleaning-count" class="compact-summary-meta">Ei valintoja</span></summary><div class="compact-section-body"><div id="work-entry-cleaning-grid" class="cleaning-grid" role="group" aria-label="Työmerkinnässä puhdistetut osat"></div><div id="work-entry-cleaning-custom" class="cleaning-custom" hidden><label>Muu puhdistettu kohde</label><input id="work-entry-cleaning-custom-input" maxlength="80" placeholder="Kirjoita puhdistettu kohde" oninput="updatePendingCustomCleaningItem(this.value)"></div></div></details>
@@ -537,12 +537,14 @@ async function sharePdf(){
 }
 let editingWorkEntryId=null,pendingWorkPhotos=[],pendingOriginalPhotoIds=new Set(),pendingWorkCleaningItems=[],pendingWorkCustomCleaningItem="",pendingWorkConditionRatings={};
 function displayWorkDate(value){if(!value)return"-";const date=new Date(value+"T00:00:00");return Number.isNaN(date.getTime())?value:date.toLocaleDateString("fi-FI")}
+function updateDateDisplay(id){const input=document.getElementById(id),display=document.getElementById(id+"-display");if(input&&display)display.textContent=input.value?displayWorkDate(input.value):"Valitse päivämäärä"}
 function workEntryTitle(entry){const title=String(entry?.title||"").trim();if(title)return title;const text=String(entry?.text||"").trim().replace(/\s+/g," ");if(text)return text.length>60?text.slice(0,57)+"...":text;return String(entry?.target||"").trim()||"Työmerkintä"}
 function openWorkEntryEditor(id=null){
   const entry=id?data.workEntries.find(item=>item.id===id):null;
   editingWorkEntryId=entry?.id||newRecordId("merkinta");pendingWorkPhotos=(entry?.photos||[]).map(photo=>({...photo}));pendingOriginalPhotoIds=new Set(pendingWorkPhotos.map(photo=>photo.id));pendingWorkCleaningItems=normalizeCleaningItems(entry?.cleaningItems);pendingWorkCustomCleaningItem=String(entry?.customCleaningItem||"");pendingWorkConditionRatings=normalizeConditionRatings(entry?.conditionRatings);
   ["work-entry-cleaning-wrap","work-entry-condition-wrap"].forEach(elementId=>{const section=document.getElementById(elementId);if(section)section.open=false});
   document.getElementById("work-entry-date").value=entry?.date||new Date().toISOString().slice(0,10);
+  updateDateDisplay("work-entry-date");
   document.getElementById("work-entry-target").value=entry?.target||"";
   document.getElementById("work-entry-title").value=entry?(entry.title||workEntryTitle(entry)):"";
   document.getElementById("work-entry-text").value=entry?.text||"";
@@ -884,7 +886,7 @@ function ventRows(ai){
   return '<div class="vent-list">'+groups.map(group=>'<details class="room-group"><summary><span class="room-group-title">'+esc(group.name)+'</span><span class="room-group-count">'+group.items.length+' '+(group.items.length===1?'venttiili':'venttiiliä')+'</span></summary><div class="room-group-body">'+group.items.map(item=>ventCard(item.v,item.vi)).join('')+'</div></details>').join('')+'</div>'
 }
 function render(){
-document.getElementById("kohde").value=data.kohde;document.getElementById("paiva").value=data.paiva;document.getElementById("mittaaja").value=data.mittaaja;document.getElementById("valine").value=data.valine;document.getElementById("default-valve").value=data.defaultValve;
+document.getElementById("kohde").value=data.kohde;document.getElementById("paiva").value=data.paiva;updateDateDisplay("paiva");document.getElementById("mittaaja").value=data.mittaaja;document.getElementById("valine").value=data.valine;document.getElementById("default-valve").value=data.defaultValve;
 renderWorkType();
 renderWorkEntries();
 let e=document.getElementById("apartments"),openApartments=new Set([...e.querySelectorAll(".apartment[open]")].map(x=>Number(x.dataset.apartmentIndex)));e.innerHTML="";
