@@ -667,7 +667,7 @@ function apartmentTotals(a){let supply=0,exhaust=0,hasSupply=false,hasExhaust=fa
 function updateApartmentSummary(ai){const t=apartmentTotals(data.apartments[ai]),s=document.getElementById("summary-supply-"+ai),e=document.getElementById("summary-exhaust-"+ai),d=document.getElementById("summary-difference-"+ai);if(!s||!e||!d)return;s.textContent=flowFormat(t.supply)+" l/s";e.textContent=flowFormat(t.exhaust)+" l/s";d.querySelector("strong").textContent=(t.difference>0?"+":"")+flowFormat(t.difference)+" l/s";d.querySelector("em").textContent=t.status;d.className="summary-box "+t.statusClass}
 function pdfText(v){return String(v??"").replace(/[\\()]/g,m=>"\\"+m).replace(/[^\x20-\x7e\xa0-\xff]/g,"?")}
 function selectedReportTitle(){
-  const titles={cleaning:"ILMANVAIHDON PUHDISTUSRAPORTTI",maintenance:"ILMANVAIHDON HUOLTORAPORTTI",installation:"ILMANVAIHDON ASENNUSRAPORTTI",measurement:"ILMANVAIHDON MITTAUS- JA SÄÄTÖRAPORTTI"};
+  const titles={cleaning:"ILMANVAIHDON PUHDISTUSRAPORTTI",maintenance:"ILMANVAIHDON HUOLTORAPORTTI",installation:"ILMANVAIHDON ASENNUSRAPORTTI",measurement:"ILMANVAIHDON SÄÄTÖ- JA MITTAUSPÖYTÄKIRJA"};
   const selected=(Array.isArray(data.workTypes)?data.workTypes:[]).filter(type=>WORK_TYPES.includes(type));
   if(selected.length===1&&titles[selected[0]])return titles[selected[0]];
   const terms={cleaning:"PUHDISTUS",maintenance:"HUOLTO",installation:"ASENNUS",measurement:"MITTAUS JA SÄÄTÖ"},parts=[];
