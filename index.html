@@ -2,7 +2,7 @@
 <html lang="fi" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4jH2VGUxSVkuEEOipQ/M+njauTedsIRMxIjGHeXw8yY='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://rmyynxecliexiznswjcy.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IrTh10gGUfUsExwqn+2VhyBbjaE6ZFM8kTmQ2hrLbPU='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://quuanwefzmsyjetltmzr.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IV Mittaus | Ilmamäärien mittauspöytäkirja</title>
 <meta name="theme-color" content="#081216">
@@ -132,8 +132,8 @@ function applyTheme(mode=themeMode(),persist=false){
 function cycleTheme(){const modes=["dark","light","system"],next=modes[(modes.indexOf(themeMode())+1)%modes.length];applyTheme(next,true);closeMenu();showToast(next==="dark"?"Tumma teema":next==="light"?"Vaalea teema":"Laitteen teema")}
 if(themeMedia.addEventListener)themeMedia.addEventListener("change",()=>{if(themeMode()==="system")applyTheme("system")});
 applyTheme();
-const SUPABASE_URL="https://rmyynxecliexiznswjcy.supabase.co";
-const SUPABASE_KEY="sb_publishable_mvjgftxIPbhMqn0yZ9lhHQ_OidQro8h";
+const SUPABASE_URL="https://quuanwefzmsyjetltmzr.supabase.co";
+const SUPABASE_KEY="sb_publishable_CbE3pBZ4XOWCEdCHqVKHhw_0dRqyPuM";
 let cloudSession=null,cloudUser=null,cloudSyncTimer=null,cloudRefreshTimer=null,cloudBusy=false,cloudRestoring=false;
 const CLOUD_DATA_SYNC_PAUSED=false;
 let cloudVersionRows=[];
@@ -308,29 +308,47 @@ async function fetchCloudBackup(){
 }
 async function insertCloudVersion(payload,createdAt){
   if(!payload||!cloudUser)return false;
-  await cloudFetch("/rest/v1/app_backup_versions",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload,created_at:createdAt||new Date().toISOString()})});return true;
+  await cloudFetch("/rest/v1/app_backup_versions?on_conflict=user_id,created_at",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"resolution=ignore-duplicates,return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload,created_at:createdAt||new Date().toISOString()})});return true;
 }
 async function trimCloudVersions(){
+  const owner=cloudUser?.id;if(!owner)return false;
   // Each batch is bounded; repeat because deleting one batch reveals the next one.
   for(let batch=0;batch<10;batch++){
-    const response=await cloudFetch("/rest/v1/app_backup_versions?user_id=eq."+encodeURIComponent(cloudUser.id)+"&select=id&order=created_at.desc&offset=20&limit=10",{headers:{Accept:"application/json"}}),rows=await response.json();
-    const ids=rows.map(row=>Number(row.id)).filter(Number.isFinite);if(!ids.length)return;
-    await cloudFetch("/rest/v1/app_backup_versions?user_id=eq."+encodeURIComponent(cloudUser.id)+"&id=in.("+ids.join(",")+")",{method:"DELETE",headers:{Prefer:"return=minimal"}});
+    if(cloudUser?.id!==owner)return false;
+    const response=await cloudFetch("/rest/v1/app_backup_versions?user_id=eq."+encodeURIComponent(owner)+"&select=id&order=created_at.desc,id.desc&offset=20&limit=10",{headers:{Accept:"application/json"}}),rows=await response.json();
+    const ids=rows.map(row=>Number(row.id)).filter(Number.isFinite);if(!ids.length)return true;
+    if(cloudUser?.id!==owner)return false;
+    await cloudFetch("/rest/v1/app_backup_versions?user_id=eq."+encodeURIComponent(owner)+"&id=in.("+ids.join(",")+")",{method:"DELETE",headers:{Prefer:"return=minimal"}});
   }
+  return false;
 }
+let cloudMaintenanceBusy=false;
 function scheduleCloudVersionMaintenance(){
+  if(cloudMaintenanceBusy||!cloudUser)return;
+  const owner=cloudUser.id;
   const key="iv_cloud_maintenance_at_"+cloudUser.id;let last=0;
   try{last=Number(localStorage.getItem(key)||0)}catch(e){}
   if(Date.now()-last<600000)return;
-  try{localStorage.setItem(key,String(Date.now()))}catch(e){}
-  setTimeout(()=>trimCloudVersions().catch(()=>{}),1000);
+  cloudMaintenanceBusy=true;
+  setTimeout(async()=>{
+    try{if(cloudUser?.id!==owner)return;const complete=await trimCloudVersions();if(complete&&cloudUser?.id===owner)localStorage.setItem(key,String(Date.now()))}
+    catch(e){if(cloudUser?.id===owner)updateCloudUi("Projektin pilvitallennus onnistui, mutta palautuspisteiden siivous epäonnistui: "+(e.message||"tuntematon virhe"))}
+    finally{cloudMaintenanceBusy=false}
+  },1000);
 }
 function shouldArchiveCloudVersion(remote,outgoing){
   if(!remote?.payload||cloudPayloadMatches(remote.payload,outgoing))return false;
   const last=Number(localStorage.getItem("iv_cloud_version_at_"+cloudUser.id)||0);
   return Date.now()-last>=900000;
 }
-function cloudPayloadMatches(a,b){try{return JSON.stringify(a)===JSON.stringify(b)}catch(e){return false}}
+function canonicalCloudValue(value){
+  if(Array.isArray(value))return value.map(canonicalCloudValue);
+  if(value&&typeof value==="object")return Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonicalCloudValue(value[key])]));
+  return value;
+}
+function cloudPayloadMatches(a,b){
+  try{if(!a||!b)return false;const {localUpdatedAt:ignoredA,...first}=a,{localUpdatedAt:ignoredB,...second}=b;return JSON.stringify(canonicalCloudValue(first))===JSON.stringify(canonicalCloudValue(second))}catch(e){return false}
+}
 function cloudVersionDescription(payload){const current=payload?.current||{},name=String(current.kohde||current.apartments?.[0]?.name||"Nimetön projekti").trim(),count=Array.isArray(payload?.projects)?payload.projects.length:0;return{name:name||"Nimetön projekti",count}}
 async function loadCloudVersions(){
   if(!cloudUser)return;const list=document.getElementById("cloud-version-list");list.hidden=false;list.innerHTML='<div class="work-empty">Haetaan palautuspisteitä…</div>';
@@ -358,7 +376,10 @@ async function syncCloudNow(showMessage,force=false){
   if(!cloudUser){if(showMessage)showToast("Kirjaudu ensin pilvitallennukseen");return false}if(cloudBusy){if(showMessage)showToast("Synkronointi on jo käynnissä");return false}if(!navigator.onLine){updateCloudUi("Ei verkkoyhteyttä. Muutokset synkronoidaan myöhemmin.");if(showMessage)showToast("Ei verkkoyhteyttä");return false}
   cloudBusy=true;let stage="pilvikopion haku";const note=document.getElementById("save-note");if(note)note.textContent="Synkronoidaan pilveen…";updateCloudUi("Synkronoidaan pilveen…");
   try{
-    const outgoing=cloudPayload(),remote=await fetchCloudBackup(),seen=localStorage.getItem("iv_cloud_seen_at_"+cloudUser.id)||"";
+    const outgoing=cloudPayload();
+    const photoProjects=[outgoing.current,...outgoing.projects.map(item=>item.data)];
+    if(photoProjects.some(project=>(project?.workEntries||[]).some(entry=>(entry.photos||[]).some(photo=>photo.storagePath&&!ownPhotoStoragePath(photo.storagePath)))))throw new Error("Vanhan pilven kuvia ei ole vielä siirretty. Säilytä varmuuskopiot ja paikalliset tiedot.");
+    const remote=await fetchCloudBackup(),seen=localStorage.getItem("iv_cloud_seen_at_"+cloudUser.id)||"";
     const remoteChanged=remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing)&&(seen?!cloudTimestampsMatch(remote.updated_at,seen):Date.parse(remote.updated_at||0)>Date.parse(outgoing.localUpdatedAt||0));
     if(remoteChanged&&!force){showCloudConflict();if(showMessage)showToast("Tarkista pilvessä oleva kopio");return false}
     if((force&&remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing))||shouldArchiveCloudVersion(remote,outgoing)){stage="palautuspisteen tallennus";await insertCloudVersion(remote.payload,remote.updated_at);localStorage.setItem("iv_cloud_version_at_"+cloudUser.id,String(Date.now()))}
@@ -451,6 +472,10 @@ function projectPhotoRecords(projectData,fallbackProjectId){const projectId=proj
 async function migratePhotoRecord(record,upload=true){
   const {photo,projectId,entryId}=record;let changed=false;photo.id=photo.id||newRecordId("kuva");photo.localKey=photo.localKey||photo.id;
   if(photo.data){const blob=dataUrlBlob(photo.data);if(blob){await cachePhotoBlob(photo.localKey,blob);delete photo.data;changed=true}}
+  if(upload&&cloudUser&&photo.storagePath&&!ownPhotoStoragePath(photo.storagePath)){
+    const blob=await cachedPhotoBlob(photo.localKey);if(!blob)return changed;
+    delete photo.storagePath;changed=true;
+  }
   if(upload&&!photo.storagePath&&cloudUser&&navigator.onLine){const blob=await cachedPhotoBlob(photo.localKey);if(blob&&await uploadPhotoBlob(photo,blob,projectId,entryId))changed=true}
   return changed;
 }
@@ -461,8 +486,8 @@ async function migrateLegacyPhotoStorage(upload=true){
   if(projectsChanged&&!setProjects(projects))showToast("Vanhojen kuvien paikallinen siirto epäonnistui");if(currentChanged)save();if(currentChanged||projectsChanged)renderWorkEntries();return currentChanged||projectsChanged;
 }
 async function syncPendingPhotoUploads(){
-  if(!cloudUser||!navigator.onLine)return false;let changed=false;for(const record of projectPhotoRecords(data,data.projectId)){try{if(!record.photo.storagePath&&await migratePhotoRecord(record,true))changed=true}catch(e){}}
-  const projects=getProjects();let projectsChanged=false;for(const item of projects){for(const record of projectPhotoRecords(item.data,item.id)){try{if(!record.photo.storagePath&&await migratePhotoRecord(record,true))projectsChanged=true}catch(e){}}}
+  if(!cloudUser||!navigator.onLine)return false;let changed=false;for(const record of projectPhotoRecords(data,data.projectId)){try{if((!record.photo.storagePath||!ownPhotoStoragePath(record.photo.storagePath))&&await migratePhotoRecord(record,true))changed=true}catch(e){}}
+  const projects=getProjects();let projectsChanged=false;for(const item of projects){for(const record of projectPhotoRecords(item.data,item.id)){try{if((!record.photo.storagePath||!ownPhotoStoragePath(record.photo.storagePath))&&await migratePhotoRecord(record,true))projectsChanged=true}catch(e){}}}
   if(projectsChanged)setProjects(projects);if(changed)save();if(changed||projectsChanged)renderWorkEntries();return changed||projectsChanged;
 }
 function cleaningLabels(items,custom=""){

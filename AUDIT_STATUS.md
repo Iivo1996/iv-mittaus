@@ -69,3 +69,13 @@ Käyttäjän toimittama tarkistustulos 5.10.2026: iv_prune_backup_history AFTER 
 Oman tallennuksen aikaleima tallennettiin Z-muodossa, mutta palvelin palauttaa saman ajan +00:00-muodossa. Tekstivertailu aiheutti väärän ristiriidan seuraavan kuvamerkinnän tallennuksessa. Korjattu kelvollisten kellonaikojen vertailuksi; käynnistys käyttää samaa ristiriitatarkistusta. Testi toistaa virheen ennen korjausta ja kattaa uuden kuvaviittauksen, uudelleenalustuksen sekä aidon ulkoisen muutoksen torjunnan. Kaikki 20 sovellustestiä ja natiivi Chromium-/PDF-testi läpäisivät. CSP-tiiviste ja välimuistiversio v52 päivitetty.
 
 Palvelimen historiatriggeriin liittyvä aikakatkaisu on edelleen tutkittava. Käyttäjälle annettiin triggerin poistaminen käytöstä, ja tämän jälkeen toimitettu kuva näytti onnistuneen synkronoinnin. Sovelluksen oma rajattu historian karsinta säilyy.
+
+## Korvaava pilviprojekti – käyttöönottovalmistelu
+
+Vanhan projektin historiassa oli 530 palautuspistettä ja taulun koko 1160 MB. Käyttäjän hyväksymä siivous poisti 410 vanhaa palautuspistettä, minkä jälkeen levy täyttyi ja tietokantayhteydet estyivät. Nykyisen pilvikopion tauluun tai Storage-kuviin ei kohdistettu muutoksia; lopputarkistus ei ollut mahdollinen. Vanhaa projektia ei poisteta.
+
+Uusi projekti Iv-mittaus-uusi (quuanwefzmsyjetltmzr, eu-north-1) on luotu ja secure_bounded_backup_history-migraatio asennettu. Tarkistettu RLS, yksityinen JPEG-kuvakansio, 2 MB:n JSON-sisältöraja, saman lähdeaikaleiman deduplikointi ja käyttäjäkohtainen 20 palautuspisteen raja. Turvallisuusneuvoja: ei havaintoja. Sovelluksen valmisteltu yhteys käyttää uuden projektin julkista publishable-avainta ja välimuistia v53.
+
+JSON-vertailu normalisoi avainten järjestyksen ja ohittaa pelkän ylimmän localUpdatedAt-muutoksen. Siivousvirhe näytetään ja onnistumisaika kirjataan vasta onnistuneesta siivouksesta. Paikallisesti saatavilla olevat vanhan omistajan kuvat ladataan uudelleen uudelle omistajalle; puuttuvia vanhoja kuvaviitteitä sisältävä pilvitallennus estetään eikä viitteitä poisteta.
+
+Testattu 22 sovellustiedostoa, uuden skeeman paikallinen Postgres-testi (20/100, deduplikointi, kokoraja, RLS, Storage-omistajuus) ja natiivi Chromium-/PDF-testi. Käyttäjän nykyisen projektin varmuuskopio sisältää kaikki neljä kuvaa. Käyttöönotto odottaa uuden käyttäjätilin luontia ja oikean käyttäjän pilvitallennus-/kuvatestiä. Muutoksia ei vielä julkaista main-haaraan; muiden vanhojen projektien kuvien saatavuus on selvitettävä ennen yhteyden vaihtoa.
