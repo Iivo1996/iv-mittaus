@@ -1,0 +1,12 @@
+const fs=require("fs"),{JSDOM}=require("jsdom");
+const html=fs.readFileSync("work/current-index.html","utf8");
+const project={projectId:"keep",kohde:"Keskeneräinen",paiva:"2026-09-30",mittaaja:"",valine:"",defaultValve:"",workTypes:[],customWorkType:"",cleaningItems:[],customCleaningItem:"",conditionRatings:{},workEntries:[],apartments:[{name:"A1",vents:[{space:"K",pa:"22"}]}]};
+const dom=new JSDOM(html,{runScripts:"dangerously",url:"https://example.test/",beforeParse(window){window.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});window.scrollTo=()=>{};window.requestAnimationFrame=fn=>fn();window.localStorage.setItem("iv_proto",JSON.stringify(project))}});
+dom.window.HTMLElement.prototype.scrollIntoView=()=>{};
+const w=dom.window,date=w.document.getElementById("paiva"),display=w.document.getElementById("paiva-display");
+if(date.value!=="2026-09-30"||display.textContent!=="30.9.2026")throw new Error("Saved date not shown");
+date.value="2026-10-02";date.dispatchEvent(new w.Event("input",{bubbles:true}));
+if(display.textContent!=="2.10.2026")throw new Error("Visible date did not update");
+const saved=JSON.parse(w.localStorage.getItem("iv_proto"));if(saved.paiva!=="2026-10-02"||saved.apartments[0].vents[0].pa!=="22")throw new Error("Date save changed measurements");
+w.openWorkEntryEditor();if(!w.document.getElementById("work-entry-date-display").textContent)throw new Error("Entry date not shown");
+console.log("date display tracks native picker and preserves measurements");w.close();

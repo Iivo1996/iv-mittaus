@@ -1,0 +1,22 @@
+const fs=require("fs");
+const {JSDOM}=require("jsdom");
+const html=fs.readFileSync("work/current-index.html","utf8");
+const existing={id:"existing-project",name:"Palautustesti",savedAt:"2026-09-24T00:00:00Z",data:{projectId:"existing-project",kohde:"Palautustesti",paiva:"2026-09-24",mittaaja:"",valine:"",workTypes:[],customWorkType:"",cleaningItems:[],customCleaningItem:"",conditionRatings:{},workEntries:[],apartments:[]}};
+const dom=new JSDOM(html,{runScripts:"dangerously",url:"https://example.test/",beforeParse(window){window.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});window.scrollTo=()=>{};window.requestAnimationFrame=fn=>fn();window.localStorage.setItem("iv_projects",JSON.stringify([existing]));}});
+dom.window.HTMLElement.prototype.scrollIntoView=()=>{};
+const project={projectId:null,kohde:"Palautustesti",paiva:"2026-09-25",mittaaja:"Tekijä",valine:"Mittari",workTypes:["measurement"],customWorkType:"",cleaningItems:[],customCleaningItem:"",conditionRatings:{},workEntries:[{id:"entry",date:"2026-09-25",target:"",title:"Merkintä",text:"",cleaningItems:[],customCleaningItem:"",conditionRatings:{},photos:[]}],apartments:[{name:"A1",comments:"",vents:[{space:"OH",type:"supply",valve:"KTS-100",kpl:"1",pa:"10",target:"8",adjusted:"8",position:"2"}],pressureEnabled:false,pressureDifference:"",speedEnabled:false,measurementSpeed:""}]};
+setTimeout(async()=>{
+  const file={text:async()=>JSON.stringify({format:"iv-mittaus-project",version:1,project})};
+  await dom.window.importProjectFile(file);
+  const saved=JSON.parse(dom.window.localStorage.getItem("iv_proto"));
+  if(saved.kohde!=="Palautustesti"||saved.apartments[0].vents.length!==1||saved.workEntries.length!==1)throw new Error("Imported project data was not preserved");
+  const projects=JSON.parse(dom.window.localStorage.getItem("iv_projects"));
+  if(projects.length!==2||!projects.find(p=>p.id==="existing-project")||!projects.find(p=>p.data.workEntries.length===1))throw new Error("Same address import overwrote an unrelated project");
+  dom.window.confirm=()=>false;
+  await dom.window.importProjectFile({text:async()=>JSON.stringify({format:"iv-mittaus-project",version:1,project:{...project,projectId:"existing-project"}})});
+  if(JSON.parse(dom.window.localStorage.getItem("iv_projects")).find(p=>p.id==="existing-project").data.workEntries.length!==0)throw new Error("Canceled replacement changed existing project");
+  dom.window.confirm=()=>true;
+  await dom.window.importProjectFile({text:async()=>JSON.stringify({format:"iv-mittaus-project",version:1,project:{...project,projectId:"existing-project"}})});
+  if(JSON.parse(dom.window.localStorage.getItem("iv_projects")).find(p=>p.id==="existing-project").data.workEntries.length!==1)throw new Error("Confirmed same-ID import did not replace project");
+  console.log("project recovery import identity ok");
+},80);

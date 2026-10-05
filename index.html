@@ -2,6 +2,7 @@
 <html lang="fi" data-theme="dark">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-AnDZ0d2dOdq7g02hCTrd8wgPrCC9vVt7RAz1AcjeaMM='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://rmyynxecliexiznswjcy.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IV Mittaus | Ilmamäärien mittauspöytäkirja</title>
 <meta name="theme-color" content="#081216">
@@ -67,52 +68,52 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 </style>
 </head>
 <body>
-<header><div class="brand"><div class="brand-mark">IV</div><div class="brand-copy"><h1>IV Mittaus</h1><p>Ilmamäärien mittauspöytäkirja</p></div><span class="tool-badge">AMMATTITYÖKALU</span><button id="theme-button" type="button" class="theme-button no-print" onclick="cycleTheme()" aria-label="Vaihda teemaa">☾</button><div class="menu-wrap no-print"><button type="button" class="menu-button" onclick="toggleMenu()">☰ Valikko</button><div id="top-menu" class="menu-panel"><button type="button" onclick="newProject()">＋ Uusi projekti</button><button type="button" onclick="saveCurrentProject()">✓ Tallenna projekti</button><button type="button" onclick="exportCurrentProject()">↓ Lataa projektin varmuuskopio</button><button type="button" onclick="openProjects()">▤ Vanhat projektit</button><button type="button" onclick="document.getElementById('project-import-file').click();closeMenu()">↥ Tuo projektitiedosto</button><button type="button" onclick="openPdfSettings()">⚙ PDF-asetukset</button><button type="button" onclick="openCloudSettings()">☁ Pilvitallennus</button><button type="button" onclick="cycleTheme()">◐ Vaihda teemaa</button><button id="install-menu-button" type="button" onclick="installApp()">⇩ Asenna sovellus</button><small id="cloud-menu-status">Projektit tallentuvat tälle laitteelle.</small></div></div></div></header>
-<input id="project-import-file" class="no-print" type="file" accept="application/json,.json,.ivprojekti" hidden onchange="importProjectFile(this.files[0]);this.value=''">
-<div id="projects-modal" class="modal no-print" onclick="if(event.target===this)closeProjects()"><div class="modal-card"><div class="modal-head"><h2>Vanhat projektit</h2><button type="button" class="small secondary" onclick="closeProjects()">Sulje</button></div><div class="modal-body"><div id="project-list" class="project-list"></div></div></div></div>
-<div id="new-project-modal" class="modal no-print" onclick="if(event.target===this)closeNewProject()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Aloita uusi projekti</h2><button type="button" class="small secondary" onclick="closeNewProject()">Sulje</button></div><div class="modal-body"><p style="margin-top:0;line-height:1.5">Nykyinen mittaus suljetaan ja näyttö tyhjennetään. Nykyinen projekti löytyy Vanhoista projekteista vain, jos siitä on luotu PDF.</p><div class="modal-actions"><button type="button" class="secondary" onclick="closeNewProject()">Peruuta</button><button type="button" class="primary" onclick="startNewProject()">Aloita uusi projekti</button></div></div></div></div>
-<div id="pdf-modal" class="modal no-print" onclick="if(event.target===this)closePdfPreview()"><div class="modal-card" style="width:min(900px,100%)"><div class="modal-head"><h2>PDF-esikatselu</h2><button type="button" class="small secondary" onclick="closePdfPreview()">Sulje</button></div><div class="modal-body"><iframe id="pdf-preview" class="pdf-frame" title="Mittauspöytäkirjan PDF-esikatselu"></iframe><div class="modal-actions"><a id="pdf-open" class="button-link secondary" target="_blank" rel="noopener">Avaa PDF</a><a id="pdf-download" class="button-link secondary" download>Lataa tiedosto</a><button id="pdf-share" type="button" class="primary" onclick="sharePdf()">Jaa PDF</button></div></div></div></div>
-<div id="install-modal" class="modal no-print" onclick="if(event.target===this)closeInstallHelp()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Asenna IV Mittaus</h2><button type="button" class="small secondary" onclick="closeInstallHelp()">Sulje</button></div><div class="modal-body"><div id="install-help-content" style="line-height:1.55"></div><div class="modal-actions"><button type="button" class="primary" onclick="closeInstallHelp()">Selvä</button></div></div></div></div>
-<div id="pdf-settings-modal" class="modal no-print" onclick="if(event.target===this)closePdfSettings()"><div class="modal-card" style="max-width:600px"><div class="modal-head"><h2>PDF-tiedoston asetukset</h2><button type="button" class="small secondary" onclick="closePdfSettings()">Sulje</button></div><div class="modal-body"><div class="settings-grid"><div><label>Yrityksen nimi</label><input id="setting-company" placeholder="Esim. Ilmastointi Oy"></div><div><label>Y-tunnus</label><input id="setting-business-id" inputmode="text" placeholder="1234567-8"></div><div><label>Yrityksen yhteystiedot</label><textarea id="setting-contact-details" rows="3" placeholder="Esim. Katuosoite, puhelin, sähköposti ja verkkosivu"></textarea><p class="muted">Voit kirjoittaa tiedot yhdelle tai useammalle riville. Ne lisätään PDF:n ylätunnisteeseen.</p></div><div><label>Yrityksen logo</label><div class="logo-row"><div id="logo-preview" class="logo-preview">Ei logoa</div><label class="file-button">Valitse logo<input id="setting-logo" type="file" accept="image/png,image/jpeg,image/webp" onchange="handleLogoFile(this.files[0])"></label><button type="button" class="danger small" onclick="removeLogo()">Poista logo</button></div><p class="muted">PNG-, JPG- tai WebP-kuva. Logo lisätään PDF:n ylätunnisteeseen.</p></div><div><label>Toinen logo</label><div class="logo-row"><div id="logo-preview-2" class="logo-preview">Ei toista logoa</div><label class="file-button">Valitse logo<input id="setting-logo-2" type="file" accept="image/png,image/jpeg,image/webp" onchange="handleSecondLogoFile(this.files[0])"></label><button type="button" class="danger small" onclick="removeSecondLogo()">Poista logo</button></div><p class="muted">Toinen logo sijoitetaan PDF:ssä ensimmäisen logon alle.</p></div></div><div class="modal-actions"><button type="button" class="secondary" onclick="closePdfSettings()">Peruuta</button><button type="button" class="primary" onclick="savePdfSettings()">Tallenna asetukset</button></div></div></div></div>
-<div id="cloud-modal" class="modal no-print" onclick="if(event.target===this)closeCloudSettings()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Pilvitallennus</h2><button type="button" class="small secondary" onclick="closeCloudSettings()">Sulje</button></div><div class="modal-body"><div id="cloud-logged-out"><p style="margin-top:0;line-height:1.5">Kirjaudu sisään, jotta projektit varmuuskopioituvat automaattisesti pilveen.</p><div class="settings-grid"><div><label>Sähköposti</label><input id="cloud-email" type="email" autocomplete="email" placeholder="nimi@esimerkki.fi"></div><div><label>Salasana</label><input id="cloud-password" type="password" autocomplete="current-password" placeholder="Vähintään 6 merkkiä"></div></div><div class="cloud-actions"><button type="button" class="secondary" onclick="cloudSignUp()">Luo käyttäjä</button><button type="button" class="primary" onclick="cloudSignIn()">Kirjaudu</button></div></div><div id="cloud-logged-in" hidden><div class="cloud-box"><strong id="cloud-user-email"></strong><p id="cloud-detail">Pilvitallennus on käytössä.</p></div><div class="cloud-actions"><button type="button" class="primary" onclick="syncCloudNow(true)">Synkronoi nyt</button><button type="button" class="secondary" onclick="loadCloudVersions()">Palautuspisteet</button><button type="button" class="danger" onclick="cloudSignOut()">Kirjaudu ulos</button></div><div id="cloud-version-list" class="project-list" style="margin-top:12px" hidden></div></div></div></div></div>
+<header><div class="brand"><div class="brand-mark">IV</div><div class="brand-copy"><h1>IV Mittaus</h1><p>Ilmamäärien mittauspöytäkirja</p></div><span class="tool-badge">AMMATTITYÖKALU</span><button id="theme-button" type="button" class="theme-button no-print" data-ui-click="cycleTheme()" aria-label="Vaihda teemaa">☾</button><div class="menu-wrap no-print"><button type="button" class="menu-button" data-ui-click="toggleMenu()">☰ Valikko</button><div id="top-menu" class="menu-panel"><button type="button" data-ui-click="newProject()">＋ Uusi projekti</button><button type="button" data-ui-click="saveCurrentProject()">✓ Tallenna projekti</button><button type="button" data-ui-click="exportCurrentProject()">↓ Lataa projektin varmuuskopio</button><button type="button" data-ui-click="openProjects()">▤ Vanhat projektit</button><button type="button" data-ui-click="document.getElementById('project-import-file').click();closeMenu()">↥ Tuo projektitiedosto</button><button type="button" data-ui-click="openPdfSettings()">⚙ PDF-asetukset</button><button type="button" data-ui-click="openCloudSettings()">☁ Pilvitallennus</button><button type="button" data-ui-click="cycleTheme()">◐ Vaihda teemaa</button><button id="install-menu-button" type="button" data-ui-click="installApp()">⇩ Asenna sovellus</button><small id="cloud-menu-status">Projektit tallentuvat tälle laitteelle.</small></div></div></div></header>
+<input id="project-import-file" class="no-print" type="file" accept="application/json,.json,.ivprojekti" hidden data-ui-change="importProjectFile(this.files[0]);this.value=''">
+<div id="projects-modal" class="modal no-print" data-ui-click="if(event.target===this)closeProjects()"><div class="modal-card"><div class="modal-head"><h2>Vanhat projektit</h2><button type="button" class="small secondary" data-ui-click="closeProjects()">Sulje</button></div><div class="modal-body"><div id="project-list" class="project-list"></div></div></div></div>
+<div id="new-project-modal" class="modal no-print" data-ui-click="if(event.target===this)closeNewProject()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Aloita uusi projekti</h2><button type="button" class="small secondary" data-ui-click="closeNewProject()">Sulje</button></div><div class="modal-body"><p style="margin-top:0;line-height:1.5">Nykyinen projekti tallennetaan Vanhoihin projekteihin ennen uuden aloittamista.</p><div class="modal-actions"><button type="button" class="secondary" data-ui-click="closeNewProject()">Peruuta</button><button type="button" class="primary" data-ui-click="startNewProject()">Aloita uusi projekti</button></div></div></div></div>
+<div id="pdf-modal" class="modal no-print" data-ui-click="if(event.target===this)closePdfPreview()"><div class="modal-card" style="width:min(900px,100%)"><div class="modal-head"><h2>PDF-esikatselu</h2><button type="button" class="small secondary" data-ui-click="closePdfPreview()">Sulje</button></div><div class="modal-body"><iframe id="pdf-preview" class="pdf-frame" title="Mittauspöytäkirjan PDF-esikatselu"></iframe><div class="modal-actions"><a id="pdf-open" class="button-link secondary" target="_blank" rel="noopener">Avaa PDF</a><a id="pdf-download" class="button-link secondary" download>Lataa tiedosto</a><button id="pdf-share" type="button" class="primary" data-ui-click="sharePdf()">Jaa PDF</button></div></div></div></div>
+<div id="install-modal" class="modal no-print" data-ui-click="if(event.target===this)closeInstallHelp()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Asenna IV Mittaus</h2><button type="button" class="small secondary" data-ui-click="closeInstallHelp()">Sulje</button></div><div class="modal-body"><div id="install-help-content" style="line-height:1.55"></div><div class="modal-actions"><button type="button" class="primary" data-ui-click="closeInstallHelp()">Selvä</button></div></div></div></div>
+<div id="pdf-settings-modal" class="modal no-print" data-ui-click="if(event.target===this)closePdfSettings()"><div class="modal-card" style="max-width:600px"><div class="modal-head"><h2>PDF-tiedoston asetukset</h2><button type="button" class="small secondary" data-ui-click="closePdfSettings()">Sulje</button></div><div class="modal-body"><div class="settings-grid"><div><label>Yrityksen nimi</label><input id="setting-company" placeholder="Esim. Ilmastointi Oy"></div><div><label>Y-tunnus</label><input id="setting-business-id" inputmode="text" placeholder="1234567-8"></div><div><label>Yrityksen yhteystiedot</label><textarea id="setting-contact-details" rows="3" placeholder="Esim. Katuosoite, puhelin, sähköposti ja verkkosivu"></textarea><p class="muted">Voit kirjoittaa tiedot yhdelle tai useammalle riville. Ne lisätään PDF:n ylätunnisteeseen.</p></div><div><label>Yrityksen logo</label><div class="logo-row"><div id="logo-preview" class="logo-preview">Ei logoa</div><label class="file-button">Valitse logo<input id="setting-logo" type="file" accept="image/png,image/jpeg,image/webp" data-ui-change="handleLogoFile(this.files[0])"></label><button type="button" class="danger small" data-ui-click="removeLogo()">Poista logo</button></div><p class="muted">PNG-, JPG- tai WebP-kuva. Logo lisätään PDF:n ylätunnisteeseen.</p></div><div><label>Toinen logo</label><div class="logo-row"><div id="logo-preview-2" class="logo-preview">Ei toista logoa</div><label class="file-button">Valitse logo<input id="setting-logo-2" type="file" accept="image/png,image/jpeg,image/webp" data-ui-change="handleSecondLogoFile(this.files[0])"></label><button type="button" class="danger small" data-ui-click="removeSecondLogo()">Poista logo</button></div><p class="muted">Toinen logo sijoitetaan PDF:ssä ensimmäisen logon alle.</p></div></div><div class="modal-actions"><button type="button" class="secondary" data-ui-click="closePdfSettings()">Peruuta</button><button type="button" class="primary" data-ui-click="savePdfSettings()">Tallenna asetukset</button></div></div></div></div>
+<div id="cloud-modal" class="modal no-print" data-ui-click="if(event.target===this)closeCloudSettings()"><div class="modal-card" style="max-width:520px"><div class="modal-head"><h2>Pilvitallennus</h2><button type="button" class="small secondary" data-ui-click="closeCloudSettings()">Sulje</button></div><div class="modal-body"><div id="cloud-logged-out"><p style="margin-top:0;line-height:1.5">Kirjaudu sisään, jotta projektit varmuuskopioituvat automaattisesti pilveen.</p><div class="settings-grid"><div><label>Sähköposti</label><input id="cloud-email" type="email" autocomplete="email" placeholder="nimi@esimerkki.fi"></div><div><label>Salasana</label><input id="cloud-password" type="password" autocomplete="current-password" placeholder="Vähintään 6 merkkiä"></div></div><div class="cloud-actions"><button type="button" class="secondary" data-ui-click="cloudSignUp()">Luo käyttäjä</button><button type="button" class="primary" data-ui-click="cloudSignIn()">Kirjaudu</button></div></div><div id="cloud-logged-in" hidden><div class="cloud-box"><strong id="cloud-user-email"></strong><p id="cloud-detail">Pilvitallennus on käytössä.</p></div><div class="cloud-actions"><button type="button" class="primary" data-ui-click="syncCloudNow(true)">Synkronoi nyt</button><button type="button" class="secondary" data-ui-click="loadCloudVersions()">Palautuspisteet</button><button type="button" class="danger" data-ui-click="cloudSignOut()">Kirjaudu ulos</button></div><button id="cloud-force-sync" type="button" class="danger" data-ui-click="forceSyncCloudNow()" hidden style="margin-top:10px;width:100%">Korvaa pilvikopio tämän laitteen tiedoilla</button><div id="cloud-version-list" class="project-list" style="margin-top:12px" hidden></div></div></div></div></div>
 <div id="toast" class="toast no-print"></div>
 <main>
 <section class="card"><div class="card-heading"><span class="step">1</span><h2>Kohteen tiedot</h2></div>
 <div class="grid">
 <div><label>Kohde</label><input id="kohde" placeholder="Esim. Virusmäentie 27, Turku"></div>
-<div><label for="paiva">Työpäivä</label><div class="date-field"><span id="paiva-display" class="date-field-display" aria-hidden="true"></span><input id="paiva" type="date" oninput="updateDateDisplay('paiva')" onchange="updateDateDisplay('paiva')"></div></div>
+<div><label for="paiva">Työpäivä</label><div class="date-field"><span id="paiva-display" class="date-field-display" aria-hidden="true"></span><input id="paiva" type="date" data-ui-input="updateDateDisplay('paiva')" data-ui-change="updateDateDisplay('paiva')"></div></div>
 <div><label>Työn suorittaja</label><input id="mittaaja" placeholder="Nimi"></div>
 <div id="measurement-instrument-wrap" hidden><label>Mittausväline</label><input id="valine" placeholder="Esim. Swema 3000md"></div>
 <div><label>Oletusventtiili</label><input id="default-valve" placeholder="Esim. KSO-125"><p class="muted">Täytetään automaattisesti uusiin venttiileihin. Jo lisättyjä venttiilejä ei muuteta.</p></div>
 <div class="work-type-block"><label>Työn laatu <span class="muted">(voit valita useita)</span></label><div class="work-type-grid" role="group" aria-label="Työn laatu">
-<button type="button" class="work-type-option" data-work-type="cleaning" role="checkbox" onclick="toggleWorkType('cleaning')">Puhdistus</button>
-<button type="button" class="work-type-option" data-work-type="maintenance" role="checkbox" onclick="toggleWorkType('maintenance')">Huolto</button>
-<button type="button" class="work-type-option" data-work-type="installation" role="checkbox" onclick="toggleWorkType('installation')">Asennus</button>
-<button type="button" class="work-type-option" data-work-type="measurement" role="checkbox" onclick="toggleWorkType('measurement')">Mittaus ja säätö</button>
-<button type="button" class="work-type-option" data-work-type="other" role="checkbox" onclick="toggleWorkType('other')">Muu, mikä?</button>
-</div><div id="custom-work-type-wrap" class="custom-work-type" hidden><label>Muu työn laatu</label><input id="custom-work-type" maxlength="50" placeholder="Esim. kanavakuvaus" oninput="updateCustomWorkType(this.value)"></div><p class="muted">Valinnat määrittävät PDF-raportin pääotsikon.</p></div>
-<details id="project-cleaning-wrap" class="cleaning-block compact-section" hidden><summary class="compact-summary"><span>Puhdistuksen laajuus</span><span id="project-cleaning-count" class="compact-summary-meta">Ei valintoja</span></summary><div class="compact-section-body"><div id="project-cleaning-grid" class="cleaning-grid" role="group" aria-label="Kohteessa puhdistetut osat"></div><div id="project-cleaning-custom" class="cleaning-custom" hidden><label>Muu puhdistettu kohde</label><input id="project-cleaning-custom-input" maxlength="80" placeholder="Kirjoita puhdistettu kohde" oninput="updateProjectCustomCleaningItem(this.value)"></div></div></details>
+<button type="button" class="work-type-option" data-work-type="cleaning" role="checkbox" data-ui-click="toggleWorkType('cleaning')">Puhdistus</button>
+<button type="button" class="work-type-option" data-work-type="maintenance" role="checkbox" data-ui-click="toggleWorkType('maintenance')">Huolto</button>
+<button type="button" class="work-type-option" data-work-type="installation" role="checkbox" data-ui-click="toggleWorkType('installation')">Asennus</button>
+<button type="button" class="work-type-option" data-work-type="measurement" role="checkbox" data-ui-click="toggleWorkType('measurement')">Mittaus ja säätö</button>
+<button type="button" class="work-type-option" data-work-type="other" role="checkbox" data-ui-click="toggleWorkType('other')">Muu, mikä?</button>
+</div><div id="custom-work-type-wrap" class="custom-work-type" hidden><label>Muu työn laatu</label><input id="custom-work-type" maxlength="50" placeholder="Esim. kanavakuvaus" data-ui-input="updateCustomWorkType(this.value)"></div><p class="muted">Valinnat määrittävät PDF-raportin pääotsikon.</p></div>
+<details id="project-cleaning-wrap" class="cleaning-block compact-section" hidden><summary class="compact-summary"><span>Puhdistuksen laajuus</span><span id="project-cleaning-count" class="compact-summary-meta">Ei valintoja</span></summary><div class="compact-section-body"><div id="project-cleaning-grid" class="cleaning-grid" role="group" aria-label="Kohteessa puhdistetut osat"></div><div id="project-cleaning-custom" class="cleaning-custom" hidden><label>Muu puhdistettu kohde</label><input id="project-cleaning-custom-input" maxlength="80" placeholder="Kirjoita puhdistettu kohde" data-ui-input="updateProjectCustomCleaningItem(this.value)"></div></div></details>
 <details id="project-condition-wrap" class="condition-block compact-section" hidden><summary class="compact-summary"><span>Ilmanvaihtojärjestelmän kunto</span><span id="project-condition-count" class="compact-summary-meta">Ei arvioita</span></summary><div class="compact-section-body"><div id="project-condition-grid" class="condition-grid" role="group" aria-label="Kohteen ilmanvaihtojärjestelmän kunto"></div><p class="muted">Valitse: Hyvä, Huomioitava tai Korjattava. Napauta valittua vaihtoehtoa uudelleen tyhjentääksesi arvion.</p></div></details>
 </div></section>
-<section class="card no-print"><div class="work-heading"><span class="step">2</span><h2>Työmerkinnät</h2><button type="button" class="secondary" onclick="openWorkEntryEditor()">+ Lisää merkintä</button></div>
+<section class="card no-print"><div class="work-heading"><span class="step">2</span><h2>Työmerkinnät</h2><button type="button" class="secondary" data-ui-click="openWorkEntryEditor()">+ Lisää merkintä</button></div>
 <div id="work-entry-editor" class="work-editor" hidden>
   <div class="work-editor-grid">
-    <div><label for="work-entry-date">Päivämäärä</label><div class="date-field"><span id="work-entry-date-display" class="date-field-display" aria-hidden="true"></span><input id="work-entry-date" type="date" oninput="updateDateDisplay('work-entry-date')" onchange="updateDateDisplay('work-entry-date')"></div></div>
+    <div><label for="work-entry-date">Päivämäärä</label><div class="date-field"><span id="work-entry-date-display" class="date-field-display" aria-hidden="true"></span><input id="work-entry-date" type="date" data-ui-input="updateDateDisplay('work-entry-date')" data-ui-change="updateDateDisplay('work-entry-date')"></div></div>
     <div><label>Asunto / kohde <span class="muted">(vapaaehtoinen)</span></label><input id="work-entry-target" placeholder="Esim. A 12 tai IV-konehuone"></div>
     <div class="full"><label>Otsikko</label><input id="work-entry-title" maxlength="100" placeholder="Esim. Poistokanavien puhdistus"></div>
-    <details id="work-entry-cleaning-wrap" class="cleaning-block compact-section full" hidden><summary class="compact-summary"><span>Puhdistettu tässä merkinnässä</span><span id="work-entry-cleaning-count" class="compact-summary-meta">Ei valintoja</span></summary><div class="compact-section-body"><div id="work-entry-cleaning-grid" class="cleaning-grid" role="group" aria-label="Työmerkinnässä puhdistetut osat"></div><div id="work-entry-cleaning-custom" class="cleaning-custom" hidden><label>Muu puhdistettu kohde</label><input id="work-entry-cleaning-custom-input" maxlength="80" placeholder="Kirjoita puhdistettu kohde" oninput="updatePendingCustomCleaningItem(this.value)"></div></div></details>
+    <details id="work-entry-cleaning-wrap" class="cleaning-block compact-section full" hidden><summary class="compact-summary"><span>Puhdistettu tässä merkinnässä</span><span id="work-entry-cleaning-count" class="compact-summary-meta">Ei valintoja</span></summary><div class="compact-section-body"><div id="work-entry-cleaning-grid" class="cleaning-grid" role="group" aria-label="Työmerkinnässä puhdistetut osat"></div><div id="work-entry-cleaning-custom" class="cleaning-custom" hidden><label>Muu puhdistettu kohde</label><input id="work-entry-cleaning-custom-input" maxlength="80" placeholder="Kirjoita puhdistettu kohde" data-ui-input="updatePendingCustomCleaningItem(this.value)"></div></div></details>
     <details id="work-entry-condition-wrap" class="condition-block compact-section full" hidden><summary class="compact-summary"><span>Kunto tässä merkinnässä</span><span id="work-entry-condition-count" class="compact-summary-meta">Ei arvioita</span></summary><div class="compact-section-body"><div id="work-entry-condition-grid" class="condition-grid" role="group" aria-label="Työmerkinnän kuntoarviot"></div></div></details>
     <div class="full"><label>Kuvaus</label><textarea id="work-entry-text" maxlength="2000" placeholder="Kirjaa tehdyt työt, havainnot ja jatkotoimenpiteet..."></textarea></div>
-    <div class="full"><label>Kuvat</label><div class="work-photo-actions"><label class="file-button">Ota kuva<input id="work-entry-camera" type="file" accept="image/*" capture="environment" onchange="handleWorkPhotoFiles(this.files);this.value='' "></label><label class="file-button">Valitse kuvia<input id="work-entry-gallery" type="file" accept="image/*" multiple onchange="handleWorkPhotoFiles(this.files);this.value='' "></label></div><div id="work-photo-preview" class="work-photo-preview"></div><p class="muted">Voit lisätä merkintään useita kuvia. Kuvat pienennetään automaattisesti raporttia varten.</p></div>
+    <div class="full"><label>Kuvat</label><div class="work-photo-actions"><label class="file-button">Ota kuva<input id="work-entry-camera" type="file" accept="image/*" capture="environment" data-ui-change="handleWorkPhotoFiles(this.files);this.value='' "></label><label class="file-button">Valitse kuvia<input id="work-entry-gallery" type="file" accept="image/*" multiple data-ui-change="handleWorkPhotoFiles(this.files);this.value='' "></label></div><div id="work-photo-preview" class="work-photo-preview"></div><p class="muted">Voit lisätä merkintään useita kuvia. Kuvat pienennetään automaattisesti raporttia varten.</p></div>
   </div>
-  <div class="work-editor-actions"><button type="button" class="secondary" onclick="closeWorkEntryEditor()">Peruuta</button><button type="button" class="primary" onclick="saveWorkEntry()">Tallenna merkintä</button></div>
+  <div class="work-editor-actions"><button type="button" class="secondary" data-ui-click="closeWorkEntryEditor()">Peruuta</button><button type="button" class="primary" data-ui-click="saveWorkEntry()">Tallenna merkintä</button></div>
 </div>
 <div id="work-entry-list" class="work-entry-list"></div></section>
 <div id="apartments"></div>
 <section class="card action-card no-print"><div class="bottom">
 <span id="save-note" class="save-note">Tallennettu automaattisesti tälle laitteelle</span>
-<button type="button" class="secondary" onclick="addApartment()">+ Lisää asunto</button><button type="button" class="save-project" onclick="saveCurrentProject()">Tallenna projekti</button><button type="button" class="danger" onclick="clearAll()">Tyhjennä</button>
-<button type="button" class="primary" onclick="generatePdf()">Luo PDF</button></div>
+<button type="button" class="secondary" data-ui-click="addApartment()">+ Lisää asunto</button><button type="button" class="save-project" data-ui-click="saveCurrentProject()">Tallenna projekti</button><button type="button" class="danger" data-ui-click="clearAll()">Tyhjennä</button>
+<button type="button" class="primary" data-ui-click="generatePdf()">Luo PDF</button></div>
 </section>
 </main>
 <script>
@@ -153,26 +154,33 @@ async function authRequest(path,body,accessToken){
   const headers={apikey:SUPABASE_KEY,"Content-Type":"application/json"};if(accessToken)headers.Authorization="Bearer "+accessToken;
   const response=await fetch(SUPABASE_URL+path,{method:"POST",headers,body:JSON.stringify(body||{})});
   const result=await response.json().catch(()=>({}));
-  if(!response.ok)throw new Error(result.error_description||result.msg||result.message||"Yhteys pilvipalveluun epäonnistui");
+  if(!response.ok){const error=new Error(result.error_description||result.msg||result.message||"Yhteys pilvipalveluun epäonnistui");error.status=response.status;throw error}
   return result;
 }
 async function refreshCloudSession(){
   if(!cloudSession?.refresh_token)return false;
-  try{const refreshed=await authRequest("/auth/v1/token?grant_type=refresh_token",{refresh_token:cloudSession.refresh_token});storeCloudSession(refreshed);await loadCloudUser();return true}catch(e){clearCloudSession();showToast("Kirjaudu pilvitallennukseen uudelleen");return false}
+  try{const refreshed=await authRequest("/auth/v1/token?grant_type=refresh_token",{refresh_token:cloudSession.refresh_token});storeCloudSession(refreshed);return !!(await loadCloudUser(false))}catch(e){if(e.status===400||e.status===401){clearCloudSession();showToast("Kirjaudu pilvitallennukseen uudelleen")}else{updateCloudUi("Yhteys pilvipalveluun katkesi. Tiedot säilyvät tällä laitteella.");cloudRefreshTimer=setTimeout(()=>refreshCloudSession().catch(()=>{}),60000)}return false}
 }
-async function loadCloudUser(){
+async function loadCloudUser(allowRefresh=true){
   if(!cloudSession?.access_token)return null;
   const response=await fetch(SUPABASE_URL+"/auth/v1/user",{headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+cloudSession.access_token}});
-  if(response.status===401&&await refreshCloudSession())return cloudUser;
-  if(!response.ok){clearCloudSession();return null}
+  if(response.status===401&&allowRefresh&&await refreshCloudSession())return cloudUser;
+  if(!response.ok){if(response.status===401||response.status===403){clearCloudSession();return null}throw new Error("Käyttäjätietojen haku epäonnistui")}
   cloudUser=await response.json();updateCloudUi();return cloudUser;
 }
-function consumeAuthCallback(){
-  if(!location.hash.includes("access_token="))return false;
-  const values=Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
-  if(!values.access_token)return false;
-  storeCloudSession({access_token:values.access_token,refresh_token:values.refresh_token,expires_in:Number(values.expires_in||3600),token_type:values.token_type||"bearer"});
-  history.replaceState(null,"",location.pathname+location.search);return true;
+async function consumeAuthCallback(){
+  const values=new URLSearchParams(location.hash.slice(1));
+  if(!values.has("access_token"))return false;
+  history.replaceState(null,"",location.pathname+location.search);
+  let pending=null;try{pending=JSON.parse(localStorage.getItem("iv_pending_signup")||"null")}catch(e){}
+  if(readCloudSession()||!pending||Date.now()>pending.expiresAt||!values.get("refresh_token")){showToast("Odottamaton kirjautumislinkki ohitettiin");return false}
+  try{
+    const response=await fetch(SUPABASE_URL+"/auth/v1/user",{headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+values.get("access_token")}});
+    if(!response.ok)throw new Error("Vahvistus epäonnistui");
+    const user=await response.json();if(user.email?.toLowerCase()!==pending.email)throw new Error("Vahvistuslinkki kuuluu toiselle käyttäjälle");
+    storeCloudSession({access_token:values.get("access_token"),refresh_token:values.get("refresh_token"),expires_in:Number(values.get("expires_in")||3600),token_type:"bearer"});
+    localStorage.removeItem("iv_pending_signup");return true;
+  }catch(e){showToast(e.message||"Vahvistus epäonnistui");return false}
 }
 function openCloudSettings(){closeMenu();updateCloudUi();document.getElementById("cloud-modal").classList.add("open")}
 function closeCloudSettings(){document.getElementById("cloud-modal").classList.remove("open")}
@@ -188,7 +196,8 @@ function updateCloudUi(detail){
 function cloudCredentials(){return{email:document.getElementById("cloud-email").value.trim(),password:document.getElementById("cloud-password").value}}
 async function cloudSignUp(){
   const {email,password}=cloudCredentials();if(!email||password.length<6){showToast("Anna sähköposti ja vähintään 6 merkin salasana");return}
-  try{const result=await authRequest("/auth/v1/signup",{email,password});if(result.access_token){storeCloudSession(result);await loadCloudUser();await initializeCloud()}else showToast("Avaa sähköpostiin tullut vahvistuslinkki")}catch(e){showToast(e.message)}
+  localStorage.setItem("iv_pending_signup",JSON.stringify({email:email.toLowerCase(),expiresAt:Date.now()+3600000}));
+  try{const result=await authRequest("/auth/v1/signup",{email,password});if(result.access_token){localStorage.removeItem("iv_pending_signup");storeCloudSession(result);await loadCloudUser();await initializeCloud()}else showToast("Avaa sähköpostiin tullut vahvistuslinkki")}catch(e){localStorage.removeItem("iv_pending_signup");showToast(e.message)}
 }
 async function cloudSignIn(){
   const {email,password}=cloudCredentials();if(!email||!password){showToast("Anna sähköposti ja salasana");return}
@@ -216,7 +225,7 @@ async function cloudFetch(path,options={},retry=true){
     return response;
   }catch(error){if(error?.name==="AbortError")throw new Error("Pilvipalvelu ei vastannut 45 sekunnissa");throw error}finally{clearTimeout(timeout)}
 }
-const PHOTO_BUCKET="project-photos",PHOTO_DB_NAME="iv-mittaus-files",PHOTO_STORE="photos";
+const PHOTO_BUCKET="Project-photos",PHOTO_DB_NAME="iv-mittaus-files",PHOTO_STORE="photos";
 let photoDbPromise=null;const photoMemoryFallback=new Map(),photoUrlCache=new Map();
 function openPhotoDb(){
   if(!globalThis.indexedDB)return Promise.resolve(null);if(photoDbPromise)return photoDbPromise;
@@ -228,47 +237,108 @@ async function deleteCachedPhoto(key){if(!key)return;photoMemoryFallback.delete(
 function dataUrlBlob(source){try{const [header,payload]=String(source||"").split(","),mime=(header.match(/^data:([^;]+)/)||[])[1]||"image/jpeg",binary=atob(payload||""),bytes=Uint8Array.from(binary,char=>char.charCodeAt(0));return new Blob([bytes],{type:mime})}catch(e){return null}}
 const encodedStoragePath=path=>String(path||"").split("/").map(encodeURIComponent).join("/");
 const photoCacheKey=photo=>photo?.localKey||photo?.id||"";
-function photoStoragePath(projectId,entryId,photoId){return[cloudUser?.id,projectId,entryId,photoId+".jpg"].map(part=>String(part||"tuntematon").replaceAll("/","_")).join("/")}
+function photoStoragePath(projectId,entryId,photoId){return[cloudUser?.id,projectId,entryId,photoId].map(part=>String(part||"tuntematon").replace(/[^a-zA-Z0-9_-]/g,"_")).join("/")+".jpg"}
+function ownPhotoStoragePath(path){const parts=String(path||"").split("/");return !!cloudUser?.id&&parts.length===4&&parts[0]===cloudUser.id&&parts.slice(1,3).every(part=>/^[a-zA-Z0-9_-]+$/.test(part))&&/^[a-zA-Z0-9_-]+\.jpg$/.test(parts[3])}
 async function uploadPhotoBlob(photo,blob,projectId,entryId){
-  if(!cloudUser||!navigator.onLine||!blob)return false;const path=photo.storagePath||photoStoragePath(projectId,entryId,photo.id);
+  if(!cloudUser||!navigator.onLine||!blob)return false;const path=ownPhotoStoragePath(photo.storagePath)?photo.storagePath:photoStoragePath(projectId,entryId,photo.id);
   await cloudFetch("/storage/v1/object/"+PHOTO_BUCKET+"/"+encodedStoragePath(path),{method:"POST",headers:{"Content-Type":"image/jpeg","x-upsert":"true"},body:blob});photo.storagePath=path;photo.localKey=photoCacheKey(photo)||photo.id;delete photo.data;return true;
 }
-async function fetchStoragePhoto(path){if(!path||!cloudUser)return null;const response=await cloudFetch("/storage/v1/object/authenticated/"+PHOTO_BUCKET+"/"+encodedStoragePath(path),{headers:{Accept:"image/jpeg"}});return response.blob()}
+async function fetchStoragePhoto(path){if(!ownPhotoStoragePath(path))return null;const response=await cloudFetch("/storage/v1/object/authenticated/"+PHOTO_BUCKET+"/"+encodedStoragePath(path),{headers:{Accept:"image/jpeg"}});return response.blob()}
 async function resolvePhotoBlob(photo){
   if(!photo)return null;const key=photoCacheKey(photo)||photo.id;if(photo.data){const blob=dataUrlBlob(photo.data);if(blob&&key)await cachePhotoBlob(key,blob);return blob}
   let blob=await cachedPhotoBlob(key);if(!blob&&photo.storagePath&&cloudUser&&navigator.onLine){blob=await fetchStoragePhoto(photo.storagePath).catch(()=>null);if(blob&&key)await cachePhotoBlob(key,blob)}return blob;
 }
 async function photoDisplayUrl(photo){if(photo?.data)return photo.data;const key=photoCacheKey(photo)||photo?.id;if(!key)return"";if(photoUrlCache.has(key))return photoUrlCache.get(key);const blob=await resolvePhotoBlob(photo);if(!blob||!globalThis.URL?.createObjectURL)return"";const url=URL.createObjectURL(blob);photoUrlCache.set(key,url);return url}
 async function hydratePhotoImages(root,photos){if(!root)return;const byId=new Map((photos||[]).map(photo=>[photo.id,photo]));for(const image of root.querySelectorAll("img[data-photo-id]")){const photo=byId.get(image.dataset.photoId);if(!photo)continue;const url=await photoDisplayUrl(photo);if(url&&image.isConnected)image.src=url}}
-async function deletePhotoAsset(photo){await deleteCachedPhoto(photoCacheKey(photo)||photo?.id);if(photo?.storagePath&&cloudUser&&navigator.onLine)await cloudFetch("/storage/v1/object/"+PHOTO_BUCKET,{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({prefixes:[photo.storagePath]})}).catch(()=>{})}
+// Persist candidates first. Offline/errors leave assets intact until all references can be checked.
+let photoCleanupTimer=null,photoCleanupBusy=false;
+function photoCleanupQueue(){const rows=JSON.parse(localStorage.getItem("iv_photo_cleanup")||"[]");if(!Array.isArray(rows))throw new Error("Virheellinen kuvien siivousjono");return rows}
+function queuePhotoCleanup(photos){
+  try{const rows=photoCleanupQueue();for(const photo of photos||[]){const item={id:photo?.id,localKey:photoCacheKey(photo),storagePath:photo?.storagePath||""};if(!item.localKey&&!item.storagePath)continue;if(!rows.some(row=>row.localKey===item.localKey&&row.storagePath===item.storagePath))rows.push(item)}localStorage.setItem("iv_photo_cleanup",JSON.stringify(rows));schedulePhotoCleanup()}catch(e){/* Never delete when the queue cannot be persisted. */}
+}
+function schedulePhotoCleanup(){clearTimeout(photoCleanupTimer);photoCleanupTimer=setTimeout(()=>cleanupPhotoAssets().catch(()=>false),5000)}
+function addPhotoReferences(refs,photos){for(const photo of photos||[]){const key=photoCacheKey(photo);if(key)refs.keys.add(key);if(photo?.storagePath)refs.paths.add(photo.storagePath)}}
+function addPayloadPhotoReferences(refs,payload){for(const project of [payload?.current,...(payload?.projects||[]).map(item=>item.data)])addPhotoReferences(refs,projectPhotoRecords(project||{},project?.projectId).map(record=>record.photo))}
+function localPhotoReferences(refs){
+  // Read persisted data directly: a failed/corrupt read must stop cleanup, not look empty.
+  const current=JSON.parse(localStorage.getItem("iv_proto")||"null"),projects=JSON.parse(localStorage.getItem("iv_projects")||"[]");
+  if(!Array.isArray(projects))throw new Error("Virheellinen projektilista");
+  addPayloadPhotoReferences(refs,{current,projects});addPayloadPhotoReferences(refs,{current:data,projects:getProjects()});addPhotoReferences(refs,pendingWorkPhotos);
+  for(const row of cloudVersionRows||[])addPayloadPhotoReferences(refs,row.payload);
+}
+async function cleanupPhotoAssets(){
+  if(photoCleanupBusy||cloudBusy)return false;
+  photoCleanupBusy=true;
+  try{
+    const candidates=photoCleanupQueue();if(!candidates.length)return true;
+    const owner=cloudUser?.id||"",refs={keys:new Set(),paths:new Set()};localPhotoReferences(refs);
+    // A signed-out or disconnected device cannot establish whether cloud recovery points need a photo.
+    if(!owner&&(cloudSession||candidates.some(photo=>photo.storagePath)))return false;
+    if(owner){
+      if(!navigator.onLine)return false;
+      const backup=await fetchCloudBackup();if(backup?.payload)addPayloadPhotoReferences(refs,backup.payload);
+      let complete=false;
+      for(let offset=0;offset<10000;offset+=100){
+        const response=await cloudFetch("/rest/v1/app_backup_versions?user_id=eq."+encodeURIComponent(owner)+"&select=payload&order=id.asc&offset="+offset+"&limit=100",{headers:{Accept:"application/json"}}),rows=await response.json();
+        if(!Array.isArray(rows))throw new Error("Palautuspisteiden tarkistus epäonnistui");
+        for(const row of rows)addPayloadPhotoReferences(refs,row.payload);
+        if(rows.length<100){complete=true;break}
+      }
+      if(!complete)return false;
+    }
+    const removed=new Set();
+    for(const photo of candidates){
+      if((cloudUser?.id||"")!==owner||cloudBusy)return false;
+      localPhotoReferences(refs); // Recheck edits made while requests were pending.
+      if(refs.keys.has(photo.localKey)||refs.paths.has(photo.storagePath))continue;
+      if(photo.storagePath){
+        if(!ownPhotoStoragePath(photo.storagePath))continue;
+        await cloudFetch("/storage/v1/object/"+PHOTO_BUCKET,{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({prefixes:[photo.storagePath]})});
+      }
+      // An edit may have restored the local reference while cloud deletion was awaiting a response.
+      localPhotoReferences(refs);if(!refs.keys.has(photo.localKey))await deleteCachedPhoto(photo.localKey);
+      removed.add(JSON.stringify(photo));
+    }
+    localStorage.setItem("iv_photo_cleanup",JSON.stringify(photoCleanupQueue().filter(photo=>!removed.has(JSON.stringify(photo)))));return true;
+  }catch(e){return false}finally{photoCleanupBusy=false}
+}
+async function deletePhotoAsset(photo){queuePhotoCleanup([photo])}
 async function fetchCloudBackup(){
-  const response=await cloudFetch("/rest/v1/app_backups?select=payload,updated_at&limit=1",{headers:{Accept:"application/json"}}),rows=await response.json();return rows[0]||null;
+  const response=await cloudFetch("/rest/v1/app_backups?user_id=eq."+encodeURIComponent(cloudUser.id)+"&select=payload,updated_at&limit=1",{headers:{Accept:"application/json"}}),rows=await response.json();return rows[0]||null;
 }
 async function insertCloudVersion(payload,createdAt){
   if(!payload||!cloudUser)return false;
   await cloudFetch("/rest/v1/app_backup_versions",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload,created_at:createdAt||new Date().toISOString()})});return true;
 }
 async function trimCloudVersions(){
-  // Keep maintenance bounded: a large history must never hold up a measurement save.
-  const response=await cloudFetch("/rest/v1/app_backup_versions?select=id&order=created_at.desc&offset=20&limit=10",{headers:{Accept:"application/json"}}),rows=await response.json();
-  if(!rows.length)return;const ids=rows.map(row=>Number(row.id)).filter(Number.isFinite);if(ids.length)await cloudFetch("/rest/v1/app_backup_versions?id=in.("+ids.join(",")+")",{method:"DELETE",headers:{Prefer:"return=minimal"}});
+  // Each batch is bounded; repeat because deleting one batch reveals the next one.
+  for(let batch=0;batch<10;batch++){
+    const response=await cloudFetch("/rest/v1/app_backup_versions?user_id=eq."+encodeURIComponent(cloudUser.id)+"&select=id&order=created_at.desc&offset=20&limit=10",{headers:{Accept:"application/json"}}),rows=await response.json();
+    const ids=rows.map(row=>Number(row.id)).filter(Number.isFinite);if(!ids.length)return;
+    await cloudFetch("/rest/v1/app_backup_versions?user_id=eq."+encodeURIComponent(cloudUser.id)+"&id=in.("+ids.join(",")+")",{method:"DELETE",headers:{Prefer:"return=minimal"}});
+  }
 }
 function scheduleCloudVersionMaintenance(){
-  const key="iv_cloud_maintenance_at";let last=0;
+  const key="iv_cloud_maintenance_at_"+cloudUser.id;let last=0;
   try{last=Number(localStorage.getItem(key)||0)}catch(e){}
-  if(Date.now()-last<3600000)return;
+  if(Date.now()-last<600000)return;
   try{localStorage.setItem(key,String(Date.now()))}catch(e){}
   setTimeout(()=>trimCloudVersions().catch(()=>{}),1000);
+}
+function shouldArchiveCloudVersion(remote,outgoing){
+  if(!remote?.payload||cloudPayloadMatches(remote.payload,outgoing))return false;
+  const last=Number(localStorage.getItem("iv_cloud_version_at_"+cloudUser.id)||0);
+  return Date.now()-last>=900000;
 }
 function cloudPayloadMatches(a,b){try{return JSON.stringify(a)===JSON.stringify(b)}catch(e){return false}}
 function cloudVersionDescription(payload){const current=payload?.current||{},name=String(current.kohde||current.apartments?.[0]?.name||"Nimetön projekti").trim(),count=Array.isArray(payload?.projects)?payload.projects.length:0;return{name:name||"Nimetön projekti",count}}
 async function loadCloudVersions(){
   if(!cloudUser)return;const list=document.getElementById("cloud-version-list");list.hidden=false;list.innerHTML='<div class="work-empty">Haetaan palautuspisteitä…</div>';
   try{
-    const [currentResponse,historyResponse]=await Promise.all([fetchCloudBackup(),cloudFetch("/rest/v1/app_backup_versions?select=id,created_at,payload&order=created_at.desc&limit=20",{headers:{Accept:"application/json"}}).then(response=>response.json())]);
+    const [currentResponse,historyResponse]=await Promise.all([fetchCloudBackup(),cloudFetch("/rest/v1/app_backup_versions?user_id=eq."+encodeURIComponent(cloudUser.id)+"&select=id,created_at,payload&order=created_at.desc&limit=20",{headers:{Accept:"application/json"}}).then(response=>response.json())]);
     cloudVersionRows=[];if(currentResponse?.payload)cloudVersionRows.push({id:"current",created_at:currentResponse.updated_at,payload:currentResponse.payload,current:true});cloudVersionRows.push(...historyResponse.map(row=>({...row,current:false})));
     if(!cloudVersionRows.length){list.innerHTML='<div class="work-empty">Ei vielä palautuspisteitä.</div>';return}
-    list.innerHTML=cloudVersionRows.map((row,index)=>{const info=cloudVersionDescription(row.payload),date=new Date(row.created_at).toLocaleString("fi-FI");return '<div class="project-item"><div><strong>'+(row.current?'Nykyinen pilvikopio':'Palautuspiste')+'</strong><span>'+esc(date)+' · '+esc(info.name)+' · '+info.count+' tallennettua projektia</span></div><div class="project-actions"><button type="button" class="secondary small" onclick="restoreCloudVersion('+index+')">Palauta</button></div></div>'}).join("");
+    list.innerHTML=cloudVersionRows.map((row,index)=>{const info=cloudVersionDescription(row.payload),date=new Date(row.created_at).toLocaleString("fi-FI");return '<div class="project-item"><div><strong>'+(row.current?'Nykyinen pilvikopio':'Palautuspiste')+'</strong><span>'+esc(date)+' · '+esc(info.name)+' · '+info.count+' tallennettua projektia</span></div><div class="project-actions"><button type="button" class="secondary small" data-ui-click="restoreCloudVersion('+index+')">Palauta</button></div></div>'}).join("");
   }catch(e){list.innerHTML='<div class="work-empty">Palautuspisteitä ei voitu hakea.</div>'}
 }
 async function restoreCloudVersion(index){
@@ -280,15 +350,21 @@ function restoreCloudBackup(row){
   cloudRestoring=true;
   try{localStorage.setItem("iv_proto",JSON.stringify(payload.current));localStorage.setItem("iv_projects",JSON.stringify(Array.isArray(payload.projects)?payload.projects:[]));localStorage.setItem("iv_pdf_settings",JSON.stringify(payload.pdfSettings||{}));localStorage.setItem("iv_local_updated_at",row.updated_at||new Date().toISOString());data=loadData();render();return true}finally{cloudRestoring=false}
 }
-async function syncCloudNow(showMessage){
+function showCloudConflict(){document.getElementById("cloud-force-sync").hidden=false;updateCloudUi("Pilvessä on eri tai uudempi kopio. Paikallisia tietoja ei korvattu. Tarkista Palautuspisteet ennen mahdollista ylikirjoitusta.")}
+async function forceSyncCloudNow(){if(!confirm("Korvataanko pilvikopio tämän laitteen tiedoilla? Nykyinen pilvikopio tallennetaan ensin palautuspisteeksi."))return false;return syncCloudNow(true,true)}
+async function syncCloudNow(showMessage,force=false){
   if(CLOUD_DATA_SYNC_PAUSED){updateCloudUi("Projektitietojen pilvisynkronointi on tilapäisesti tauolla tietojen suojaamiseksi.");if(showMessage)showToast("Pilvisynkronointi on tauolla");return false}
   if(!cloudUser){if(showMessage)showToast("Kirjaudu ensin pilvitallennukseen");return false}if(cloudBusy){if(showMessage)showToast("Synkronointi on jo käynnissä");return false}if(!navigator.onLine){updateCloudUi("Ei verkkoyhteyttä. Muutokset synkronoidaan myöhemmin.");if(showMessage)showToast("Ei verkkoyhteyttä");return false}
   cloudBusy=true;let stage="pilvikopion haku";const note=document.getElementById("save-note");if(note)note.textContent="Synkronoidaan pilveen…";updateCloudUi("Synkronoidaan pilveen…");
   try{
-    const outgoing=cloudPayload(),remote=await fetchCloudBackup();
-    if(remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing)){stage="palautuspisteen tallennus";await insertCloudVersion(remote.payload,remote.updated_at)}
+    const outgoing=cloudPayload(),remote=await fetchCloudBackup(),seen=localStorage.getItem("iv_cloud_seen_at_"+cloudUser.id)||"";
+    const remoteChanged=remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing)&&(seen?remote.updated_at!==seen:Date.parse(remote.updated_at||0)>Date.parse(outgoing.localUpdatedAt||0));
+    if(remoteChanged&&!force){showCloudConflict();if(showMessage)showToast("Tarkista pilvessä oleva kopio");return false}
+    if((force&&remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing))||shouldArchiveCloudVersion(remote,outgoing)){stage="palautuspisteen tallennus";await insertCloudVersion(remote.payload,remote.updated_at);localStorage.setItem("iv_cloud_version_at_"+cloudUser.id,String(Date.now()))}
     stage="projektin tallennus";
-    await cloudFetch("/rest/v1/app_backups?on_conflict=user_id",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload:outgoing,updated_at:new Date().toISOString()})});
+    const savedAt=new Date().toISOString();
+    await cloudFetch("/rest/v1/app_backups?on_conflict=user_id",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify({user_id:cloudUser.id,payload:outgoing,updated_at:savedAt})});
+    localStorage.setItem("iv_cloud_seen_at_"+cloudUser.id,savedAt);document.getElementById("cloud-force-sync").hidden=true;
     scheduleCloudVersionMaintenance();
     if(localUpdatedAt()!==outgoing.localUpdatedAt){if(note)note.textContent="Tallennettu laitteelle – synkronoidaan uusimmat muutokset…";updateCloudUi("Uusia muutoksia odottaa pilvitallennusta.");clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>syncCloudNow(false),100);if(showMessage)showToast("Uusimmat muutokset synkronoidaan");return true}
     if(note)note.textContent="Tallennettu automaattisesti laitteelle ja pilveen";updateCloudUi("Kaikki tiedot on tallennettu pilveen.");if(showMessage)showToast("Tiedot synkronoitu");return true;
@@ -296,14 +372,16 @@ async function syncCloudNow(showMessage){
 }
 async function initializeCloud(){
   if(!cloudUser)return;
-  try{await migrateLegacyPhotoStorage(true);await syncPendingPhotoUploads();const remote=await fetchCloudBackup();if(!remote||Date.parse(localUpdatedAt()||0)>=Date.parse(remote.updated_at||0))await syncCloudNow(false);else updateCloudUi("Pilvessä on uudempi kopio. Paikallisia tietoja ei korvattu. Voit tarkistaa kopion Palautuspisteistä.")}catch(e){updateCloudUi("Pilveen yhdistäminen epäonnistui. Tiedot säilyvät tällä laitteella.")}
+  try{await migrateLegacyPhotoStorage(true);await syncPendingPhotoUploads();const remote=await fetchCloudBackup();if(!remote||Date.parse(localUpdatedAt()||0)>=Date.parse(remote.updated_at||0))await syncCloudNow(false);else showCloudConflict()}catch(e){updateCloudUi("Pilveen yhdistäminen epäonnistui. Tiedot säilyvät tällä laitteella.")}
 }
 async function initializeCloudAuth(){
-  const callback=consumeAuthCallback();cloudSession=readCloudSession();if(!cloudSession){updateCloudUi();return}
-  if(cloudSession.expires_at*1000<Date.now()+30000&&!await refreshCloudSession())return;
-  await loadCloudUser();if(cloudUser){await initializeCloud();if(callback)showToast("Sähköposti vahvistettu ja pilvitallennus yhdistetty")}
+  const callback=await consumeAuthCallback();cloudSession=readCloudSession();if(!cloudSession){updateCloudUi();return}
+  try{
+    if(cloudSession.expires_at*1000<Date.now()+30000&&!await refreshCloudSession())return;
+    await loadCloudUser();if(cloudUser){await initializeCloud();if(callback)showToast("Sähköposti vahvistettu ja pilvitallennus yhdistetty")}
+  }catch(e){updateCloudUi("Yhteys pilvipalveluun katkesi. Tiedot säilyvät tällä laitteella.")}
 }
-window.addEventListener("online",async()=>{if(cloudUser){await syncPendingPhotoUploads().catch(()=>false);await syncCloudNow(false)}});
+window.addEventListener("online",async()=>{if(cloudSession&&!cloudUser){try{if(await loadCloudUser())await initializeCloud()}catch(e){return}}else if(cloudUser){await syncPendingPhotoUploads().catch(()=>false);await syncCloudNow(false)}schedulePhotoCleanup()});
 function newRecordId(prefix){return(globalThis.crypto?.randomUUID?.()||prefix+"-"+Date.now()+"-"+Math.random().toString(36).slice(2))}
 const emptyVent=(space="",type="exhaust")=>({space,type,valve:"",kpl:"1",pa:"",target:"",adjusted:"",position:""});
 const emptyApartment=()=>({name:"",comments:"",vents:[],pressureEnabled:false,pressureDifference:"",speedEnabled:false,measurementSpeed:""});
@@ -316,7 +394,8 @@ const normalizeCleaningItems=items=>[...new Set((Array.isArray(items)?items:[]).
 const CONDITION_ITEMS=[{id:"airUnit",label:"IV-koneen yleiskunto"},{id:"fans",label:"Puhaltimien kunto"},{id:"seals",label:"Tiivisteiden kunto"},{id:"filters",label:"Suodattimien kunto"},{id:"heatRecovery",label:"LTO-kennon kunto"},{id:"condensate",label:"Kondenssiveden poisto"}];
 const CONDITION_STATES=[{id:"good",label:"Hyvä"},{id:"attention",label:"Huomioitava"},{id:"repair",label:"Korjattava"}];
 function normalizeConditionRatings(ratings){const result={};if(!ratings||typeof ratings!=="object"||Array.isArray(ratings))return result;CONDITION_ITEMS.forEach(item=>{if(CONDITION_STATES.some(state=>state.id===ratings[item.id]))result[item.id]=ratings[item.id]});return result}
-const emptyData=()=>({projectId:null,kohde:"",paiva:new Date().toISOString().slice(0,10),mittaaja:"",valine:"",defaultValve:"",workTypes:[],customWorkType:"",cleaningItems:[],customCleaningItem:"",conditionRatings:{},workEntries:[],apartments:[]});
+const todayInFinland=()=>new Date().toLocaleDateString("sv-SE",{timeZone:"Europe/Helsinki"});
+const emptyData=()=>({projectId:null,kohde:"",paiva:todayInFinland(),mittaaja:"",valine:"",defaultValve:"",workTypes:[],customWorkType:"",cleaningItems:[],customCleaningItem:"",conditionRatings:{},workEntries:[],apartments:[]});
 function sortedApartments(apartments){
   return (Array.isArray(apartments)?apartments:[]).map((apartment,index)=>({apartment,index})).sort((a,b)=>{
     const left=String(a.apartment?.name||"").trim(),right=String(b.apartment?.name||"").trim();
@@ -347,7 +426,7 @@ function normalizeData(saved){
   result.defaultValve=String(result.defaultValve||"");
   result.cleaningItems=normalizeCleaningItems(result.cleaningItems);result.customCleaningItem=String(result.customCleaningItem||"");result.conditionRatings=normalizeConditionRatings(result.conditionRatings);
   result.workEntries=(Array.isArray(result.workEntries)?result.workEntries:[]).map(entry=>({
-    id:entry?.id||newRecordId("merkinta"),date:entry?.date||new Date().toISOString().slice(0,10),target:String(entry?.target||""),title:String(entry?.title||""),text:String(entry?.text||""),
+    id:entry?.id||newRecordId("merkinta"),date:entry?.date||todayInFinland(),target:String(entry?.target||""),title:String(entry?.title||""),text:String(entry?.text||""),
     cleaningItems:normalizeCleaningItems(entry?.cleaningItems),customCleaningItem:String(entry?.customCleaningItem||""),conditionRatings:normalizeConditionRatings(entry?.conditionRatings),
     photos:(Array.isArray(entry?.photos)?entry.photos:[]).filter(photo=>photo&&(photo.data||photo.storagePath||photo.localKey)).map(normalizePhoto)
   }));
@@ -389,9 +468,9 @@ function cleaningLabels(items,custom=""){
   const selected=normalizeCleaningItems(items),labels=CLEANING_ITEMS.filter(item=>selected.includes(item.id)&&item.id!=="other").map(item=>item.label),other=String(custom||"").trim();
   if(selected.includes("other")&&other)labels.push(other);return labels;
 }
-function cleaningOptionsHtml(selected,handler){const chosen=new Set(normalizeCleaningItems(selected));return CLEANING_ITEMS.map(item=>'<button type="button" class="cleaning-option'+(chosen.has(item.id)?' selected':'')+'" role="checkbox" aria-checked="'+(chosen.has(item.id)?'true':'false')+'" onclick="'+handler+'(\''+item.id+'\')">'+esc(item.label)+'</button>').join("")}
+function cleaningOptionsHtml(selected,handler){const chosen=new Set(normalizeCleaningItems(selected));return CLEANING_ITEMS.map(item=>'<button type="button" class="cleaning-option'+(chosen.has(item.id)?' selected':'')+'" role="checkbox" aria-checked="'+(chosen.has(item.id)?'true':'false')+'" data-ui-click="'+handler+'(\''+item.id+'\')">'+esc(item.label)+'</button>').join("")}
 function conditionEntries(ratings){const normalized=normalizeConditionRatings(ratings);return CONDITION_ITEMS.flatMap(item=>{const state=CONDITION_STATES.find(option=>option.id===normalized[item.id]);return state?[{id:item.id,label:item.label,state:state.id,stateLabel:state.label}]:[]})}
-function conditionGridHtml(ratings,handler){const normalized=normalizeConditionRatings(ratings);return CONDITION_ITEMS.map(item=>'<div class="condition-item"><strong>'+esc(item.label)+'</strong><div class="condition-choices">'+CONDITION_STATES.map(state=>'<button type="button" class="condition-choice '+state.id+(normalized[item.id]===state.id?' selected':'')+'" aria-pressed="'+(normalized[item.id]===state.id?'true':'false')+'" onclick="'+handler+'(\''+item.id+'\',\''+state.id+'\')">'+state.label+'</button>').join("")+'</div></div>').join("")}
+function conditionGridHtml(ratings,handler){const normalized=normalizeConditionRatings(ratings);return CONDITION_ITEMS.map(item=>'<div class="condition-item"><strong>'+esc(item.label)+'</strong><div class="condition-choices">'+CONDITION_STATES.map(state=>'<button type="button" class="condition-choice '+state.id+(normalized[item.id]===state.id?' selected':'')+'" aria-pressed="'+(normalized[item.id]===state.id?'true':'false')+'" data-ui-click="'+handler+'(\''+item.id+'\',\''+state.id+'\')">'+state.label+'</button>').join("")+'</div></div>').join("")}
 function renderProjectCleaning(){
   const selected=normalizeCleaningItems(data.cleaningItems),grid=document.getElementById("project-cleaning-grid"),custom=document.getElementById("project-cleaning-custom"),input=document.getElementById("project-cleaning-custom-input"),count=document.getElementById("project-cleaning-count");if(grid)grid.innerHTML=cleaningOptionsHtml(selected,"toggleProjectCleaningItem");if(custom)custom.hidden=!selected.includes("other");if(input)input.value=data.customCleaningItem||"";if(count)count.textContent=selected.length?selected.length+" valittu":"Ei valintoja";
 }
@@ -433,8 +512,8 @@ const DEFAULT_SECOND_LOGO={src:"./airduo-logo.jpg",width:658,height:306};
 const emptyPdfSettings=()=>({company:"",businessId:"",contactDetails:"",logoData:"",logoWidth:0,logoHeight:0,logo2Data:"",logo2Width:0,logo2Height:0,airduoDefaultApplied:false});
 function getPdfSettings(){try{const settings={...emptyPdfSettings(),...JSON.parse(localStorage.getItem("iv_pdf_settings")||"{}")};if(!settings.airduoDefaultApplied){if(!settings.logo2Data){settings.logo2Data=DEFAULT_SECOND_LOGO.src;settings.logo2Width=DEFAULT_SECOND_LOGO.width;settings.logo2Height=DEFAULT_SECOND_LOGO.height}settings.airduoDefaultApplied=true}return settings}catch(e){const settings=emptyPdfSettings();settings.logo2Data=DEFAULT_SECOND_LOGO.src;settings.logo2Width=DEFAULT_SECOND_LOGO.width;settings.logo2Height=DEFAULT_SECOND_LOGO.height;settings.airduoDefaultApplied=true;return settings}}
 let pendingPdfSettings=getPdfSettings();
-function renderLogoPreview(){const box=document.getElementById("logo-preview");box.innerHTML=pendingPdfSettings.logoData?'<img src="'+pendingPdfSettings.logoData+'" alt="Yrityksen logo">':'Ei logoa'}
-function renderSecondLogoPreview(){const box=document.getElementById("logo-preview-2");box.innerHTML=pendingPdfSettings.logo2Data?'<img src="'+pendingPdfSettings.logo2Data+'" alt="Toinen logo">':'Ei toista logoa'}
+function renderLogoPreview(){const box=document.getElementById("logo-preview");box.innerHTML=pendingPdfSettings.logoData?'<img src="'+esc(pendingPdfSettings.logoData)+'" alt="Yrityksen logo">':'Ei logoa'}
+function renderSecondLogoPreview(){const box=document.getElementById("logo-preview-2");box.innerHTML=pendingPdfSettings.logo2Data?'<img src="'+esc(pendingPdfSettings.logo2Data)+'" alt="Toinen logo">':'Ei toista logoa'}
 function openPdfSettings(){closeMenu();pendingPdfSettings=getPdfSettings();document.getElementById("setting-company").value=pendingPdfSettings.company;document.getElementById("setting-business-id").value=pendingPdfSettings.businessId;document.getElementById("setting-contact-details").value=pendingPdfSettings.contactDetails;document.getElementById("setting-logo").value="";document.getElementById("setting-logo-2").value="";renderLogoPreview();renderSecondLogoPreview();document.getElementById("pdf-settings-modal").classList.add("open")}
 function closePdfSettings(){document.getElementById("pdf-settings-modal").classList.remove("open")}
 function handleLogoFile(file){
@@ -454,20 +533,20 @@ function save(){
   data.kohde=document.getElementById("kohde").value;data.paiva=document.getElementById("paiva").value;data.mittaaja=document.getElementById("mittaaja").value;data.valine=document.getElementById("valine").value;data.defaultValve=document.getElementById("default-valve").value;
   try{localStorage.setItem("iv_proto",JSON.stringify(data));markLocalChange();return true}catch(e){showToast("Tallennustila on täynnä. Poista kuvia tai vanhoja projekteja.");return false}
 }
-function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}
 function getProjects(){try{const p=JSON.parse(localStorage.getItem("iv_projects")||"[]");return Array.isArray(p)?p:[]}catch(e){return[]}}
-function setProjects(projects){try{localStorage.setItem("iv_projects",JSON.stringify(projects));return true}catch(e){return false}}
+function setProjects(projects){try{const before=getProjects();localStorage.setItem("iv_projects",JSON.stringify(projects));queuePhotoCleanup(before.flatMap(item=>projectPhotoRecords(item.data||{},item.id).map(record=>record.photo)));return true}catch(e){return false}}
 function projectHasContent(){return !!(data.kohde||data.mittaaja||data.valine||(data.workTypes||[]).length||data.apartments.length||data.workEntries.length)}
 function projectName(projectData=data){return projectData.kohde?.trim()||projectData.apartments?.[0]?.name?.trim()||"Nimetön projekti"}
 function toggleMenu(force){const m=document.getElementById("top-menu");if(typeof force==="boolean")m.classList.toggle("open",force);else m.classList.toggle("open")}
 function closeMenu(){document.getElementById("top-menu").classList.remove("open")}
 function showToast(message){const t=document.getElementById("toast");t.textContent=message;t.classList.add("show");clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove("show"),2600)}
 function saveProjectSnapshot(){
-  save();
   if(!data.projectId)data.projectId=(globalThis.crypto?.randomUUID?.()||("projekti-"+Date.now()+"-"+Math.random().toString(36).slice(2)));
+  if(!save())return false;
   const projects=getProjects(),snapshot=JSON.parse(JSON.stringify(data)),item={id:data.projectId,name:projectName(),savedAt:new Date().toISOString(),data:snapshot},i=projects.findIndex(p=>p.id===data.projectId);
   if(i>=0)projects.splice(i,1);projects.unshift(item);
-  const ok=setProjects(projects.slice(0,100));save();return ok;
+  return setProjects(projects.slice(0,100));
 }
 function saveCurrentProject(){closeMenu();const ok=saveProjectSnapshot();showToast(ok?"Projekti tallennettu":"Projektia ei voitu tallentaa")}
 function blobDataUrl(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error||new Error("Kuvaa ei voitu lukea"));reader.readAsDataURL(blob)})}
@@ -489,11 +568,19 @@ async function importProjectFile(file){
   try{
     const parsed=JSON.parse(await file.text());
     if(parsed?.format!=="iv-mittaus-project"||parsed?.version!==1||!parsed.project||!Array.isArray(parsed.project.apartments)||!Array.isArray(parsed.project.workEntries))throw new Error("Tiedosto ei ole IV Mittaus -projektitiedosto");
+    const imported=normalizeData(parsed.project),importId=String(imported.projectId||"");
+    if(projectHasContent()&&!saveProjectSnapshot())throw new Error("Nykyistä projektia ei voitu turvata ennen tuontia");
+    if(importId&&getProjects().some(item=>item.id===importId)&&!confirm("Varmuuskopiossa on sama projektitunnus kuin tallennetussa projektissa. Korvataanko tallennettu projekti varmuuskopiolla?"))return;
     await migrateLegacyPhotoStorage(true);
-    const imported=normalizeData(parsed.project),projects=getProjects(),sameProject=projects.find(item=>String(item?.data?.kohde||item?.name||"").trim().toLocaleLowerCase("fi")===String(imported.kohde||"").trim().toLocaleLowerCase("fi"));
-    imported.projectId=sameProject?.id||newRecordId("projekti");
+    imported.projectId=importId||newRecordId("projekti");
     let uploadFailures=0;
-    for(const record of projectPhotoRecords(imported,imported.projectId)){try{await migratePhotoRecord(record,true)}catch(e){uploadFailures++}}
+    for(const record of projectPhotoRecords(imported,imported.projectId)){
+      const photo=record.photo;
+      if(photo.storagePath&&cloudUser&&!ownPhotoStoragePath(photo.storagePath)){
+        if(photo.data||await cachedPhotoBlob(photoCacheKey(photo))){delete photo.storagePath}else{uploadFailures++;continue}
+      }
+      try{await migratePhotoRecord(record,true)}catch(e){uploadFailures++}
+    }
     data=imported;render();
     if(!saveProjectSnapshot())throw new Error("Palautettua projektia ei voitu tallentaa");
     window.scrollTo({top:0,behavior:"smooth"});
@@ -506,21 +593,24 @@ function newProject(){
   document.getElementById("new-project-modal").classList.add("open");
 }
 function closeNewProject(){document.getElementById("new-project-modal").classList.remove("open")}
-function startNewProject(){closeWorkEntryEditor();data=emptyData();render();save();closeNewProject();window.scrollTo({top:0,behavior:"smooth"});showToast("Uusi projekti avattu")}
+function startNewProject(){if(projectHasContent()&&!saveProjectSnapshot()){showToast("Nykyistä projektia ei voitu turvata");return}closeWorkEntryEditor();data=emptyData();render();save();closeNewProject();window.scrollTo({top:0,behavior:"smooth"});showToast("Uusi projekti avattu")}
 function openProjects(){closeMenu();renderProjectList();document.getElementById("projects-modal").classList.add("open")}
 function closeProjects(){document.getElementById("projects-modal").classList.remove("open")}
 function renderProjectList(){
   const list=document.getElementById("project-list"),projects=getProjects();
   if(!projects.length){list.innerHTML='<div class="empty-state"><strong>Ei tallennettuja projekteja</strong>Projekti tallentuu tähän listaan, kun lataat siitä PDF:n.</div>';return}
-  list.innerHTML=projects.map(p=>'<div class="project-item"><div><strong>'+esc(p.name||"Nimetön projekti")+'</strong><span>Tallennettu '+esc(new Date(p.savedAt).toLocaleString("fi-FI"))+'</span></div><div class="project-actions"><button type="button" class="primary" onclick="loadProject(\''+esc(p.id)+'\')">Avaa</button><button type="button" class="danger" onclick="deleteProject(\''+esc(p.id)+'\')">Poista</button></div></div>').join("");
+  list.innerHTML=projects.map((p,index)=>'<div class="project-item"><div><strong>'+esc(p.name||"Nimetön projekti")+'</strong><span>Tallennettu '+esc(new Date(p.savedAt).toLocaleString("fi-FI"))+'</span></div><div class="project-actions"><button type="button" class="primary" data-project-index="'+index+'" data-project-action="open">Avaa</button><button type="button" class="danger" data-project-index="'+index+'" data-project-action="delete">Poista</button></div></div>').join("");
+  list.querySelectorAll("[data-project-action]").forEach(button=>button.addEventListener("click",()=>{const id=projects[Number(button.dataset.projectIndex)]?.id;if(!id)return;if(button.dataset.projectAction==="open")loadProject(id);else deleteProject(id)}));
 }
 function loadProject(id){
+  if(!getProjects().some(x=>x.id===id))return;
+  if(projectHasContent()&&!saveProjectSnapshot()){showToast("Nykyistä projektia ei voitu turvata");return}
   const p=getProjects().find(x=>x.id===id);if(!p)return;
   closeWorkEntryEditor();data=normalizeData(JSON.parse(JSON.stringify(p.data)));data.projectId=id;render();save();closeProjects();window.scrollTo({top:0,behavior:"smooth"});showToast("Projekti avattu");
 }
 function deleteProject(id){
   const projects=getProjects(),p=projects.find(x=>x.id===id);if(!p||!confirm('Poistetaanko projekti "'+(p.name||"Nimetön projekti")+'"?'))return;
-  setProjects(projects.filter(x=>x.id!==id));if(data.projectId===id)data.projectId=null;else projectPhotoRecords(p.data,id).forEach(record=>deletePhotoAsset(record.photo));save();renderProjectList();showToast("Projekti poistettu");
+  if(!setProjects(projects.filter(x=>x.id!==id))){showToast("Projektia ei voitu poistaa");return}if(data.projectId===id)data.projectId=null;save();renderProjectList();showToast("Projekti poistettu");
 }
 let pdfObjectUrl=null,pdfShareFile=null;
 function closePdfPreview(){document.getElementById("pdf-modal").classList.remove("open")}
@@ -543,7 +633,7 @@ function openWorkEntryEditor(id=null){
   const entry=id?data.workEntries.find(item=>item.id===id):null;
   editingWorkEntryId=entry?.id||newRecordId("merkinta");pendingWorkPhotos=(entry?.photos||[]).map(photo=>({...photo}));pendingOriginalPhotoIds=new Set(pendingWorkPhotos.map(photo=>photo.id));pendingWorkCleaningItems=normalizeCleaningItems(entry?.cleaningItems);pendingWorkCustomCleaningItem=String(entry?.customCleaningItem||"");pendingWorkConditionRatings=normalizeConditionRatings(entry?.conditionRatings);
   ["work-entry-cleaning-wrap","work-entry-condition-wrap"].forEach(elementId=>{const section=document.getElementById(elementId);if(section)section.open=false});
-  document.getElementById("work-entry-date").value=entry?.date||new Date().toISOString().slice(0,10);
+  document.getElementById("work-entry-date").value=entry?.date||todayInFinland();
   updateDateDisplay("work-entry-date");
   document.getElementById("work-entry-target").value=entry?.target||"";
   document.getElementById("work-entry-title").value=entry?(entry.title||workEntryTitle(entry)):"";
@@ -572,10 +662,10 @@ async function handleWorkPhotoFiles(files){
   if(!data.projectId)data.projectId=newRecordId("projekti");
   for(const file of selected){try{const compressed=await compressWorkPhoto(file),id=newRecordId("kuva"),photo={id,localKey:id,width:compressed.width,height:compressed.height};await cachePhotoBlob(id,compressed.blob);pendingWorkPhotos.push(photo);renderWorkPhotoPreview();if(cloudUser&&navigator.onLine){await uploadPhotoBlob(photo,compressed.blob,data.projectId,editingWorkEntryId);renderWorkPhotoPreview()}else showToast("Kuva tallennettu lähetysjonoon")}catch(e){showToast(e.message||"Kuvaa ei voitu lisätä")}}
 }
-function renderWorkPhotoPreview(){const box=document.getElementById("work-photo-preview");if(!box)return;box.innerHTML=pendingWorkPhotos.map((photo,index)=>'<div class="work-photo"><img data-photo-id="'+esc(photo.id)+'" alt="Työmerkinnän kuva '+(index+1)+'"><button type="button" onclick="removePendingWorkPhoto('+index+')" aria-label="Poista kuva">×</button></div>').join("");hydratePhotoImages(box,pendingWorkPhotos)}
+function renderWorkPhotoPreview(){const box=document.getElementById("work-photo-preview");if(!box)return;box.innerHTML=pendingWorkPhotos.map((photo,index)=>'<div class="work-photo"><img data-photo-id="'+esc(photo.id)+'" alt="Työmerkinnän kuva '+(index+1)+'"><button type="button" data-ui-click="removePendingWorkPhoto('+index+')" aria-label="Poista kuva">×</button></div>').join("");hydratePhotoImages(box,pendingWorkPhotos)}
 function removePendingWorkPhoto(index){const [removed]=pendingWorkPhotos.splice(index,1);if(removed&&!pendingOriginalPhotoIds.has(removed.id))deletePhotoAsset(removed);renderWorkPhotoPreview()}
 function saveWorkEntry(){
-  const date=document.getElementById("work-entry-date").value||new Date().toISOString().slice(0,10),target=document.getElementById("work-entry-target").value.trim(),title=document.getElementById("work-entry-title").value.trim(),textValue=document.getElementById("work-entry-text").value.trim();
+  const date=document.getElementById("work-entry-date").value||todayInFinland(),target=document.getElementById("work-entry-target").value.trim(),title=document.getElementById("work-entry-title").value.trim(),textValue=document.getElementById("work-entry-text").value.trim();
   if(!title){showToast("Anna työmerkinnälle otsikko");document.getElementById("work-entry-title").focus();return}
   if(!textValue&&!pendingWorkPhotos.length&&!pendingWorkCleaningItems.length&&!conditionEntries(pendingWorkConditionRatings).length){showToast("Kirjoita kuvaus, tee valinta tai lisää kuva");return}
   const entry={id:editingWorkEntryId||newRecordId("merkinta"),date,target,title,text:textValue,cleaningItems:normalizeCleaningItems(pendingWorkCleaningItems),customCleaningItem:pendingWorkCustomCleaningItem.trim(),conditionRatings:normalizeConditionRatings(pendingWorkConditionRatings),photos:pendingWorkPhotos.map(photo=>({...photo}))},before=data.workEntries.map(item=>({...item,cleaningItems:[...(item.cleaningItems||[])],conditionRatings:{...(item.conditionRatings||{})},photos:(item.photos||[]).map(photo=>({...photo}))})),index=data.workEntries.findIndex(item=>item.id===entry.id),previousPhotos=index>=0?(data.workEntries[index].photos||[]):[],removedPhotos=previousPhotos.filter(photo=>!entry.photos.some(next=>next.id===photo.id));
@@ -586,14 +676,15 @@ function saveWorkEntry(){
 function editWorkEntry(id){openWorkEntryEditor(id)}
 function deleteWorkEntry(id){
   const entry=data.workEntries.find(item=>item.id===id);if(!entry||!confirm("Poistetaanko tämä työmerkintä kuvineen?"))return;
-  data.workEntries=data.workEntries.filter(item=>item.id!==id);(entry.photos||[]).forEach(photo=>deletePhotoAsset(photo));if(editingWorkEntryId===id)closeWorkEntryEditor();renderWorkEntries();save();showToast("Työmerkintä poistettu");
+  const before=data.workEntries;data.workEntries=data.workEntries.filter(item=>item.id!==id);if(!save()){data.workEntries=before;return}if(editingWorkEntryId===id)closeWorkEntryEditor();queuePhotoCleanup(entry.photos||[]);renderWorkEntries();showToast("Työmerkintä poistettu");
 }
 function renderWorkEntries(){
   const list=document.getElementById("work-entry-list");if(!list)return;
   const entries=[...(data.workEntries||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   if(!entries.length){list.innerHTML='<div class="work-empty">Ei vielä työmerkintöjä. Lisää yleinen tai asunto-/kohdekohtainen merkintä.</div>';return}
   const types=data.workTypes||[],cleaningActive=types.includes("cleaning"),conditionActive=cleaningActive||types.includes("maintenance");
-  const allPhotos=[];list.innerHTML=entries.map(entry=>{const photos=entry.photos||[],labels=cleaningActive?cleaningLabels(entry.cleaningItems,entry.customCleaningItem):[],conditions=conditionActive?conditionEntries(entry.conditionRatings):[],photoLabel=photos.length===1?"1 kuva":photos.length+" kuvaa";allPhotos.push(...photos);return '<details class="work-entry-card" data-work-entry-id="'+esc(entry.id)+'"><summary><span class="work-entry-summary-main"><strong>'+esc(workEntryTitle(entry))+'</strong><span>'+esc(entry.target||"Yleinen")+'</span></span><span class="work-entry-summary-meta"><span>'+esc(displayWorkDate(entry.date))+'</span><span>'+photoLabel+'</span></span></summary><div class="work-entry-body">'+(labels.length?'<div class="cleaning-tags">'+labels.map(label=>'<span class="cleaning-tag">✓ '+esc(label)+'</span>').join("")+'</div>':'')+(conditions.length?'<div class="condition-tags">'+conditions.map(item=>'<span class="condition-tag '+item.state+'">'+esc(item.label)+': '+esc(item.stateLabel)+'</span>').join("")+'</div>':'')+(entry.text?'<p class="work-entry-text">'+esc(entry.text)+'</p>':'')+(photos.length?'<div class="work-entry-photos">'+photos.map((photo,index)=>'<img data-photo-id="'+esc(photo.id)+'" alt="'+esc(workEntryTitle(entry))+', kuva '+(index+1)+'">').join("")+'</div>':'')+'<div class="work-entry-actions"><button type="button" class="secondary small" onclick="editWorkEntry(\''+entry.id+'\')">Muokkaa</button><button type="button" class="danger small" onclick="deleteWorkEntry(\''+entry.id+'\')">Poista</button></div></div></details>'}).join("");hydratePhotoImages(list,allPhotos);
+  const allPhotos=[];list.innerHTML=entries.map((entry,entryIndex)=>{const photos=entry.photos||[],labels=cleaningActive?cleaningLabels(entry.cleaningItems,entry.customCleaningItem):[],conditions=conditionActive?conditionEntries(entry.conditionRatings):[],photoLabel=photos.length===1?"1 kuva":photos.length+" kuvaa";allPhotos.push(...photos);return '<details class="work-entry-card" data-work-entry-id="'+esc(entry.id)+'"><summary><span class="work-entry-summary-main"><strong>'+esc(workEntryTitle(entry))+'</strong><span>'+esc(entry.target||"Yleinen")+'</span></span><span class="work-entry-summary-meta"><span>'+esc(displayWorkDate(entry.date))+'</span><span>'+photoLabel+'</span></span></summary><div class="work-entry-body">'+(labels.length?'<div class="cleaning-tags">'+labels.map(label=>'<span class="cleaning-tag">✓ '+esc(label)+'</span>').join("")+'</div>':'')+(conditions.length?'<div class="condition-tags">'+conditions.map(item=>'<span class="condition-tag '+item.state+'">'+esc(item.label)+': '+esc(item.stateLabel)+'</span>').join("")+'</div>':'')+(entry.text?'<p class="work-entry-text">'+esc(entry.text)+'</p>':'')+(photos.length?'<div class="work-entry-photos">'+photos.map((photo,index)=>'<img data-photo-id="'+esc(photo.id)+'" alt="'+esc(workEntryTitle(entry))+', kuva '+(index+1)+'">').join("")+'</div>':'')+'<div class="work-entry-actions"><button type="button" class="secondary small" data-entry-index="'+entryIndex+'" data-entry-action="edit">Muokkaa</button><button type="button" class="danger small" data-entry-index="'+entryIndex+'" data-entry-action="delete">Poista</button></div></div></details>'}).join("");
+  list.querySelectorAll("[data-entry-action]").forEach(button=>button.addEventListener("click",()=>{const id=entries[Number(button.dataset.entryIndex)]?.id;if(!id)return;if(button.dataset.entryAction==="edit")editWorkEntry(id);else deleteWorkEntry(id)}));hydratePhotoImages(list,allPhotos);
 }
 function addApartment(){data.apartments.push(emptyApartment());render();save();const apartment=document.querySelectorAll(".apartment")[data.apartments.length-1];if(apartment){apartment.open=true;apartment.querySelector(".apartment-title input")?.focus()}}
 function removeApartment(ai){if(confirm("Poistetaanko tämä asunto mittauksineen?")){data.apartments.splice(ai,1);render();save()}}
@@ -606,6 +697,7 @@ function finishApartmentNameEdit(ai){
 function updateApartmentComments(ai,v){data.apartments[ai].comments=v;save()}
 function addVent(ai){data.apartments[ai].vents.push({...emptyVent(),valve:String(data.defaultValve||"")});const vi=data.apartments[ai].vents.length-1;render();save();const apartment=document.querySelectorAll(".apartment")[ai],card=apartment?.querySelector('.vent-card[data-vent-index="'+vi+'"]');if(apartment)apartment.open=true;if(card){card.open=true;const room=card.closest(".room-group");if(room)room.open=true;card.querySelector(".field-space input")?.focus()}}
 function removeVent(ai,vi){data.apartments[ai].vents.splice(vi,1);render();save()}
+function finishVentSpaceEdit(ai,vi){render();const apartment=document.querySelector('.apartment[data-apartment-index="'+ai+'"]'),card=apartment?.querySelector('.vent-card[data-vent-index="'+vi+'"]');if(apartment)apartment.open=true;if(card){card.open=true;card.closest(".room-group").open=true}}
 function updateVent(ai,vi,key,value){
   data.apartments[ai].vents[vi][key]=value;
   const card=document.querySelector('.apartment[data-apartment-index="'+ai+'"] .vent-card[data-vent-index="'+vi+'"]');
@@ -631,13 +723,7 @@ function updateVent(ai,vi,key,value){
     }
     updateApartmentSummary(ai);updateVentDeviation(ai,vi);updateApartmentDeviationNotes(ai);save();return;
   }
-  save();if(key==="adjusted")updateApartmentSummary(ai);updateVentDeviation(ai,vi);updateApartmentDeviationNotes(ai)
-}
-function togglePressureSign(ai){
-  const apartment=data.apartments[ai];let x=String(apartment.pressureDifference||"").trim();
-  apartment.pressureDifference=x.startsWith("-")?x.slice(1):"-"+x;
-  const input=document.querySelector('input[data-pressure-index="'+ai+'"]');if(input){input.value=apartment.pressureDifference;input.focus()}
-  save();
+  save();if(key==="adjusted"||key==="kpl")updateApartmentSummary(ai);updateVentDeviation(ai,vi);updateApartmentDeviationNotes(ai)
 }
 function toggleApartmentOption(ai,key){const apartment=data.apartments[ai],enabled=!apartment[key];apartment[key]=enabled;if(key==="pressureEnabled"&&enabled&&!String(apartment.pressureDifference||"").trim())apartment.pressureDifference="-";render();save()}
 function updateApartmentOption(ai,key,value){data.apartments[ai][key]=value;save()}
@@ -663,7 +749,8 @@ function updateApartmentDeviationNotes(ai){
   const box=document.getElementById("deviation-comments-"+ai);if(!box)return;const notes=apartmentDeviationComments(data.apartments[ai]);
   box.hidden=!notes.length;box.innerHTML=notes.length?'<strong>Automaattinen huomio</strong><ul>'+notes.map(note=>'<li>'+esc(note)+'</li>').join("")+'</ul>':"";
 }
-function apartmentTotals(a){let supply=0,exhaust=0,hasSupply=false,hasExhaust=false;(a.vents||[]).forEach(v=>{if(v.type==="exhaust"){hasExhaust=true;exhaust+=flowNumber(v.adjusted)}else{hasSupply=true;supply+=flowNumber(v.adjusted)}});const difference=supply-exhaust;return{supply,exhaust,hasSupply,hasExhaust,difference,status:Math.abs(difference)<0.05?"Tasapainossa":difference<0?"Alipaineinen":"Ylipaineinen",statusClass:Math.abs(difference)<0.05?"balanced":difference<0?"negative":"positive"}}
+function ventQuantity(v){const quantity=flowNumber(v.kpl);return Number.isFinite(quantity)&&quantity>0?quantity:1}
+function apartmentTotals(a){let supply=0,exhaust=0,hasSupply=false,hasExhaust=false;(a.vents||[]).forEach(v=>{if(v.type==="exhaust"){hasExhaust=true;exhaust+=flowNumber(v.adjusted)*ventQuantity(v)}else{hasSupply=true;supply+=flowNumber(v.adjusted)*ventQuantity(v)}});const difference=supply-exhaust;return{supply,exhaust,hasSupply,hasExhaust,difference,status:Math.abs(difference)<0.05?"Tasapainossa":difference<0?"Alipaineinen":"Ylipaineinen",statusClass:Math.abs(difference)<0.05?"balanced":difference<0?"negative":"positive"}}
 function updateApartmentSummary(ai){const t=apartmentTotals(data.apartments[ai]),s=document.getElementById("summary-supply-"+ai),e=document.getElementById("summary-exhaust-"+ai),d=document.getElementById("summary-difference-"+ai);if(!s||!e||!d)return;s.textContent=flowFormat(t.supply)+" l/s";e.textContent=flowFormat(t.exhaust)+" l/s";d.querySelector("strong").textContent=(t.difference>0?"+":"")+flowFormat(t.difference)+" l/s";d.querySelector("em").textContent=t.status;d.className="summary-box "+t.statusClass}
 function pdfText(v){return String(v??"").replace(/[\\()]/g,m=>"\\"+m).replace(/[^\x20-\x7e\xa0-\xff]/g,"?")}
 function selectedReportTitle(){
@@ -677,16 +764,27 @@ function selectedReportTitle(){
 }
 async function jpegBytes(source){
   if(!source)return null;
-  if(source.startsWith("data:image/jpeg;base64,"))return Uint8Array.from(atob(source.split(",")[1]),c=>c.charCodeAt(0));
-  try{const response=await fetch(source);return response.ok?new Uint8Array(await response.arrayBuffer()):null}catch(e){return null}
+  if(source.startsWith("data:"))return pdfJpegAsset(dataUrlBlob(source));
+  try{const response=await fetch(source);return response.ok?pdfJpegAsset(await response.blob()):null}catch(e){return null}
 }
-async function workPhotoBytes(photo){const blob=await resolvePhotoBlob(photo);return blob?new Uint8Array(await blob.arrayBuffer()):null}
+async function pdfJpegAsset(blob){
+  if(!blob)throw new Error("PDF:n kuvaa ei voitu lukea");
+  const url=URL.createObjectURL(blob);
+  try{
+    const img=await new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error("PDF:n kuvaa ei voitu avata"));image.src=url});
+    const scale=Math.min(1,1600/img.naturalWidth,1600/img.naturalHeight),width=Math.max(1,Math.round(img.naturalWidth*scale)),height=Math.max(1,Math.round(img.naturalHeight*scale));
+    const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;const ctx=canvas.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,width,height);ctx.drawImage(img,0,0,width,height);
+    const jpeg=await new Promise((resolve,reject)=>canvas.toBlob(result=>result?resolve(result):reject(new Error("PDF:n kuvaa ei voitu muuntaa")),"image/jpeg",.84));
+    return{bytes:new Uint8Array(await jpeg.arrayBuffer()),width,height};
+  }finally{URL.revokeObjectURL(url)}
+}
+async function workPhotoBytes(photo){const blob=await resolvePhotoBlob(photo);return blob?pdfJpegAsset(blob):null}
 async function makePdf(){
   save();
   const settings=getPdfSettings(),workEntries=Array.isArray(data.workEntries)?data.workEntries:[],pdfApartments=sortedApartments(data.apartments),photoRecords=[];
   workEntries.forEach(entry=>(entry.photos||[]).forEach(photo=>photoRecords.push({entryId:entry.id,...photo})));
-  const [logoBytes,logo2Bytes,...photoBytes]=await Promise.all([jpegBytes(settings.logoData),jpegBytes(settings.logo2Data),...photoRecords.map(workPhotoBytes)]);
-  const workImages=photoRecords.map((photo,index)=>({...photo,name:"W"+(index+1),bytes:photoBytes[index]})).filter(photo=>photo.bytes),workImageMap=new Map(workImages.map(photo=>[photo.id,photo]));
+  const [logoAsset,logo2Asset,...photoAssets]=await Promise.all([jpegBytes(settings.logoData),jpegBytes(settings.logo2Data),...photoRecords.map(workPhotoBytes)]);
+  const workImages=photoRecords.map((photo,index)=>({...photo,...photoAssets[index],name:"W"+(index+1)})).filter(photo=>photo.bytes),workImageMap=new Map(workImages.map(photo=>[photo.id,photo]));
   const pages=[[]],left=32,width=531,cols=[64,57,125,30,35,67,72,81],headers=["Tila","Tulo/poisto","Venttiili / päätelaite","Kpl","Pa","Suunn. l/s","Säädetty l/s","Asento"];
   const C={ink:"0.09 0.14 0.18",muted:"0.38 0.44 0.48",line:"0.80 0.84 0.86",pale:"0.96 0.97 0.97",green:"0.06 0.65 0.43",amber:"0.72 0.43 0.04",supply:"0.38 0.50 0.59",exhaust:"0.54 0.50 0.46",red:"0.71 0.14 0.09",redPale:"0.99 0.90 0.90"};
   const reportTitle=selectedReportTitle()||(workEntries.length?(data.apartments.length?"ILMANVAIHDON TYÖ- JA MITTAUSRAPORTTI":"ILMANVAIHDON TYÖRAPORTTI"):"ILMAMÄÄRIEN MITTAUSPÖYTÄKIRJA"),hasCover=data.apartments.length>=3||workEntries.length>0;
@@ -702,13 +800,13 @@ async function makePdf(){
   function addPage(){if(page.length){page=[];pages.push(page)}}
   function brandHeader(){
     let companyX=left,maxLogoW=0;
-    const hasLogo1=!!(logoBytes&&settings.logoWidth&&settings.logoHeight),hasLogo2=!!(logo2Bytes&&settings.logo2Width&&settings.logo2Height);
+    const hasLogo1=!!logoAsset,hasLogo2=!!logo2Asset;
     if(hasLogo1){
-      const logoH=hasLogo2?20:38,logoW=Math.min(88,logoH*settings.logoWidth/settings.logoHeight);
+      const logoH=hasLogo2?20:38,logoW=Math.min(88,logoH*logoAsset.width/logoAsset.height);
       image(left,hasLogo2?808:790,logoW,logoH);maxLogoW=Math.max(maxLogoW,logoW);
     }
     if(hasLogo2){
-      const logoH=hasLogo1?20:38,logoW=Math.min(88,logoH*settings.logo2Width/settings.logo2Height);
+      const logoH=hasLogo1?20:38,logoW=Math.min(88,logoH*logo2Asset.width/logo2Asset.height);
       image(left,hasLogo1?784:790,logoW,logoH,"Im2");maxLogoW=Math.max(maxLogoW,logoW);
     }
     if(maxLogoW)companyX=left+maxLogoW+16;
@@ -758,7 +856,7 @@ async function makePdf(){
   function apartmentHeight(a){const rows=commentRows(a);return 26+18+20+(a.vents||[]).length*17+8+16+34+8+Math.max(24,10+rows.length*9)+13}
   function apartmentBar(name,continued=false){ensure(27);text((name||"-")+(continued?"  (jatkuu)":""),left,y-15,13,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=30}
   function tableHeader(title){
-    text(title,left,y-9,7.5,true,C.ink);y-=14;rect(left,y-20,width,20,C.pale,C.line);
+    text(title+" - arvot / venttiili",left,y-9,7.5,true,C.ink);y-=14;rect(left,y-20,width,20,C.pale,C.line);
     let x=left;headers.forEach((h,i)=>{text(fit(h,[10,10,21,4,5,10,11,10][i]),x+3,y-13,6.3,true,C.ink);x+=cols[i];if(i<headers.length-1)line(x,y-20,x,y,C.line)});y-=20;
   }
   function tableRow(values,alertAdjusted=false){
@@ -838,7 +936,7 @@ async function makePdf(){
   drawMeasurements();
   pages.forEach((p,i)=>{page=p;line(left,31,563,31,C.line);if(settings.company)text(fit(settings.company,36),left,18,6.5,false,C.muted);text("IV Mittaus",278,18,5.8,false,C.muted);text("Sivu "+(i+1)+" / "+pages.length,510,18,6.5,false,C.muted)});
   const objects=[],pageIds=pages.map((_,i)=>5+i*2),contentIds=pages.map((_,i)=>6+i*2),firstImageId=5+pages.length*2;
-  let nextImageId=firstImageId;const imageId=logoBytes?nextImageId++:null,image2Id=logo2Bytes?nextImageId++:null;workImages.forEach(asset=>asset.objectId=nextImageId++);
+  let nextImageId=firstImageId;const imageId=logoAsset?nextImageId++:null,image2Id=logo2Asset?nextImageId++:null;workImages.forEach(asset=>asset.objectId=nextImageId++);
   const xobjects=[imageId?"/Im1 "+imageId+" 0 R":"",image2Id?"/Im2 "+image2Id+" 0 R":"",...workImages.map(asset=>"/"+asset.name+" "+asset.objectId+" 0 R")].filter(Boolean).join(" ");
   objects[1]="<< /Type /Catalog /Pages 2 0 R >>";
   objects[2]="<< /Type /Pages /Kids ["+pageIds.map(id=>id+" 0 R").join(" ")+"] /Count "+pages.length+" >>";
@@ -849,8 +947,8 @@ async function makePdf(){
     const body=commands.join("\n");
     objects[contentIds[i]]="<< /Length "+body.length+" >>\nstream\n"+body+"\nendstream";
   });
-  if(imageId)objects[imageId]={dict:"<< /Type /XObject /Subtype /Image /Width "+settings.logoWidth+" /Height "+settings.logoHeight+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+logoBytes.length+" >>",bytes:logoBytes};
-  if(image2Id)objects[image2Id]={dict:"<< /Type /XObject /Subtype /Image /Width "+settings.logo2Width+" /Height "+settings.logo2Height+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+logo2Bytes.length+" >>",bytes:logo2Bytes};
+  if(imageId)objects[imageId]={dict:"<< /Type /XObject /Subtype /Image /Width "+logoAsset.width+" /Height "+logoAsset.height+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+logoAsset.bytes.length+" >>",bytes:logoAsset.bytes};
+  if(image2Id)objects[image2Id]={dict:"<< /Type /XObject /Subtype /Image /Width "+logo2Asset.width+" /Height "+logo2Asset.height+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+logo2Asset.bytes.length+" >>",bytes:logo2Asset.bytes};
   workImages.forEach(asset=>objects[asset.objectId]={dict:"<< /Type /XObject /Subtype /Image /Width "+asset.width+" /Height "+asset.height+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+asset.bytes.length+" >>",bytes:asset.bytes});
   const latin1=s=>Uint8Array.from([...s],ch=>ch.charCodeAt(0)&255),chunks=[],offsets=[0];let total=0;
   const append=bytes=>{chunks.push(bytes);total+=bytes.length};append(latin1("%PDF-1.4\n%âãÏÓ\n"));
@@ -859,30 +957,32 @@ async function makePdf(){
   const pdf=new Uint8Array(total);let pos=0;chunks.forEach(chunk=>{pdf.set(chunk,pos);pos+=chunk.length});return pdf;
 }
 async function generatePdf(){
-  const stored=saveProjectSnapshot();
-  const base=(data.kohde||"iv-mittapoytakirja").replace(/[^a-zA-Z0-9äöåÄÖÅ_-]+/g,"_");
-  pdfShareFile=new File([await makePdf()],base+".pdf",{type:"application/pdf"});
-  const url=URL.createObjectURL(pdfShareFile);
-  if(pdfObjectUrl)URL.revokeObjectURL(pdfObjectUrl);pdfObjectUrl=url;
-  document.getElementById("pdf-preview").src=url;
-  const open=document.getElementById("pdf-open"),download=document.getElementById("pdf-download");open.href=url;download.href=url;download.download=base+".pdf";
-  document.getElementById("pdf-modal").classList.add("open");
-  showToast(stored?"PDF luotu ja projekti tallennettu":"PDF luotu, mutta projektia ei voitu tallentaa");
+  try{
+    const stored=saveProjectSnapshot();
+    const base=(data.kohde||"iv-mittapoytakirja").replace(/[^a-zA-Z0-9äöåÄÖÅ_-]+/g,"_");
+    pdfShareFile=new File([await makePdf()],base+".pdf",{type:"application/pdf"});
+    const url=URL.createObjectURL(pdfShareFile);
+    if(pdfObjectUrl)URL.revokeObjectURL(pdfObjectUrl);pdfObjectUrl=url;
+    document.getElementById("pdf-preview").src=url;
+    const open=document.getElementById("pdf-open"),download=document.getElementById("pdf-download");open.href=url;download.href=url;download.download=base+".pdf";
+    document.getElementById("pdf-modal").classList.add("open");
+    showToast(stored?"PDF luotu ja projekti tallennettu":"PDF luotu, mutta projektia ei voitu tallentaa");
+  }catch(e){showToast(e.message||"PDF:n luonti epäonnistui")}
 }
-function clearAll(){if(confirm("Tyhjennetäänkö koko mittaus?")){try{localStorage.removeItem("iv_proto")}catch(e){}closeWorkEntryEditor();data=emptyData();render();markLocalChange()}}
+function clearAll(){if(confirm("Tyhjennetäänkö koko mittaus?")){const before=data;data=emptyData();render();if(!save()){data=before;render();return}closeWorkEntryEditor();queuePhotoCleanup(projectPhotoRecords(before,before.projectId).map(record=>record.photo))}}
 function ventRows(ai){
   const vents=data.apartments[ai].vents||[];if(!vents.length)return '<div class="empty-state" style="margin:0;padding:22px 14px"><strong>Ei venttiilejä</strong>Lisää ensimmäinen mittausrivi.</div>';
   const groups=[];vents.forEach((v,vi)=>{const name=String(v.space||"").trim()||"Nimetön tila",key=name.toLocaleLowerCase("fi");let group=groups.find(g=>g.key===key);if(!group){group={key,name,items:[]};groups.push(group)}group.items.push({v,vi})});
   const ventCard=(v,vi)=>{const alert=!!airflowDeviation(v)?.exceeds;return '<details class="vent-card '+(v.type==="exhaust"?"exhaust":"supply")+'" data-vent-index="'+vi+'"><summary><span class="vent-summary-main"><strong>'+esc(v.valve||"Uusi venttiili")+'</strong><span>'+(v.type==="exhaust"?"Poisto":"Tulo")+'</span></span><span class="vent-summary-flow">'+(String(v.adjusted||"").trim()?esc(v.adjusted)+' l/s':'Ei tulosta')+'</span></summary><div class="vent-row '+(v.type==="exhaust"?"exhaust":"supply")+'">'+
-  '<div class="field-space"><label>Tila</label><input value="'+esc(v.space)+'" oninput="updateVent('+ai+','+vi+',\'space\',this.value)" placeholder="Esim. OH"></div>'+
-  '<div class="field-type select-wrap"><label>Tulo/poisto</label><select onchange="updateVent('+ai+','+vi+',\'type\',this.value)"><option value="supply"'+(v.type!=="exhaust"?" selected":"")+'>Tulo</option><option value="exhaust"'+(v.type==="exhaust"?" selected":"")+'>Poisto</option></select></div>'+
-  '<div class="field-valve"><label>Venttiili / päätelaite</label><input value="'+esc(v.valve)+'" oninput="updateVent('+ai+','+vi+',\'valve\',this.value)" placeholder="KSO-125"></div>'+
-  '<div class="field-small"><label>Kpl</label><input inputmode="decimal" value="'+esc(v.kpl)+'" oninput="updateVent('+ai+','+vi+',\'kpl\',this.value)"></div>'+
-  '<div class="field-small"><label>Pa</label><input inputmode="decimal" value="'+esc(v.pa)+'" oninput="updateVent('+ai+','+vi+',\'pa\',this.value)"></div>'+
-  '<div class="field-flow"><label>Suunn. l/s</label><input inputmode="decimal" value="'+esc(v.target)+'" oninput="updateVent('+ai+','+vi+',\'target\',this.value)"></div>'+
-  '<div class="field-flow"><label>Säädetty l/s</label><input data-adjusted-result inputmode="decimal" class="'+(alert?'measurement-alert':'')+'" value="'+esc(v.adjusted)+'" oninput="updateVent('+ai+','+vi+',\'adjusted\',this.value)"></div>'+
-  '<div class="field-position"><label>Asento</label><input value="'+esc(v.position)+'" oninput="updateVent('+ai+','+vi+',\'position\',this.value)" placeholder="-7 tai kiinni"></div>'+
-  '<button type="button" class="danger small no-print remove-vent" onclick="removeVent('+ai+','+vi+')">Poista</button></div></details>'};
+  '<div class="field-space"><label>Tila</label><input value="'+esc(v.space)+'" data-ui-input="updateVent('+ai+','+vi+',\'space\',this.value)" data-ui-change="finishVentSpaceEdit('+ai+','+vi+')" placeholder="Esim. OH"></div>'+
+  '<div class="field-type select-wrap"><label>Tulo/poisto</label><select data-ui-change="updateVent('+ai+','+vi+',\'type\',this.value)"><option value="supply"'+(v.type!=="exhaust"?" selected":"")+'>Tulo</option><option value="exhaust"'+(v.type==="exhaust"?" selected":"")+'>Poisto</option></select></div>'+
+  '<div class="field-valve"><label>Venttiili / päätelaite</label><input value="'+esc(v.valve)+'" data-ui-input="updateVent('+ai+','+vi+',\'valve\',this.value)" placeholder="KSO-125"></div>'+
+  '<div class="field-small"><label>Kpl</label><input inputmode="decimal" value="'+esc(v.kpl)+'" data-ui-input="updateVent('+ai+','+vi+',\'kpl\',this.value)"></div>'+
+  '<div class="field-small"><label>Pa</label><input inputmode="decimal" value="'+esc(v.pa)+'" data-ui-input="updateVent('+ai+','+vi+',\'pa\',this.value)"></div>'+
+  '<div class="field-flow"><label>Suunn. l/s / venttiili</label><input inputmode="decimal" value="'+esc(v.target)+'" data-ui-input="updateVent('+ai+','+vi+',\'target\',this.value)"></div>'+
+  '<div class="field-flow"><label>Säädetty l/s / venttiili</label><input data-adjusted-result inputmode="decimal" class="'+(alert?'measurement-alert':'')+'" value="'+esc(v.adjusted)+'" data-ui-input="updateVent('+ai+','+vi+',\'adjusted\',this.value)"></div>'+
+  '<div class="field-position"><label>Asento</label><input value="'+esc(v.position)+'" data-ui-input="updateVent('+ai+','+vi+',\'position\',this.value)" placeholder="-7 tai kiinni"></div>'+
+  '<button type="button" class="danger small no-print remove-vent" data-ui-click="removeVent('+ai+','+vi+')">Poista</button></div></details>'};
   return '<div class="vent-list">'+groups.map(group=>'<details class="room-group"><summary><span class="room-group-title">'+esc(group.name)+'</span><span class="room-group-count">'+group.items.length+' '+(group.items.length===1?'venttiili':'venttiiliä')+'</span></summary><div class="room-group-body">'+group.items.map(item=>ventCard(item.v,item.vi)).join('')+'</div></details>').join('')+'</div>'
 }
 function render(){
@@ -890,9 +990,24 @@ document.getElementById("kohde").value=data.kohde;document.getElementById("paiva
 renderWorkType();
 renderWorkEntries();
 let e=document.getElementById("apartments"),openApartments=new Set([...e.querySelectorAll(".apartment[open]")].map(x=>Number(x.dataset.apartmentIndex)));e.innerHTML="";
-if(!data.apartments.length)e.innerHTML='<div class="empty-state no-print"><strong>Aloita lisäämällä asunto tai mittauskohde</strong>Lisää sen alle venttiilit ja valitse jokaiselle tulo tai poisto.<br><button type="button" class="primary" onclick="addApartment()">+ Lisää ensimmäinen kohde</button></div>';
-data.apartments.forEach((a,ai)=>{const t=apartmentTotals(a),deviationNotes=apartmentDeviationComments(a);let apartment=document.createElement("details");apartment.className="card apartment";apartment.dataset.apartmentIndex=ai;if(openApartments.has(ai))apartment.open=true;apartment.innerHTML='<summary class="apartment-summary"><span class="apartment-summary-name">'+esc(a.name||"Nimetön kohde")+'</span></summary><div class="apartment-body"><div class="apartment-title"><input aria-label="Kohteen tunnus" value="'+esc(a.name)+'" oninput="updateApartment('+ai+',this.value)" onchange="finishApartmentNameEdit('+ai+')" placeholder="Tunnus, esim. A1"><button type="button" class="danger small no-print" onclick="removeApartment('+ai+')">Poista kohde</button></div>'+ventRows(ai)+'<div class="vent-actions no-print"><button type="button" class="secondary" onclick="addVent('+ai+')">+ Lisää venttiili</button>'+(!a.pressureEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">+ Paine-ero</button>':'')+(!a.speedEnabled?'<button type="button" class="secondary" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">+ Säädetty/mitattu nopeudella</button>':'')+'</div><div class="optional-fields">'+(a.pressureEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Paine-ero</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'pressureEnabled\')">Poista</button></div><div class="signed-input"><input data-pressure-index="'+ai+'" inputmode="decimal" value="'+esc(a.pressureDifference)+'" oninput="updateApartmentOption('+ai+',\'pressureDifference\',this.value)" placeholder="Esim. -5"></div></div>':'')+(a.speedEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Säädetty/mitattu nopeudella</strong><button type="button" class="danger small no-print" onclick="toggleApartmentOption('+ai+',\'speedEnabled\')">Poista</button></div><input value="'+esc(a.measurementSpeed)+'" oninput="updateApartmentOption('+ai+',\'measurementSpeed\',this.value)" placeholder="Esim. teho 2 / 60 %"></div>':'')+'</div><div class="air-summary"><div class="summary-box"><span>Tuloilma yhteensä</span><strong id="summary-supply-'+ai+'">'+flowFormat(t.supply)+' l/s</strong></div><div class="summary-box"><span>Poistoilma yhteensä</span><strong id="summary-exhaust-'+ai+'">'+flowFormat(t.exhaust)+' l/s</strong></div><div id="summary-difference-'+ai+'" class="summary-box '+t.statusClass+'"><span>Erotus (tulo − poisto)</span><strong>'+(t.difference>0?"+":"")+flowFormat(t.difference)+' l/s</strong><em>'+t.status+'</em></div></div><div style="margin-top:15px"><label>Kommentit / tehdyt korjaukset ja kulut</label><textarea oninput="updateApartmentComments('+ai+',this.value)" placeholder="Kirjaa tehdyt korjaukset, havainnot ja kulut...">'+esc(a.comments||"")+'</textarea><div id="deviation-comments-'+ai+'" class="deviation-comments"'+(deviationNotes.length?'':' hidden')+'>'+(deviationNotes.length?'<strong>Automaattinen huomio</strong><ul>'+deviationNotes.map(note=>'<li>'+esc(note)+'</li>').join("")+'</ul>':'')+'</div></div></div>';
+if(!data.apartments.length)e.innerHTML='<div class="empty-state no-print"><strong>Aloita lisäämällä asunto tai mittauskohde</strong>Lisää sen alle venttiilit ja valitse jokaiselle tulo tai poisto.<br><button type="button" class="primary" data-ui-click="addApartment()">+ Lisää ensimmäinen kohde</button></div>';
+data.apartments.forEach((a,ai)=>{const t=apartmentTotals(a),deviationNotes=apartmentDeviationComments(a);let apartment=document.createElement("details");apartment.className="card apartment";apartment.dataset.apartmentIndex=ai;if(openApartments.has(ai))apartment.open=true;apartment.innerHTML='<summary class="apartment-summary"><span class="apartment-summary-name">'+esc(a.name||"Nimetön kohde")+'</span></summary><div class="apartment-body"><div class="apartment-title"><input aria-label="Kohteen tunnus" value="'+esc(a.name)+'" data-ui-input="updateApartment('+ai+',this.value)" data-ui-change="finishApartmentNameEdit('+ai+')" placeholder="Tunnus, esim. A1"><button type="button" class="danger small no-print" data-ui-click="removeApartment('+ai+')">Poista kohde</button></div>'+ventRows(ai)+'<div class="vent-actions no-print"><button type="button" class="secondary" data-ui-click="addVent('+ai+')">+ Lisää venttiili</button>'+(!a.pressureEnabled?'<button type="button" class="secondary" data-ui-click="toggleApartmentOption('+ai+',\'pressureEnabled\')">+ Paine-ero</button>':'')+(!a.speedEnabled?'<button type="button" class="secondary" data-ui-click="toggleApartmentOption('+ai+',\'speedEnabled\')">+ Säädetty/mitattu nopeudella</button>':'')+'</div><div class="optional-fields">'+(a.pressureEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Paine-ero</strong><button type="button" class="danger small no-print" data-ui-click="toggleApartmentOption('+ai+',\'pressureEnabled\')">Poista</button></div><div class="signed-input"><input data-pressure-index="'+ai+'" inputmode="decimal" value="'+esc(a.pressureDifference)+'" data-ui-input="updateApartmentOption('+ai+',\'pressureDifference\',this.value)" placeholder="Esim. -5"></div></div>':'')+(a.speedEnabled?'<div class="optional-field"><div class="optional-field-head"><strong>Säädetty/mitattu nopeudella</strong><button type="button" class="danger small no-print" data-ui-click="toggleApartmentOption('+ai+',\'speedEnabled\')">Poista</button></div><input value="'+esc(a.measurementSpeed)+'" data-ui-input="updateApartmentOption('+ai+',\'measurementSpeed\',this.value)" placeholder="Esim. teho 2 / 60 %"></div>':'')+'</div><div class="air-summary"><div class="summary-box"><span>Tuloilma yhteensä</span><strong id="summary-supply-'+ai+'">'+flowFormat(t.supply)+' l/s</strong></div><div class="summary-box"><span>Poistoilma yhteensä</span><strong id="summary-exhaust-'+ai+'">'+flowFormat(t.exhaust)+' l/s</strong></div><div id="summary-difference-'+ai+'" class="summary-box '+t.statusClass+'"><span>Erotus (tulo − poisto)</span><strong>'+(t.difference>0?"+":"")+flowFormat(t.difference)+' l/s</strong><em>'+t.status+'</em></div></div><div style="margin-top:15px"><label>Kommentit / tehdyt korjaukset ja kulut</label><textarea data-ui-input="updateApartmentComments('+ai+',this.value)" placeholder="Kirjaa tehdyt korjaukset, havainnot ja kulut...">'+esc(a.comments||"")+'</textarea><div id="deviation-comments-'+ai+'" class="deviation-comments"'+(deviationNotes.length?'':' hidden')+'>'+(deviationNotes.length?'<strong>Automaattinen huomio</strong><ul>'+deviationNotes.map(note=>'<li>'+esc(note)+'</li>').join("")+'</ul>':'')+'</div></div></div>';
 e.appendChild(apartment)})}
-["kohde","paiva","mittaaja","valine","default-valve"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();initializeCloudAuth().then(async()=>{if(!cloudUser)await migrateLegacyPhotoStorage(false)}).catch(()=>migrateLegacyPhotoStorage(false));
+
+// Action descriptors are parsed as data; no eval/Function or executable attributes.
+const UI_ACTIONS=new Set(["finishVentSpaceEdit","addApartment", "addVent", "clearAll", "closeCloudSettings", "closeInstallHelp", "closeNewProject", "closePdfPreview", "closePdfSettings", "closeProjects", "closeWorkEntryEditor", "cloudSignIn", "cloudSignOut", "cloudSignUp", "cycleTheme", "exportCurrentProject", "finishApartmentNameEdit", "forceSyncCloudNow", "generatePdf", "handleLogoFile", "handleSecondLogoFile", "handleWorkPhotoFiles", "importProjectFile", "installApp", "loadCloudVersions", "newProject", "openCloudSettings", "openPdfSettings", "openProjects", "openWorkEntryEditor", "removeApartment", "removeLogo", "removePendingWorkPhoto", "removeSecondLogo", "removeVent", "restoreCloudVersion", "saveCurrentProject", "savePdfSettings", "saveWorkEntry", "sharePdf", "startNewProject", "syncCloudNow", "toggleApartmentOption", "toggleMenu", "togglePendingCleaningItem", "togglePendingCondition", "toggleProjectCleaningItem", "toggleProjectCondition", "toggleWorkType", "updateApartment", "updateApartmentComments", "updateApartmentOption", "updateCustomWorkType", "updateDateDisplay", "updatePendingCustomCleaningItem", "updateProjectCustomCleaningItem", "updateVent"]);
+function runUiAction(source,element,event){
+  if(source.startsWith("if(event.target===this)")){if(event.target!==element)return;source=source.slice(23)}
+  if(source==="document.getElementById('project-import-file').click();closeMenu()"){document.getElementById("project-import-file").click();closeMenu();return}
+  let clearInput=false;if(/;this\.value=''\s*$/.test(source)){clearInput=true;source=source.replace(/;this\.value=''\s*$/,"")}
+  const call=source.match(/^(\w+)\((.*)\)$/);if(!call||!UI_ACTIONS.has(call[1])||typeof window[call[1]]!=="function")return;
+  const tokens=call[2].trim()?call[2].match(/'(?:[^'\\]|\\.)*'|this\.files\[0\]|this\.files|this\.value|true|false|\d+/g):[];
+  if(!tokens||tokens.join(",")!==call[2])return;
+  const args=tokens.map(token=>token==="this.value"?element.value:token==="this.files"?element.files:token==="this.files[0]"?element.files?.[0]:token==="true"?true:token==="false"?false:token.startsWith("'")?token.slice(1,-1):Number(token));
+  window[call[1]](...args);if(clearInput)element.value="";
+}
+for(const type of ["click","input","change"])document.addEventListener(type,event=>{const element=event.target.closest?.("[data-ui-"+type+"]");if(element)runUiAction(element.getAttribute("data-ui-"+type),element,event)});
+
+["kohde","paiva","mittaaja","valine","default-valve"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();schedulePhotoCleanup();initializeCloudAuth().then(async()=>{if(!cloudUser)await migrateLegacyPhotoStorage(false)}).catch(()=>migrateLegacyPhotoStorage(false));
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
 </script></body></html>

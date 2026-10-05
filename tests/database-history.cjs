@@ -1,0 +1,32 @@
+const {PGlite}=require('@electric-sql/pglite'),fs=require('fs'),assert=require('assert');
+const migration=fs.readFileSync('supabase/migrations/20261005_bound_backup_history.sql','utf8');
+(async()=>{const db=new PGlite();await db.exec(`
+CREATE ROLE authenticated;
+CREATE SCHEMA auth;
+CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT current_setting('request.jwt.claim.sub',true)::uuid $$;
+CREATE TABLE public.app_backup_versions (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,user_id uuid NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),payload jsonb NOT NULL);
+CREATE INDEX app_backup_versions_user_created_idx ON public.app_backup_versions(user_id,created_at DESC);
+CREATE TABLE public.app_backups (user_id uuid PRIMARY KEY,payload jsonb);
+INSERT INTO public.app_backups VALUES ('11111111-1111-1111-1111-111111111111','{"current":"keep"}');
+ALTER TABLE public.app_backup_versions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY own_read ON public.app_backup_versions FOR SELECT TO authenticated USING(auth.uid()=user_id);
+CREATE POLICY own_insert ON public.app_backup_versions FOR INSERT TO authenticated WITH CHECK(auth.uid()=user_id);
+CREATE POLICY own_delete ON public.app_backup_versions FOR DELETE TO authenticated USING(auth.uid()=user_id);
+GRANT USAGE ON SCHEMA public,auth TO authenticated;
+GRANT SELECT,INSERT,DELETE ON public.app_backup_versions TO authenticated;
+GRANT USAGE ON SEQUENCE public.app_backup_versions_id_seq TO authenticated;
+INSERT INTO public.app_backup_versions(user_id,created_at,payload) SELECT '11111111-1111-1111-1111-111111111111','2026-10-01'::timestamptz+make_interval(mins=>g),jsonb_build_object('version',g) FROM generate_series(1,30) g;
+INSERT INTO public.app_backup_versions(user_id,created_at,payload) SELECT '22222222-2222-2222-2222-222222222222','2026-10-01'::timestamptz+make_interval(mins=>g),jsonb_build_object('version',g) FROM generate_series(1,30) g;
+`);await db.exec(migration);await db.exec(migration); // rerunnable
+await db.exec(`SET ROLE authenticated; SET request.jwt.claim.sub='11111111-1111-1111-1111-111111111111'; INSERT INTO public.app_backup_versions(user_id,created_at,payload) VALUES ('11111111-1111-1111-1111-111111111111','2026-10-05','{"version":31}');`);
+let r=await db.query('SELECT count(*)::int AS n, min((payload->>\'version\')::int) AS oldest,max((payload->>\'version\')::int) AS newest FROM public.app_backup_versions');assert.deepEqual(r.rows[0],{n:20,oldest:12,newest:31});
+assert.equal((await db.query("SELECT count(*)::int AS n FROM public.app_backup_versions WHERE user_id='22222222-2222-2222-2222-222222222222'")).rows[0].n,0);
+await assert.rejects(db.exec("INSERT INTO public.app_backup_versions(user_id,payload) VALUES ('22222222-2222-2222-2222-222222222222','{}')"));
+await db.exec(`INSERT INTO public.app_backup_versions(user_id,created_at,payload) SELECT '11111111-1111-1111-1111-111111111111','2026-10-06',jsonb_build_object('version',g) FROM generate_series(32,56) g;`);
+r=await db.query('SELECT count(*)::int AS n,min((payload->>\'version\')::int) AS oldest,max((payload->>\'version\')::int) AS newest FROM public.app_backup_versions');assert.deepEqual(r.rows[0],{n:20,oldest:37,newest:56});
+await db.exec(`BEGIN;INSERT INTO public.app_backup_versions(user_id,payload) VALUES ('11111111-1111-1111-1111-111111111111','{"version":100}');ROLLBACK;RESET ROLE;`);
+assert.equal((await db.query("SELECT count(*)::int AS n FROM public.app_backup_versions WHERE user_id='22222222-2222-2222-2222-222222222222'")).rows[0].n,30);
+assert.equal((await db.query('SELECT payload FROM public.app_backups')).rows[0].payload.current,'keep');
+assert.equal((await db.query("SELECT max((payload->>'version')::int) AS n FROM public.app_backup_versions WHERE user_id='11111111-1111-1111-1111-111111111111'")).rows[0].n,56);
+console.log('Postgres history trigger passed: latest 20, equal-time tie break, RLS user isolation, rollback and current-backup preservation; migration rerunnable');await db.close();
+})().catch(e=>{console.error(e);process.exitCode=1});

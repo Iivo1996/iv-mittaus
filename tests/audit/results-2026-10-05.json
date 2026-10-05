@@ -1,0 +1,102 @@
+[
+  {
+    "test": "test-imported-photo-owner.js",
+    "exit": 0,
+    "output": "imported photo ownership and path checks ok"
+  },
+  {
+    "test": "test-project-import.js",
+    "exit": 0,
+    "output": "project recovery import identity ok"
+  },
+  {
+    "test": "test-cloud-sync-timeout.js",
+    "exit": 0,
+    "output": "cloud sync timeout and concurrent-edit scenarios preserve measurements"
+  },
+  {
+    "test": "test-imported-id-safety.js",
+    "exit": 0,
+    "output": "malicious imported IDs stay inert; project and entry actions still work"
+  },
+  {
+    "test": "test-auth-callback.js",
+    "exit": 0,
+    "output": "unsolicited auth links rejected; matching signup verified before cloud initialization"
+  },
+  {
+    "test": "test-auth-offline-session.js",
+    "exit": 0,
+    "output": "offline auth retains session, invalid token clears it"
+  },
+  {
+    "test": "test-pdf-image-conversion.js",
+    "exit": 0,
+    "output": "PDF image decode and JPEG conversion path ok"
+  },
+  {
+    "test": "test-service-worker-scope.js",
+    "exit": 0,
+    "output": "service worker ignores cloud/auth requests and caches only successful app pages"
+  },
+  {
+    "test": "test-project-switch-preserves-current.js",
+    "exit": 0,
+    "output": "project switch/import preservation ok"
+  },
+  {
+    "test": "test-cloud-owner-filter.js",
+    "exit": 0,
+    "output": "cloud backup reads and history deletes always include signed-in user filter"
+  },
+  {
+    "test": "test-vent-quantity.js",
+    "exit": 0,
+    "output": "per-vent values multiplied by quantity; legacy blank quantity defaults to one; changing quantity updates summary"
+  },
+  {
+    "test": "test-cloud-conflict.js",
+    "exit": 0,
+    "output": "remote conflict blocks automatic/manual sync; explicit override archives remote before replacing it"
+  },
+  {
+    "test": "test-photo-cleanup.js",
+    "exit": 0,
+    "output": "photo cleanup preserves current/saved/cloud/history references; network failures defer deletion; failed save retains entry"
+  },
+  {
+    "test": "test-cloud-history-retention.js",
+    "exit": 0,
+    "output": "frequent edits create one recovery point; bounded cleanup drains old history"
+  },
+  {
+    "test": "test-finnish-work-date.js",
+    "exit": 0,
+    "output": "Finnish dates across summer and winter midnight ok"
+  },
+  {
+    "test": "test-ui-hardening.js",
+    "exit": 0,
+    "output": "CSP hash matches; delegated inputs/buttons/overlays work; logo attributes and storage paths reject injection"
+  },
+  {
+    "test": "test-workflow-defaults-and-sorting.js",
+    "exit": 0,
+    "output": "workflow defaults, natural sorting, PDF order and data preservation ok"
+  },
+  {
+    "test": "test-project-export.js",
+    "exit": 0,
+    "output": "project JSON backup preserves measurements and embeds local photos"
+  },
+  {
+    "test": "test-date-field.js",
+    "exit": 0,
+    "output": "date display tracks native picker and preserves measurements"
+  },
+  {
+    "test": "test-photo-bucket.js",
+    "exit": 0,
+    "output": "upload, authenticated read and reference-safe deletion use the existing Project-photos bucket"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "devDependencies": {
+    "jsdom": "26.1.0",
+    "@electric-sql/pglite": "0.5.8"
+  },
+  "scripts": {
+    "test": "node tests/run-audit.cjs",
+    "test:database": "node tests/database-history.cjs"
+  }
+}

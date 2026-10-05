@@ -1,0 +1,11 @@
+const fs=require('fs'),{JSDOM}=require('jsdom'),html=fs.readFileSync('work/current-index.html','utf8');
+const malicious="x');window.__attacked=true;//",project={projectId:malicious,kohde:'Testikohde',paiva:'2026-10-05',mittaaja:'',valine:'',defaultValve:'',workTypes:[],customWorkType:'',cleaningItems:[],customCleaningItem:'',conditionRatings:{},apartments:[],workEntries:[{id:malicious,date:'2026-10-05',target:'',title:'Merkintä',text:'Kuvaus',photos:[]}]};
+const dom=new JSDOM(html,{runScripts:'dangerously',url:'https://example.test/',beforeParse(w){w.matchMedia=()=>({matches:false,addEventListener(){}});w.scrollTo=()=>{};w.requestAnimationFrame=fn=>fn();w.localStorage.setItem('iv_proto',JSON.stringify(project));w.localStorage.setItem('iv_projects',JSON.stringify([{id:malicious,name:'Testikohde',savedAt:new Date().toISOString(),data:project}]))}});
+dom.window.HTMLElement.prototype.scrollIntoView=()=>{};
+const w=dom.window;w.openProjects();
+if([...w.document.querySelectorAll('[data-project-action],[data-entry-action]')].some(button=>button.hasAttribute('onclick')))throw Error('Data-derived inline handler remains');
+w.document.querySelector('[data-project-action="open"]').click();
+w.document.querySelector('[data-entry-action="edit"]').click();
+if(w.__attacked||w.document.getElementById('work-entry-editor').hidden)throw Error('Imported ID executed or editor failed');
+if(JSON.parse(w.localStorage.getItem('iv_proto')).workEntries[0].id!==malicious)throw Error('Imported data changed unexpectedly');
+console.log('malicious imported IDs stay inert; project and entry actions still work');w.close();
