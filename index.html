@@ -2,7 +2,7 @@
 <html lang="fi" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-AnDZ0d2dOdq7g02hCTrd8wgPrCC9vVt7RAz1AcjeaMM='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://rmyynxecliexiznswjcy.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4jH2VGUxSVkuEEOipQ/M+njauTedsIRMxIjGHeXw8yY='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://rmyynxecliexiznswjcy.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IV Mittaus | Ilmamäärien mittauspöytäkirja</title>
 <meta name="theme-color" content="#081216">
@@ -350,6 +350,7 @@ function restoreCloudBackup(row){
   cloudRestoring=true;
   try{localStorage.setItem("iv_proto",JSON.stringify(payload.current));localStorage.setItem("iv_projects",JSON.stringify(Array.isArray(payload.projects)?payload.projects:[]));localStorage.setItem("iv_pdf_settings",JSON.stringify(payload.pdfSettings||{}));localStorage.setItem("iv_local_updated_at",row.updated_at||new Date().toISOString());data=loadData();render();return true}finally{cloudRestoring=false}
 }
+function cloudTimestampsMatch(a,b){const first=Date.parse(a),second=Date.parse(b);return Number.isFinite(first)&&Number.isFinite(second)&&first===second}
 function showCloudConflict(){document.getElementById("cloud-force-sync").hidden=false;updateCloudUi("Pilvessä on eri tai uudempi kopio. Paikallisia tietoja ei korvattu. Tarkista Palautuspisteet ennen mahdollista ylikirjoitusta.")}
 async function forceSyncCloudNow(){if(!confirm("Korvataanko pilvikopio tämän laitteen tiedoilla? Nykyinen pilvikopio tallennetaan ensin palautuspisteeksi."))return false;return syncCloudNow(true,true)}
 async function syncCloudNow(showMessage,force=false){
@@ -358,7 +359,7 @@ async function syncCloudNow(showMessage,force=false){
   cloudBusy=true;let stage="pilvikopion haku";const note=document.getElementById("save-note");if(note)note.textContent="Synkronoidaan pilveen…";updateCloudUi("Synkronoidaan pilveen…");
   try{
     const outgoing=cloudPayload(),remote=await fetchCloudBackup(),seen=localStorage.getItem("iv_cloud_seen_at_"+cloudUser.id)||"";
-    const remoteChanged=remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing)&&(seen?remote.updated_at!==seen:Date.parse(remote.updated_at||0)>Date.parse(outgoing.localUpdatedAt||0));
+    const remoteChanged=remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing)&&(seen?!cloudTimestampsMatch(remote.updated_at,seen):Date.parse(remote.updated_at||0)>Date.parse(outgoing.localUpdatedAt||0));
     if(remoteChanged&&!force){showCloudConflict();if(showMessage)showToast("Tarkista pilvessä oleva kopio");return false}
     if((force&&remote?.payload&&!cloudPayloadMatches(remote.payload,outgoing))||shouldArchiveCloudVersion(remote,outgoing)){stage="palautuspisteen tallennus";await insertCloudVersion(remote.payload,remote.updated_at);localStorage.setItem("iv_cloud_version_at_"+cloudUser.id,String(Date.now()))}
     stage="projektin tallennus";
@@ -372,7 +373,7 @@ async function syncCloudNow(showMessage,force=false){
 }
 async function initializeCloud(){
   if(!cloudUser)return;
-  try{await migrateLegacyPhotoStorage(true);await syncPendingPhotoUploads();const remote=await fetchCloudBackup();if(!remote||Date.parse(localUpdatedAt()||0)>=Date.parse(remote.updated_at||0))await syncCloudNow(false);else showCloudConflict()}catch(e){updateCloudUi("Pilveen yhdistäminen epäonnistui. Tiedot säilyvät tällä laitteella.")}
+  try{await migrateLegacyPhotoStorage(true);await syncPendingPhotoUploads();await syncCloudNow(false)}catch(e){updateCloudUi("Pilveen yhdistäminen epäonnistui. Tiedot säilyvät tällä laitteella.")}
 }
 async function initializeCloudAuth(){
   const callback=await consumeAuthCallback();cloudSession=readCloudSession();if(!cloudSession){updateCloudUi();return}

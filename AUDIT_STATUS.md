@@ -63,3 +63,9 @@ Jäljellä ennen julkaisua: käyttäjä asentaa palvelimen historiamigraation ja
 ## Tuotantomigraation vahvistus
 
 Käyttäjän toimittama tarkistustulos 5.10.2026: iv_prune_backup_history AFTER INSERT ON public.app_backup_versions FOR EACH ROW EXECUTE FUNCTION iv_prune_backup_history(). Palvelinpuolen historian karsinta on asennettu. Kaikki 20 sovellustestitiedostoa läpäisivät viimeisen yhteisajon, ja natiivi Chromium-/PDF-testi läpäisi. Julkaisu GitHub main -haaraan on nyt käyttäjän aiemman ohjeen mukaisesti valmis.
+
+## Synkronoinnin jatkokorjaus
+
+Oman tallennuksen aikaleima tallennettiin Z-muodossa, mutta palvelin palauttaa saman ajan +00:00-muodossa. Tekstivertailu aiheutti väärän ristiriidan seuraavan kuvamerkinnän tallennuksessa. Korjattu kelvollisten kellonaikojen vertailuksi; käynnistys käyttää samaa ristiriitatarkistusta. Testi toistaa virheen ennen korjausta ja kattaa uuden kuvaviittauksen, uudelleenalustuksen sekä aidon ulkoisen muutoksen torjunnan. Kaikki 20 sovellustestiä ja natiivi Chromium-/PDF-testi läpäisivät. CSP-tiiviste ja välimuistiversio v52 päivitetty.
+
+Palvelimen historiatriggeriin liittyvä aikakatkaisu on edelleen tutkittava. Käyttäjälle annettiin triggerin poistaminen käytöstä, ja tämän jälkeen toimitettu kuva näytti onnistuneen synkronoinnin. Sovelluksen oma rajattu historian karsinta säilyy.
