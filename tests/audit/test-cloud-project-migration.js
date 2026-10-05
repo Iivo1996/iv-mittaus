@@ -1,0 +1,14 @@
+const fs=require('fs'),assert=require('assert'),{JSDOM}=require('jsdom');let uploads=[];
+const dom=new JSDOM(fs.readFileSync('work/current-index.html','utf8'),{runScripts:'dangerously',url:'https://example.test/',beforeParse(w){w.matchMedia=()=>({matches:false,addEventListener(){}});w.scrollTo=()=>{};w.requestAnimationFrame=f=>f();w.fetch=async(url,options={})=>{if(options.method==='POST')uploads.push(String(url));return {ok:true,status:201,json:async()=>[]}}}});
+(async()=>{const w=dom.window;await new Promise(resolve=>setTimeout(resolve,100));w.eval('cloudUser={id:"new-user"};cloudSession={access_token:"test"}');
+ await w.cachePhotoBlob('cached',new w.Blob(['photo'],{type:'image/jpeg'}));
+ const photo={id:'cached',localKey:'cached',storagePath:'old-user/project/entry/cached.jpg'};
+ assert(await w.migratePhotoRecord({photo,projectId:'project',entryId:'entry'},true));
+ assert.equal(photo.storagePath,'new-user/project/entry/cached.jpg');assert(uploads[0].endsWith('/new-user/project/entry/cached.jpg'));
+ const unavailable={id:'missing',localKey:'missing',storagePath:'old-user/project/entry/missing.jpg'};
+ await w.migratePhotoRecord({photo:unavailable,projectId:'project',entryId:'entry'},true);
+ assert.equal(unavailable.storagePath,'old-user/project/entry/missing.jpg','Unrecoverable reference must be preserved');
+ w.eval('data.workEntries=[{id:"entry",photos:[{id:"missing",storagePath:"old-user/project/entry/missing.jpg"}]}]');
+ const before=uploads.length;assert.equal(await w.syncCloudNow(false),false);assert.equal(uploads.length,before);assert(w.document.getElementById('cloud-detail').textContent.includes('Vanhan pilven kuvia'));
+ console.log('Backend migration reuploads cached old-owner photos; unavailable references are preserved and block incomplete cloud sync');w.close();
+})().catch(e=>{console.error(e);dom.window.close();process.exitCode=1});

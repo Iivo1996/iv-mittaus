@@ -14,12 +14,12 @@ async function scenario(failingStage){
       const path=String(url).replace(/^https?:\/\/[^/]+/,""),method=options.method||"GET";calls.push({path,method});
       if(path==="/auth/v1/user")return response({id:"user-1",email:"test@example.com"});
       if(path.startsWith("/rest/v1/app_backups?")&&method==="GET")return response(saved?[{payload:saved,updated_at:savedAt}]:[{payload:remote,updated_at:"2026-09-30T10:00:00.000Z"}]);
-      if(path==="/rest/v1/app_backup_versions"&&method==="POST")return failingStage==="version"?response({message:"canceling statement due to statement timeout"},500):response(null,201);
+      if(path.startsWith("/rest/v1/app_backup_versions?on_conflict=")&&method==="POST")return failingStage==="version"?response({message:"canceling statement due to statement timeout"},500):response(null,201);
       if(path.startsWith("/rest/v1/app_backups?on_conflict")&&method==="POST"){
         if(failingStage==="upsert")return response({message:"canceling statement due to statement timeout"},500);
         const body=JSON.parse(options.body);saved=body.payload;savedAt=body.updated_at;return response(null,201);
       }
-      if(path.startsWith("/rest/v1/app_backup_versions?select=id"))return failingStage==="cleanup"?response({message:"canceling statement due to statement timeout"},500):response([]);
+      if(path.startsWith("/rest/v1/app_backup_versions?")&&method==="GET")return failingStage==="cleanup"?response({message:"canceling statement due to statement timeout"},500):response([]);
       return response([]);
     };
   }});
@@ -32,11 +32,12 @@ async function scenario(failingStage){
     if(result!==false)throw new Error(failingStage+": failure incorrectly marked as success");
     if(!dom.window.document.getElementById("cloud-detail").textContent.includes(failingStage==="version"?"palautuspisteen tallennus":"projektin tallennus"))throw new Error(failingStage+": wrong error stage");
   }else if(result!==true||!saved||saved.current.apartments[0].vents[0].pa!=="25")throw new Error(failingStage+": current copy not saved");
-  if(failingStage==="version"&&calls.some(call=>call.path.includes("on_conflict")))throw new Error("Overwrote remote without a recovery version");
+  if(failingStage==="version"&&calls.some(call=>call.path.startsWith("/rest/v1/app_backups?on_conflict")&&call.method==="POST"))throw new Error("Overwrote remote without a recovery version");
   if(failingStage==="cleanup"){
     await new Promise(resolve=>setTimeout(resolve,1150));
     if(!calls.some(call=>call.path.includes("offset=20&limit=10")))throw new Error("Cleanup was not bounded");
-    if(!dom.window.document.getElementById("cloud-detail").textContent.includes("Kaikki tiedot"))throw new Error("Cleanup failure hid successful backup");
+    if(!dom.window.document.getElementById("cloud-detail").textContent.includes("siivous epäonnistui"))throw new Error("Cleanup failure was hidden");
+    if(dom.window.localStorage.getItem("iv_cloud_maintenance_at_user-1"))throw new Error("Failed cleanup was recorded as successful");
   }
   dom.window.close();
 }
@@ -50,7 +51,7 @@ async function concurrentEdit(){
       const path=String(url).replace(/^https?:\/\/[^/]+/,""),method=options.method||"GET";calls.push({path,method});
       if(path==="/auth/v1/user")return response({id:"user-1",email:"test@example.com"});
       if(path.startsWith("/rest/v1/app_backups?")&&method==="GET")return response(remoteCopy?[{payload:remoteCopy,updated_at:remoteAt}]:[{payload:remote,updated_at:"2026-09-30T10:00:00.000Z"}]);
-      if(path==="/rest/v1/app_backup_versions"&&method==="POST")return response(null,201);
+      if(path.startsWith("/rest/v1/app_backup_versions?on_conflict=")&&method==="POST")return response(null,201);
       if(path.startsWith("/rest/v1/app_backups?on_conflict")&&method==="POST"){
         const body=JSON.parse(options.body);remoteCopy=body.payload;remoteAt=body.updated_at;
         if(!edited){edited=true;window.localStorage.setItem("iv_local_updated_at","2026-10-01T10:01:00.000Z");dom.window.eval('data.apartments[0].vents[0].pa="26"');window.localStorage.setItem("iv_proto",JSON.stringify(dom.window.eval("data")))}
