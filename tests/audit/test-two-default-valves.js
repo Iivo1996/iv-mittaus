@@ -5,6 +5,8 @@ dom.window.HTMLElement.prototype.scrollIntoView=()=>{};
 setTimeout(()=>{try{
   const w=dom.window,saved=()=>JSON.parse(w.localStorage.getItem('iv_proto'));
   w.save();
+  const fields=['measurement-instrument-wrap','measurement-exhaust-default-wrap','measurement-supply-default-wrap'];
+  assert(fields.every(id=>w.document.getElementById(id).hidden));w.toggleWorkType('maintenance');assert(fields.every(id=>w.document.getElementById(id).hidden));w.toggleWorkType('measurement');assert(fields.every(id=>!w.document.getElementById(id).hidden));
   const setDefault=(id,value)=>{const e=w.document.getElementById(id);e.value=value;e.dispatchEvent(new w.Event('input',{bubbles:true}));};
   assert.equal(saved().defaultExhaustValve,'KSO-125');assert.equal(saved().defaultSupplyValve,'');
   setDefault('default-supply-valve','KTS-160');w.addVent(0);
@@ -18,6 +20,7 @@ setTimeout(()=>{try{
   w.updateVent(0,0,'type','supply');assert.equal(saved().apartments[0].vents[0].valve,'KSO-old');assert.equal(saved().apartments[0].vents[0].pa,'34');
   w.updateVent(0,1,'valve','');w.updateVent(0,1,'type','exhaust');assert.equal(saved().apartments[0].vents[1].valve,'KSO-160');
   const restored=w.normalizeData(saved());assert.equal(restored.defaultSupplyValve,'KTS-160');assert.equal(restored.apartments[0].vents[1].autoDefaultValve,'KSO-160');
+  w.toggleWorkType('measurement');assert(fields.every(id=>w.document.getElementById(id).hidden));assert.equal(saved().defaultSupplyValve,'KTS-160');assert.equal(saved().defaultExhaustValve,'KSO-160');w.toggleWorkType('measurement');assert(fields.every(id=>!w.document.getElementById(id).hidden));
   assert.equal(w.normalizeData({defaultValve:'Legacy',defaultExhaustValve:'',defaultSupplyValve:''}).defaultExhaustValve,'');
   assert.equal(w.eval('emptyData().defaultExhaustValve'),'');assert.equal(w.eval('emptyData().defaultSupplyValve'),'');
   console.log('Two defaults: legacy migration, type switching, open panel, manual/existing values, persistence and empty defaults PASS');
