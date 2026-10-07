@@ -2,7 +2,7 @@
 <html lang="fi" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-pQMDuVy3QmXly4Vq8kwDszfJdYdd/7WySFG8Co74dVo='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://quuanwefzmsyjetltmzr.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-7oF7x+mM4r0bjWg0AztZrVtsTNLcO0bcnXArrBTrkP4='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://quuanwefzmsyjetltmzr.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IV Mittaus | Ilmamäärien mittauspöytäkirja</title>
 <meta name="theme-color" content="#081216">
@@ -83,9 +83,6 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <div><label>Kohde</label><input id="kohde" placeholder="Esim. Virusmäentie 27, Turku"></div>
 <div><label for="paiva">Työpäivä</label><div class="date-field"><span id="paiva-display" class="date-field-display" aria-hidden="true"></span><input id="paiva" type="date" data-ui-input="updateDateDisplay('paiva')" data-ui-change="updateDateDisplay('paiva')"></div></div>
 <div><label>Työn suorittaja</label><input id="mittaaja" placeholder="Nimi"></div>
-<div id="measurement-instrument-wrap" hidden><label>Mittausväline</label><input id="valine" placeholder="Esim. Swema 3000md"></div>
-<div><label for="default-exhaust-valve">Poiston oletusventtiili</label><input id="default-exhaust-valve" placeholder="Esim. KSO-125"><p class="muted">Täytetään uusiin poistoventtiileihin. Asetuksen muuttaminen ei muuta jo lisättyjä venttiilejä.</p></div>
-<div><label for="default-supply-valve">Tulon oletusventtiili</label><input id="default-supply-valve" placeholder="Esim. KTS-125"><p class="muted">Täytetään tuloa valittaessa, jos venttiili on oletusarvo tai tyhjä. Käsin kirjoitettua nimeä ei korvata.</p></div>
 <div class="work-type-block"><label>Työn laatu <span class="muted">(voit valita useita)</span></label><div class="work-type-grid" role="group" aria-label="Työn laatu">
 <button type="button" class="work-type-option" data-work-type="cleaning" role="checkbox" data-ui-click="toggleWorkType('cleaning')">Puhdistus</button>
 <button type="button" class="work-type-option" data-work-type="maintenance" role="checkbox" data-ui-click="toggleWorkType('maintenance')">Huolto</button>
@@ -93,6 +90,9 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <button type="button" class="work-type-option" data-work-type="measurement" role="checkbox" data-ui-click="toggleWorkType('measurement')">Mittaus ja säätö</button>
 <button type="button" class="work-type-option" data-work-type="other" role="checkbox" data-ui-click="toggleWorkType('other')">Muu, mikä?</button>
 </div><div id="custom-work-type-wrap" class="custom-work-type" hidden><label>Muu työn laatu</label><input id="custom-work-type" maxlength="50" placeholder="Esim. kanavakuvaus" data-ui-input="updateCustomWorkType(this.value)"></div><p class="muted">Valinnat määrittävät PDF-raportin pääotsikon.</p></div>
+<div id="measurement-instrument-wrap" hidden><label>Mittausväline</label><input id="valine" placeholder="Esim. Swema 3000md"></div>
+<div id="measurement-exhaust-default-wrap" hidden><label for="default-exhaust-valve">Poiston oletusventtiili</label><input id="default-exhaust-valve" placeholder="Esim. KSO-125"><p class="muted">Täytetään uusiin poistoventtiileihin. Asetuksen muuttaminen ei muuta jo lisättyjä venttiilejä.</p></div>
+<div id="measurement-supply-default-wrap" hidden><label for="default-supply-valve">Tulon oletusventtiili</label><input id="default-supply-valve" placeholder="Esim. KTS-125"><p class="muted">Täytetään tuloa valittaessa, jos venttiili on oletusarvo tai tyhjä. Käsin kirjoitettua nimeä ei korvata.</p></div>
 <details id="project-cleaning-wrap" class="cleaning-block compact-section" hidden><summary class="compact-summary"><span>Puhdistuksen laajuus</span><span id="project-cleaning-count" class="compact-summary-meta">Ei valintoja</span></summary><div class="compact-section-body"><div id="project-cleaning-grid" class="cleaning-grid" role="group" aria-label="Kohteessa puhdistetut osat"></div><div id="project-cleaning-custom" class="cleaning-custom" hidden><label>Muu puhdistettu kohde</label><input id="project-cleaning-custom-input" maxlength="80" placeholder="Kirjoita puhdistettu kohde" data-ui-input="updateProjectCustomCleaningItem(this.value)"></div></div></details>
 <details id="project-condition-wrap" class="condition-block compact-section" hidden><summary class="compact-summary"><span>Ilmanvaihtojärjestelmän kunto</span><span id="project-condition-count" class="compact-summary-meta">Ei arvioita</span></summary><div class="compact-section-body"><div id="project-condition-grid" class="condition-grid" role="group" aria-label="Kohteen ilmanvaihtojärjestelmän kunto"></div><p class="muted">Valitse: Hyvä, Huomioitava tai Korjattava. Napauta valittua vaihtoehtoa uudelleen tyhjentääksesi arvion.</p></div></details>
 </div></section>
@@ -511,7 +511,7 @@ function renderWorkType(){
   const selectedTypes=Array.isArray(data.workTypes)?data.workTypes:[];
   document.querySelectorAll("[data-work-type]").forEach(button=>{const selected=selectedTypes.includes(button.dataset.workType);button.classList.toggle("selected",selected);button.setAttribute("aria-checked",selected?"true":"false")});
   const wrap=document.getElementById("custom-work-type-wrap"),input=document.getElementById("custom-work-type");if(wrap)wrap.hidden=!selectedTypes.includes("other");if(input)input.value=data.customWorkType||"";
-  const instrumentWrap=document.getElementById("measurement-instrument-wrap");if(instrumentWrap)instrumentWrap.hidden=!selectedTypes.includes("measurement");
+  ["measurement-instrument-wrap","measurement-exhaust-default-wrap","measurement-supply-default-wrap"].forEach(id=>{const field=document.getElementById(id);if(field)field.hidden=!selectedTypes.includes("measurement")});
   const projectCleaningWrap=document.getElementById("project-cleaning-wrap");if(projectCleaningWrap)projectCleaningWrap.hidden=!selectedTypes.includes("cleaning");renderProjectCleaning();renderWorkEntryCleaning();
   const conditionRelevant=selectedTypes.includes("cleaning")||selectedTypes.includes("maintenance"),projectConditionWrap=document.getElementById("project-condition-wrap");if(projectConditionWrap)projectConditionWrap.hidden=!conditionRelevant;renderProjectConditions();renderWorkEntryConditions();
 }
