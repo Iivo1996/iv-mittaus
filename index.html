@@ -2,7 +2,7 @@
 <html lang="fi" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IrTh10gGUfUsExwqn+2VhyBbjaE6ZFM8kTmQ2hrLbPU='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://quuanwefzmsyjetltmzr.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-pQMDuVy3QmXly4Vq8kwDszfJdYdd/7WySFG8Co74dVo='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://quuanwefzmsyjetltmzr.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IV Mittaus | Ilmamäärien mittauspöytäkirja</title>
 <meta name="theme-color" content="#081216">
@@ -84,7 +84,8 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <div><label for="paiva">Työpäivä</label><div class="date-field"><span id="paiva-display" class="date-field-display" aria-hidden="true"></span><input id="paiva" type="date" data-ui-input="updateDateDisplay('paiva')" data-ui-change="updateDateDisplay('paiva')"></div></div>
 <div><label>Työn suorittaja</label><input id="mittaaja" placeholder="Nimi"></div>
 <div id="measurement-instrument-wrap" hidden><label>Mittausväline</label><input id="valine" placeholder="Esim. Swema 3000md"></div>
-<div><label>Oletusventtiili</label><input id="default-valve" placeholder="Esim. KSO-125"><p class="muted">Täytetään automaattisesti uusiin venttiileihin. Jo lisättyjä venttiilejä ei muuteta.</p></div>
+<div><label for="default-exhaust-valve">Poiston oletusventtiili</label><input id="default-exhaust-valve" placeholder="Esim. KSO-125"><p class="muted">Täytetään uusiin poistoventtiileihin. Asetuksen muuttaminen ei muuta jo lisättyjä venttiilejä.</p></div>
+<div><label for="default-supply-valve">Tulon oletusventtiili</label><input id="default-supply-valve" placeholder="Esim. KTS-125"><p class="muted">Täytetään tuloa valittaessa, jos venttiili on oletusarvo tai tyhjä. Käsin kirjoitettua nimeä ei korvata.</p></div>
 <div class="work-type-block"><label>Työn laatu <span class="muted">(voit valita useita)</span></label><div class="work-type-grid" role="group" aria-label="Työn laatu">
 <button type="button" class="work-type-option" data-work-type="cleaning" role="checkbox" data-ui-click="toggleWorkType('cleaning')">Puhdistus</button>
 <button type="button" class="work-type-option" data-work-type="maintenance" role="checkbox" data-ui-click="toggleWorkType('maintenance')">Huolto</button>
@@ -417,7 +418,7 @@ const CONDITION_ITEMS=[{id:"airUnit",label:"IV-koneen yleiskunto"},{id:"fans",la
 const CONDITION_STATES=[{id:"good",label:"Hyvä"},{id:"attention",label:"Huomioitava"},{id:"repair",label:"Korjattava"}];
 function normalizeConditionRatings(ratings){const result={};if(!ratings||typeof ratings!=="object"||Array.isArray(ratings))return result;CONDITION_ITEMS.forEach(item=>{if(CONDITION_STATES.some(state=>state.id===ratings[item.id]))result[item.id]=ratings[item.id]});return result}
 const todayInFinland=()=>new Date().toLocaleDateString("sv-SE",{timeZone:"Europe/Helsinki"});
-const emptyData=()=>({projectId:null,kohde:"",paiva:todayInFinland(),mittaaja:"",valine:"",defaultValve:"",workTypes:[],customWorkType:"",cleaningItems:[],customCleaningItem:"",conditionRatings:{},workEntries:[],apartments:[]});
+const emptyData=()=>({projectId:null,kohde:"",paiva:todayInFinland(),mittaaja:"",valine:"",defaultValve:"",defaultExhaustValve:"",defaultSupplyValve:"",workTypes:[],customWorkType:"",cleaningItems:[],customCleaningItem:"",conditionRatings:{},workEntries:[],apartments:[]});
 function sortedApartments(apartments){
   return (Array.isArray(apartments)?apartments:[]).map((apartment,index)=>({apartment,index})).sort((a,b)=>{
     const left=String(a.apartment?.name||"").trim(),right=String(b.apartment?.name||"").trim();
@@ -445,7 +446,9 @@ function normalizeData(saved){
   result.workTypes=[...new Set((Array.isArray(saved?.workTypes)?saved.workTypes:legacyType?[legacyType]:[]).filter(type=>WORK_TYPES.includes(type)))];
   delete result.workType;
   result.customWorkType=String(result.customWorkType||"");
-  result.defaultValve=String(result.defaultValve||"");
+  result.defaultExhaustValve=String(saved?.defaultExhaustValve??saved?.defaultValve??"");
+  result.defaultSupplyValve=String(saved?.defaultSupplyValve??"");
+  result.defaultValve=result.defaultExhaustValve; // Keep older backups/readers compatible.
   result.cleaningItems=normalizeCleaningItems(result.cleaningItems);result.customCleaningItem=String(result.customCleaningItem||"");result.conditionRatings=normalizeConditionRatings(result.conditionRatings);
   result.workEntries=(Array.isArray(result.workEntries)?result.workEntries:[]).map(entry=>({
     id:entry?.id||newRecordId("merkinta"),date:entry?.date||todayInFinland(),target:String(entry?.target||""),title:String(entry?.title||""),text:String(entry?.text||""),
@@ -556,7 +559,7 @@ function handleSecondLogoFile(file){
 function removeSecondLogo(){pendingPdfSettings.logo2Data="";pendingPdfSettings.logo2Width=0;pendingPdfSettings.logo2Height=0;document.getElementById("setting-logo-2").value="";renderSecondLogoPreview()}
 function savePdfSettings(){pendingPdfSettings.company=document.getElementById("setting-company").value.trim();pendingPdfSettings.businessId=document.getElementById("setting-business-id").value.trim();pendingPdfSettings.contactDetails=document.getElementById("setting-contact-details").value.trim();try{localStorage.setItem("iv_pdf_settings",JSON.stringify(pendingPdfSettings));markLocalChange();closePdfSettings();showToast("PDF-asetukset tallennettu")}catch(e){showToast("Asetuksia ei voitu tallentaa")}}
 function save(){
-  data.kohde=document.getElementById("kohde").value;data.paiva=document.getElementById("paiva").value;data.mittaaja=document.getElementById("mittaaja").value;data.valine=document.getElementById("valine").value;data.defaultValve=document.getElementById("default-valve").value;
+  data.kohde=document.getElementById("kohde").value;data.paiva=document.getElementById("paiva").value;data.mittaaja=document.getElementById("mittaaja").value;data.valine=document.getElementById("valine").value;data.defaultExhaustValve=document.getElementById("default-exhaust-valve").value;data.defaultSupplyValve=document.getElementById("default-supply-valve").value;data.defaultValve=data.defaultExhaustValve;
   try{localStorage.setItem("iv_proto",JSON.stringify(data));markLocalChange();return true}catch(e){showToast("Tallennustila on täynnä. Poista kuvia tai vanhoja projekteja.");return false}
 }
 function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}
@@ -721,11 +724,15 @@ function finishApartmentNameEdit(ai){
   const nextIndex=data.apartments.indexOf(apartment),element=document.querySelector('.apartment[data-apartment-index="'+nextIndex+'"]');if(element)element.open=true;
 }
 function updateApartmentComments(ai,v){data.apartments[ai].comments=v;save()}
-function addVent(ai){data.apartments[ai].vents.push({...emptyVent(),valve:String(data.defaultValve||"")});const vi=data.apartments[ai].vents.length-1;render();save();const apartment=document.querySelectorAll(".apartment")[ai],card=apartment?.querySelector('.vent-card[data-vent-index="'+vi+'"]');if(apartment)apartment.open=true;if(card){card.open=true;const room=card.closest(".room-group");if(room)room.open=true;card.querySelector(".field-space input")?.focus()}}
+function defaultValveForType(type){return String(type==="exhaust"?data.defaultExhaustValve||"":data.defaultSupplyValve||"")}
+function addVent(ai){const vent=emptyVent();vent.valve=defaultValveForType(vent.type);vent.autoDefaultValve=vent.valve;data.apartments[ai].vents.push(vent);const vi=data.apartments[ai].vents.length-1;render();save();const apartment=document.querySelectorAll(".apartment")[ai],card=apartment?.querySelector('.vent-card[data-vent-index="'+vi+'"]');if(apartment)apartment.open=true;if(card){card.open=true;const room=card.closest(".room-group");if(room)room.open=true;card.querySelector(".field-space input")?.focus()}}
 function removeVent(ai,vi){data.apartments[ai].vents.splice(vi,1);render();save()}
 function finishVentSpaceEdit(ai,vi){render();const apartment=document.querySelector('.apartment[data-apartment-index="'+ai+'"]'),card=apartment?.querySelector('.vent-card[data-vent-index="'+vi+'"]');if(apartment)apartment.open=true;if(card){card.open=true;card.closest(".room-group").open=true}}
 function updateVent(ai,vi,key,value){
-  data.apartments[ai].vents[vi][key]=value;
+  const vent=data.apartments[ai].vents[vi];
+  if(key==="type"&&(!String(vent.valve||"").trim()||(typeof vent.autoDefaultValve==="string"&&vent.valve===vent.autoDefaultValve))){vent.valve=defaultValveForType(value);vent.autoDefaultValve=vent.valve}
+  if(key==="valve")delete vent.autoDefaultValve;
+  vent[key]=value;
   const card=document.querySelector('.apartment[data-apartment-index="'+ai+'"] .vent-card[data-vent-index="'+vi+'"]');
   if(card&&key==="space"){
     const room=card.closest(".room-group"),roomTitle=room?.querySelector(".room-group-title");
@@ -739,6 +746,7 @@ function updateVent(ai,vi,key,value){
   }
   if(key==="type"){
     if(card){
+      const valveInput=card.querySelector(".field-valve input"),valveTitle=card.querySelector(".vent-summary-main strong");if(valveInput)valveInput.value=vent.valve;if(valveTitle)valveTitle.textContent=String(vent.valve||"").trim()||"Uusi venttiili";
       const isExhaust=value==="exhaust";
       card.classList.toggle("exhaust",isExhaust);
       card.classList.toggle("supply",!isExhaust);
@@ -879,22 +887,33 @@ async function makePdf(){
     apartmentDeviationComments(a).forEach(note=>wrap("Automaattinen huomio: "+note,76).forEach(row=>rows.push({text:row||" ",color:C.red,bold:true})));
     return rows.length?rows:[{text:"-",color:C.ink}];
   }
-  function apartmentHeight(a){const rows=commentRows(a);return 26+18+20+(a.vents||[]).length*17+8+16+34+8+Math.max(24,10+rows.length*9)+13}
+  function spaceLines(value){
+    // Conservative Helvetica glyph widths: wrap the complete name instead of truncating it.
+    const glyphWidth=c=>6.6*(/[MWmw]/.test(c)?1:/[A-ZÅÄÖ]/.test(c)?.8:/[ilI.,:;!|' ]/.test(c)?.3:.65),maxWidth=cols[0]-6,out=[];
+    for(const part of String(value||"-").split(/\r?\n/)){
+      let row="",rowWidth=0;
+      for(const c of part){const w=glyphWidth(c);if(row&&rowWidth+w>maxWidth){const split=Math.max(row.lastIndexOf(" "),row.lastIndexOf("/"));if(split>=0){const end=split+(row[split]==="/"?1:0);out.push(row.slice(0,end));row=row.slice(split+1)}else{out.push(row);row=""}rowWidth=Array.from(row).reduce((sum,ch)=>sum+glyphWidth(ch),0)}row+=c;rowWidth+=w}
+      out.push(row);
+    }
+    return out;
+  }
+  const ventRowHeight=lines=>Math.max(17,8+lines.length*9);
+  function apartmentHeight(a){const rows=commentRows(a);return 26+18+20+(a.vents||[]).reduce((sum,v)=>sum+ventRowHeight(spaceLines(v.space)),0)+8+16+34+8+Math.max(24,10+rows.length*9)+13}
   function apartmentBar(name,continued=false){ensure(27);text((name||"-")+(continued?"  (jatkuu)":""),left,y-15,13,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=30}
   function tableHeader(title){
     text(title+" - arvot / venttiili",left,y-9,7.5,true,C.ink);y-=14;rect(left,y-20,width,20,C.pale,C.line);
     let x=left;headers.forEach((h,i)=>{text(fit(h,[10,10,21,4,5,10,11,10][i]),x+3,y-13,6.3,true,C.ink);x+=cols[i];if(i<headers.length-1)line(x,y-20,x,y,C.line)});y-=20;
   }
-  function tableRow(values,alertAdjusted=false){
-    rect(left,y-17,width,17,"1 1 1",C.line);
-    const limits=[11,10,22,4,5,9,10,12];let x=left;values.forEach((v,i)=>{const alert=alertAdjusted&&i===6;if(alert)rect(x,y-17,cols[i],17,C.redPale,C.red);const color=alert?C.red:i===1?(v==="Poisto"?C.exhaust:C.supply):C.ink;text(fit(v,limits[i]),x+3,y-11.5,6.6,i===1||alert,color);x+=cols[i];if(i<values.length-1)line(x,y-17,x,y,C.line)});y-=17;
+  function tableRow(values,alertAdjusted=false,lines=spaceLines(values[0])){
+    const height=ventRowHeight(lines);rect(left,y-height,width,height,"1 1 1",C.line);
+    const limits=[11,10,22,4,5,9,10,12];let x=left;values.forEach((v,i)=>{const alert=alertAdjusted&&i===6;if(alert)rect(x,y-height,cols[i],height,C.redPale,C.red);const color=alert?C.red:i===1?(v==="Poisto"?C.exhaust:C.supply):C.ink;if(i===0)lines.forEach((row,j)=>text(row,x+3,y-11.5-j*9,6.6,false,color));else text(fit(v,limits[i]),x+3,y-11.5,6.6,i===1||alert,color);x+=cols[i];if(i<values.length-1)line(x,y-height,x,y,C.line)});y-=height;
   }
   function drawVentTable(a){
     const rows=a.vents||[];
     if(!rows.length){text("Ei lisättyjä venttiilejä.",left+5,y-11,8,false,C.muted);y-=22;return}
     if(y-(14+20+17)<42){newContentPage();apartmentBar(a.name,true)}
     tableHeader("MITTAUSTULOKSET");
-    rows.forEach(v=>{if(y-17<42){newContentPage();apartmentBar(a.name,true);tableHeader("MITTAUSTULOKSET (jatkuu)")}tableRow([v.space,v.type==="exhaust"?"Poisto":"Tulo",v.valve,v.kpl,v.pa,v.target,v.adjusted,v.position],!!airflowDeviation(v)?.exceeds)});
+    rows.forEach(v=>{const lines=spaceLines(v.space);for(let offset=0;offset<lines.length;offset+=60){const chunk=lines.slice(offset,offset+60);if(y-ventRowHeight(chunk)<42){newContentPage();apartmentBar(a.name,true);tableHeader("MITTAUSTULOKSET (jatkuu)")}tableRow([v.space,v.type==="exhaust"?"Poisto":"Tulo",v.valve,v.kpl,v.pa,v.target,v.adjusted,v.position],!!airflowDeviation(v)?.exceeds,chunk)}});
     y-=6;
   }
   function drawSummary(a){
@@ -1012,7 +1031,7 @@ function ventRows(ai){
   return '<div class="vent-list">'+groups.map(group=>'<details class="room-group"><summary><span class="room-group-title">'+esc(group.name)+'</span><span class="room-group-count">'+group.items.length+' '+(group.items.length===1?'venttiili':'venttiiliä')+'</span></summary><div class="room-group-body">'+group.items.map(item=>ventCard(item.v,item.vi)).join('')+'</div></details>').join('')+'</div>'
 }
 function render(){
-document.getElementById("kohde").value=data.kohde;document.getElementById("paiva").value=data.paiva;updateDateDisplay("paiva");document.getElementById("mittaaja").value=data.mittaaja;document.getElementById("valine").value=data.valine;document.getElementById("default-valve").value=data.defaultValve;
+document.getElementById("kohde").value=data.kohde;document.getElementById("paiva").value=data.paiva;updateDateDisplay("paiva");document.getElementById("mittaaja").value=data.mittaaja;document.getElementById("valine").value=data.valine;document.getElementById("default-exhaust-valve").value=data.defaultExhaustValve;document.getElementById("default-supply-valve").value=data.defaultSupplyValve;
 renderWorkType();
 renderWorkEntries();
 let e=document.getElementById("apartments"),openApartments=new Set([...e.querySelectorAll(".apartment[open]")].map(x=>Number(x.dataset.apartmentIndex)));e.innerHTML="";
@@ -1034,6 +1053,6 @@ function runUiAction(source,element,event){
 }
 for(const type of ["click","input","change"])document.addEventListener(type,event=>{const element=event.target.closest?.("[data-ui-"+type+"]");if(element)runUiAction(element.getAttribute("data-ui-"+type),element,event)});
 
-["kohde","paiva","mittaaja","valine","default-valve"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();schedulePhotoCleanup();initializeCloudAuth().then(async()=>{if(!cloudUser)await migrateLegacyPhotoStorage(false)}).catch(()=>migrateLegacyPhotoStorage(false));
+["kohde","paiva","mittaaja","valine","default-exhaust-valve","default-supply-valve"].forEach(id=>document.getElementById(id).addEventListener("input",save));render();schedulePhotoCleanup();initializeCloudAuth().then(async()=>{if(!cloudUser)await migrateLegacyPhotoStorage(false)}).catch(()=>migrateLegacyPhotoStorage(false));
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
 </script></body></html>

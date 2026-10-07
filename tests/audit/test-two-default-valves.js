@@ -1,0 +1,24 @@
+const fs=require('fs'),assert=require('assert/strict'),{JSDOM}=require('jsdom');
+const old={projectId:'two-defaults',defaultValve:'KSO-125',apartments:[{name:'A1',vents:[{space:'OH',type:'exhaust',valve:'KSO-old',pa:'34',adjusted:'16'}]}]};
+const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{runScripts:'dangerously',url:'https://example.test/',beforeParse(w){w.matchMedia=()=>({matches:false,addEventListener(){}});w.requestAnimationFrame=f=>f();w.localStorage.setItem('iv_proto',JSON.stringify(old));}});
+dom.window.HTMLElement.prototype.scrollIntoView=()=>{};
+setTimeout(()=>{try{
+  const w=dom.window,saved=()=>JSON.parse(w.localStorage.getItem('iv_proto'));
+  w.save();
+  const setDefault=(id,value)=>{const e=w.document.getElementById(id);e.value=value;e.dispatchEvent(new w.Event('input',{bubbles:true}));};
+  assert.equal(saved().defaultExhaustValve,'KSO-125');assert.equal(saved().defaultSupplyValve,'');
+  setDefault('default-supply-valve','KTS-160');w.addVent(0);
+  assert.equal(saved().apartments[0].vents[1].valve,'KSO-125');
+  w.updateVent(0,1,'type','supply');assert.equal(saved().apartments[0].vents[1].valve,'KTS-160');
+  assert.equal(w.document.querySelector('[data-vent-index="1"] .field-valve input').value,'KTS-160');
+  assert(w.document.querySelector('[data-vent-index="1"]').open);
+  w.updateVent(0,1,'type','exhaust');assert.equal(saved().apartments[0].vents[1].valve,'KSO-125');
+  setDefault('default-exhaust-valve','KSO-160');assert.equal(saved().apartments[0].vents[1].valve,'KSO-125');
+  w.updateVent(0,1,'valve','Custom');w.updateVent(0,1,'type','supply');assert.equal(saved().apartments[0].vents[1].valve,'Custom');
+  w.updateVent(0,0,'type','supply');assert.equal(saved().apartments[0].vents[0].valve,'KSO-old');assert.equal(saved().apartments[0].vents[0].pa,'34');
+  w.updateVent(0,1,'valve','');w.updateVent(0,1,'type','exhaust');assert.equal(saved().apartments[0].vents[1].valve,'KSO-160');
+  const restored=w.normalizeData(saved());assert.equal(restored.defaultSupplyValve,'KTS-160');assert.equal(restored.apartments[0].vents[1].autoDefaultValve,'KSO-160');
+  assert.equal(w.normalizeData({defaultValve:'Legacy',defaultExhaustValve:'',defaultSupplyValve:''}).defaultExhaustValve,'');
+  assert.equal(w.eval('emptyData().defaultExhaustValve'),'');assert.equal(w.eval('emptyData().defaultSupplyValve'),'');
+  console.log('Two defaults: legacy migration, type switching, open panel, manual/existing values, persistence and empty defaults PASS');
+}catch(e){console.error(e);process.exitCode=1}finally{dom.window.close()}},100);
