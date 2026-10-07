@@ -34,7 +34,7 @@ setTimeout(async()=>{
   if(byName.B2.comments!=="B2 kommentti"||byName.B2.pressureDifference!=="-5"||byName.B2.measurementSpeed!=="60 %"||byName.B2.customApartmentValue!=="keep-B2")throw new Error("Existing apartment content changed");
   if(saved.workEntries[0].text!=="Älä hävitä"||saved.workEntries[0].photos[0].storagePath!=="user/project/photo.jpg")throw new Error("Work entry or photo reference changed");
 
-  const defaultInput=dom.window.document.getElementById("default-valve");defaultInput.value="KSO-125";defaultInput.dispatchEvent(new dom.window.Event("input",{bubbles:true}));
+  const defaultInput=dom.window.document.getElementById("default-exhaust-valve");defaultInput.value="KSO-125";defaultInput.dispatchEvent(new dom.window.Event("input",{bubbles:true}));
   saved=JSON.parse(dom.window.localStorage.getItem("iv_proto"));
   const a1Index=saved.apartments.findIndex(a=>a.name==="A1");
   dom.window.addVent(a1Index);
