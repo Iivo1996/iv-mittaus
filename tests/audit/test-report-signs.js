@@ -1,0 +1,13 @@
+const fs=require('fs'),assert=require('assert/strict'),{JSDOM}=require('jsdom');
+const project={projectId:'signs',workTypes:['measurement'],apartments:[{name:'A1',vents:[{space:'OH',type:'supply',target:'15',adjusted:'12',kpl:'2'},{space:'K',type:'exhaust',target:'20',adjusted:'25',kpl:'1'}]}]};
+const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{runScripts:'dangerously',url:'https://example.test/',beforeParse(w){w.matchMedia=()=>({matches:false,addEventListener(){}});w.requestAnimationFrame=f=>f();w.localStorage.setItem('iv_proto',JSON.stringify(project));}});
+setTimeout(async()=>{try{const w=dom.window;
+ for(const [value,type,expected] of [['15','supply','+15'],['20','exhaust','-20'],['-12,5','supply','+12,5'],['+8','exhaust','-8'],['0','exhaust','0'],['','supply',''],['-','exhaust','-']])assert.equal(w.pdfAirflow(value,type),expected);
+ for(const [value,expected] of [['6','+6'],['+6','+6'],['-6','-6'],['−6','-6'],['0','0'],['-0','0'],['kiinni','kiinni'],['',''],['-','-'],['1,5','+1,5']])assert.equal(w.pdfPosition(value),expected);
+ w.eval('data.apartments[0].vents[0].position="6";data.apartments[0].vents[1].position="-6"');
+ const before=JSON.stringify(w.eval('data.apartments')),totals=w.apartmentTotals(w.eval('data.apartments[0]'));
+ const bytes=await w.makePdf(),raw=Buffer.from(bytes).toString('latin1');for(const value of ['+15','+12','-20','-25'])assert(raw.includes('('+value+') Tj'));
+ assert(raw.includes('(+6) Tj'));assert(raw.includes('(-6) Tj'));
+ assert.equal(totals.supply,24);assert.equal(totals.exhaust,25);assert.equal(totals.difference,-1);assert.equal(JSON.stringify(w.eval('data.apartments')),before);
+ fs.mkdirSync('tmp/pdfs',{recursive:true});fs.writeFileSync('tmp/pdfs/report-signs.pdf',Buffer.from(bytes));console.log('PDF airflow signs and unchanged measurements/totals PASS');
+}catch(e){console.error(e);process.exitCode=1}finally{dom.window.close()}},80);
