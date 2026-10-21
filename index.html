@@ -2,7 +2,7 @@
 <html lang="fi" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-7oF7x+mM4r0bjWg0AztZrVtsTNLcO0bcnXArrBTrkP4='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://quuanwefzmsyjetltmzr.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-qPdAvxnL/B3jnOuep4AlHtRF2dymZa9cV7WsTPn7f6U='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://quuanwefzmsyjetltmzr.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IV Mittaus | Ilmamäärien mittauspöytäkirja</title>
 <meta name="theme-color" content="#081216">
@@ -114,6 +114,7 @@ button{background:var(--ui-surface-3);color:var(--ui-text)}button.primary,button
 <section class="card action-card no-print"><div class="bottom">
 <span id="save-note" class="save-note">Tallennettu automaattisesti tälle laitteelle</span>
 <button type="button" class="secondary" data-ui-click="addApartment()">+ Lisää asunto</button><button type="button" class="save-project" data-ui-click="saveCurrentProject()">Tallenna projekti</button><button type="button" class="danger" data-ui-click="clearAll()">Tyhjennä</button>
+<div><label for="pdf-content-select">PDF:n sisältö</label><select id="pdf-content-select"><option value="all">Kaikki osat</option><option value="measurements">Vain mittauspöytäkirja</option><option value="work">Vain työ- ja havaintoraportti</option></select><p class="muted">Valinta koskee vain PDF:ää. Projektin kaikki tiedot säilyvät.</p></div>
 <button type="button" class="primary" data-ui-click="generatePdf()">Luo PDF</button></div>
 </section>
 </main>
@@ -407,7 +408,7 @@ async function initializeCloudAuth(){
 window.addEventListener("online",async()=>{if(cloudSession&&!cloudUser){try{if(await loadCloudUser())await initializeCloud()}catch(e){return}}else if(cloudUser){await syncPendingPhotoUploads().catch(()=>false);await syncCloudNow(false)}schedulePhotoCleanup()});
 function newRecordId(prefix){return(globalThis.crypto?.randomUUID?.()||prefix+"-"+Date.now()+"-"+Math.random().toString(36).slice(2))}
 const emptyVent=(space="",type="exhaust")=>({space,type,valve:"",kpl:"1",pa:"",target:"",adjusted:"",position:""});
-const emptyApartment=()=>({name:"",comments:"",vents:[],pressureEnabled:false,pressureDifference:"",speedEnabled:false,measurementSpeed:""});
+const emptyApartment=()=>({name:"",comments:"",vents:[],measurementStatus:"pending",measurementReason:"",pressureEnabled:false,pressureDifference:"",speedEnabled:false,measurementSpeed:""});
 const WORK_TYPES=["cleaning","maintenance","installation","measurement","other"];
 const CLEANING_ITEMS=[
   {id:"supplyDucts",label:"Tuloilmakanavat"},{id:"exhaustDucts",label:"Poistoilmakanavat"},{id:"outdoorDuct",label:"Raitisilmakanava"},{id:"exhaustAirDuct",label:"Jäteilmakanava"},{id:"terminals",label:"Venttiilit ja päätelaitteet"},{id:"airUnit",label:"IV-kone"},
@@ -437,6 +438,7 @@ function normalizeApartment(apartment){
     });
   }
   a.vents=a.vents.map(v=>({...emptyVent(),...v,type:v?.type==="exhaust"?"exhaust":"supply"}));
+  a.measurementStatus=["measured","pending","inaccessible"].includes(source.measurementStatus)?source.measurementStatus:a.vents.length?"measured":"pending";a.measurementReason=String(source.measurementReason||"");
   delete a.rooms;return a;
 }
 function normalizePhoto(photo){const id=photo?.id||newRecordId("kuva");return{id,...(photo?.data?{data:photo.data}:{}),...(photo?.storagePath?{storagePath:String(photo.storagePath)}:{}),localKey:String(photo?.localKey||id),width:Number(photo?.width)||800,height:Number(photo?.height)||600}}
@@ -787,9 +789,11 @@ function ventQuantity(v){const quantity=flowNumber(v.kpl);return Number.isFinite
 function apartmentTotals(a){let supply=0,exhaust=0,hasSupply=false,hasExhaust=false;(a.vents||[]).forEach(v=>{if(v.type==="exhaust"){hasExhaust=true;exhaust+=flowNumber(v.adjusted)*ventQuantity(v)}else{hasSupply=true;supply+=flowNumber(v.adjusted)*ventQuantity(v)}});const difference=supply-exhaust;return{supply,exhaust,hasSupply,hasExhaust,difference,status:Math.abs(difference)<0.05?"Tasapainossa":difference<0?"Alipaineinen":"Ylipaineinen",statusClass:Math.abs(difference)<0.05?"balanced":difference<0?"negative":"positive"}}
 function updateApartmentSummary(ai){const t=apartmentTotals(data.apartments[ai]),s=document.getElementById("summary-supply-"+ai),e=document.getElementById("summary-exhaust-"+ai),d=document.getElementById("summary-difference-"+ai);if(!s||!e||!d)return;s.textContent=flowFormat(t.supply)+" l/s";e.textContent=flowFormat(t.exhaust)+" l/s";d.querySelector("strong").textContent=(t.difference>0?"+":"")+flowFormat(t.difference)+" l/s";d.querySelector("em").textContent=t.status;d.className="summary-box "+t.statusClass}
 function pdfText(v){return String(v??"").replace(/[\\()]/g,m=>"\\"+m).replace(/[^\x20-\x7e\xa0-\xff]/g,"?")}
-function selectedReportTitle(){
+function pdfAirflow(value,type){const raw=String(value??"").trim();if(!raw)return "";if(!/^[+\-−]?\d+(?:[.,]\d+)?$/.test(raw))return raw;const magnitude=raw.replace(/^[+\-−]/,"");return Number(magnitude.replace(",","."))===0?"0":(type==="exhaust"?"-":"+")+magnitude}
+function pdfPosition(value){const raw=String(value??"").trim();if(!/^[+\-−]?\d+(?:[.,]\d+)?$/.test(raw))return raw;const number=Number(raw.replace("−","-").replace(",","."));return number===0?"0":number>0?"+"+raw.replace(/^\+/,""):raw.replace("−","-")}
+function selectedReportTitle(types=data.workTypes){
   const titles={cleaning:"ILMANVAIHDON PUHDISTUSRAPORTTI",maintenance:"ILMANVAIHDON HUOLTORAPORTTI",installation:"ILMANVAIHDON ASENNUSRAPORTTI",measurement:"ILMANVAIHDON SÄÄTÖ- JA MITTAUSPÖYTÄKIRJA"};
-  const selected=(Array.isArray(data.workTypes)?data.workTypes:[]).filter(type=>WORK_TYPES.includes(type));
+  const selected=(Array.isArray(types)?types:[]).filter(type=>WORK_TYPES.includes(type));
   if(selected.length===1&&titles[selected[0]])return titles[selected[0]];
   const terms={cleaning:"PUHDISTUS",maintenance:"HUOLTO",installation:"ASENNUS",measurement:"MITTAUS JA SÄÄTÖ"},parts=[];
   selected.forEach(type=>{if(terms[type])parts.push(terms[type]);else if(type==="other"){const custom=String(data.customWorkType||"").trim().toLocaleUpperCase("fi");if(custom)parts.push(custom.replace(/RAPORTTI$/,""))}});
@@ -813,16 +817,18 @@ async function pdfJpegAsset(blob){
   }finally{URL.revokeObjectURL(url)}
 }
 async function workPhotoBytes(photo){const blob=await resolvePhotoBlob(photo);return blob?pdfJpegAsset(blob):null}
-async function makePdf(){
+async function makePdf(mode=document.getElementById("pdf-content-select")?.value||"all"){
   save();
-  const settings=getPdfSettings(),workEntries=Array.isArray(data.workEntries)?data.workEntries:[],pdfApartments=sortedApartments(data.apartments),photoRecords=[];
+  if(!["all","measurements","work"].includes(mode))throw new Error("Valitse PDF:n sisältö");
+  const includeMeasurements=mode!=="work",includeWork=mode!=="measurements",settings=getPdfSettings(),workEntries=includeWork&&Array.isArray(data.workEntries)?data.workEntries:[],pdfApartments=includeMeasurements?sortedApartments(data.apartments):[],photoRecords=[];
+  if(mode==="measurements"&&!pdfApartments.length)throw new Error("Projektissa ei ole mittauskohteita");
   workEntries.forEach(entry=>(entry.photos||[]).forEach(photo=>photoRecords.push({entryId:entry.id,...photo})));
   const [logoAsset,logo2Asset,...photoAssets]=await Promise.all([jpegBytes(settings.logoData),jpegBytes(settings.logo2Data),...photoRecords.map(workPhotoBytes)]);
   const workImages=photoRecords.map((photo,index)=>({...photo,...photoAssets[index],name:"W"+(index+1)})).filter(photo=>photo.bytes),workImageMap=new Map(workImages.map(photo=>[photo.id,photo]));
   const pages=[[]],left=32,width=531,cols=[64,57,125,30,35,67,72,81],headers=["Tila","Tulo/poisto","Venttiili / päätelaite","Kpl","Pa","Suunn. l/s","Säädetty l/s","Asento"];
   const C={ink:"0.09 0.14 0.18",muted:"0.38 0.44 0.48",line:"0.80 0.84 0.86",pale:"0.96 0.97 0.97",green:"0.06 0.65 0.43",amber:"0.72 0.43 0.04",supply:"0.38 0.50 0.59",exhaust:"0.54 0.50 0.46",red:"0.71 0.14 0.09",redPale:"0.99 0.90 0.90"};
-  const reportTitle=selectedReportTitle()||(workEntries.length?(data.apartments.length?"ILMANVAIHDON TYÖ- JA MITTAUSRAPORTTI":"ILMANVAIHDON TYÖRAPORTTI"):"ILMAMÄÄRIEN MITTAUSPÖYTÄKIRJA"),hasCover=data.apartments.length>=3||workEntries.length>0;
-  let page=pages[0],y=0;
+  const reportTitle=(mode==="measurements"?selectedReportTitle(["measurement"]):selectedReportTitle(mode==="work"?(data.workTypes||[]).filter(type=>type!=="measurement"):data.workTypes))||(workEntries.length?(pdfApartments.length?"ILMANVAIHDON TYÖ- JA MITTAUSRAPORTTI":"ILMANVAIHDON TYÖRAPORTTI"):mode==="work"?"ILMANVAIHDON TYÖRAPORTTI":"ILMAMÄÄRIEN MITTAUSPÖYTÄKIRJA"),hasCover=workEntries.length>0;
+  let page=pages[0],y=0,photosOnPage=0;
   const n=v=>Number(v).toFixed(2).replace(/\.00$/,"");
   const text=(v,x,yy,size=9,bold=false,color="0 0 0")=>page.push(color+" rg BT /F"+(bold?2:1)+" "+n(size)+" Tf "+n(x)+" "+n(yy)+" Td ("+pdfText(v)+") Tj ET");
   const rect=(x,yy,w,h,fill=null,stroke=C.line)=>{let c="";if(fill)c+=fill+" rg ";if(stroke)c+=stroke+" RG 0.6 w ";c+=n(x)+" "+n(yy)+" "+n(w)+" "+n(h)+" re "+(fill&&stroke?"B":fill?"f":"S");page.push(c)};
@@ -851,7 +857,7 @@ async function makePdf(){
     wrap(settings.contactDetails,contactChars).slice(0,4).forEach((row,i)=>text(fit(row,contactChars),contactX,816-i*10,7.2,i===0,C.ink));
     line(left,780,563,780,C.green,1);
   }
-  function newContentPage(){addPage();brandHeader();y=758}
+  function newContentPage(){addPage();brandHeader();y=758;photosOnPage=0}
   function coverPage(){
     brandHeader();
     const compactTitle=reportTitle.length>56,titleSize=compactTitle?12.5:15,titleStep=compactTitle?16:19,titleRows=wrap(reportTitle,compactTitle?70:56).slice(0,2),titleLineY=606-(titleRows.length-1)*titleStep;
@@ -859,7 +865,7 @@ async function makePdf(){
     text("KOHDE",left,566,7,true,C.muted);
     text(fit(data.kohde||"Nimetön kohde",38),left,532,25,true,C.ink);
     rect(left,375,width,82,null,C.line);
-    const hasInstrument=(data.workTypes||[]).includes("measurement")&&!!String(data.valine||"").trim(),items=[{label:"TYÖPÄIVÄ",value:displayWorkDate(data.paiva)},{label:"TYÖN SUORITTAJA",value:data.mittaaja||"-"}];
+    const hasInstrument=includeMeasurements&&(data.workTypes||[]).includes("measurement")&&!!String(data.valine||"").trim(),items=[{label:"TYÖPÄIVÄ",value:displayWorkDate(data.paiva)},{label:"TYÖN SUORITTAJA",value:data.mittaaja||"-"}];
     if(hasInstrument)items.push({label:"MITTAUSVÄLINE",value:data.valine});
     const itemX=hasInstrument?[left+12,left+172,left+324]:[left+12,left+278];items.forEach((item,index)=>item.x=itemX[index]);
     items.forEach(item=>{text(item.label,item.x,431,6.5,true,C.muted);text(fit(item.value,24),item.x,411,8.5,true,C.ink)});
@@ -870,11 +876,11 @@ async function makePdf(){
     text("KOHDE",left,y,6.5,true,C.muted);text(fit(data.kohde||"Nimetön kohde",42),left+72,y,10,true,C.ink);
     text("TYÖPÄIVÄ",left+300,y,6.5,true,C.muted);text(displayWorkDate(data.paiva),left+390,y,8.5,false,C.ink);y-=21;
     text("TYÖN SUORITTAJA",left,y,6.5,true,C.muted);text(fit(data.mittaaja||"-",28),left+92,y,8.5,false,C.ink);
-    if((data.workTypes||[]).includes("measurement")&&String(data.valine||"").trim()){text("MITTAUSVÄLINE",left+300,y,6.5,true,C.muted);text(fit(data.valine,23),left+390,y,8.5,false,C.ink)}y-=24;
+    if(includeMeasurements&&(data.workTypes||[]).includes("measurement")&&String(data.valine||"").trim()){text("MITTAUSVÄLINE",left+300,y,6.5,true,C.muted);text(fit(data.valine,23),left+390,y,8.5,false,C.ink)}y-=24;
   }
   function ensure(h){if(y-h<42)newContentPage()}
   function summaryItems(a){
-    const t=apartmentTotals(a),items=[];
+    const t=apartmentTotals({...a,vents:(a.vents||[]).filter(v=>strictFlowNumber(v.adjusted)!==null)}),items=[];
     if(t.hasSupply)items.push({label:"TULOILMA YHTEENSÄ",value:flowFormat(t.supply)+" l/s"});
     if(t.hasExhaust)items.push({label:"POISTOILMA YHTEENSÄ",value:flowFormat(t.exhaust)+" l/s"});
     if(t.hasSupply||t.hasExhaust)items.push({label:"EROTUS",value:(t.difference>0?"+":"")+flowFormat(t.difference)+" l/s",sub:t.status,color:t.difference<=0?C.green:C.red});
@@ -898,9 +904,11 @@ async function makePdf(){
     return out;
   }
   const ventRowHeight=lines=>Math.max(17,8+lines.length*9);
-  function apartmentHeight(a){const rows=commentRows(a);return 26+18+20+(a.vents||[]).reduce((sum,v)=>sum+ventRowHeight(spaceLines(v.space)),0)+8+16+34+8+Math.max(24,10+rows.length*9)+13}
-  function apartmentBar(name,continued=false){ensure(27);text((name||"-")+(continued?"  (jatkuu)":""),left,y-15,13,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=30}
+  let measurementHeaderPage=null;
+  function apartmentHeight(a){return 22+(measurementHeaderPage===page?0:34)+Math.min(548,ventRowHeight(spaceLines(a.vents?.[0]?.space||"")))}
+  function apartmentBar(name,continued=false){ensure(22);rect(left,y-18,width,18,C.pale,C.line);text((name||"-")+(continued?"  (jatkuu)":""),left+3,y-12,8.5,true,C.ink);y-=22}
   function tableHeader(title){
+    if(measurementHeaderPage===page)return;measurementHeaderPage=page;
     text(title+" - arvot / venttiili",left,y-9,7.5,true,C.ink);y-=14;rect(left,y-20,width,20,C.pale,C.line);
     let x=left;headers.forEach((h,i)=>{text(fit(h,[10,10,21,4,5,10,11,10][i]),x+3,y-13,6.3,true,C.ink);x+=cols[i];if(i<headers.length-1)line(x,y-20,x,y,C.line)});y-=20;
   }
@@ -908,33 +916,39 @@ async function makePdf(){
     const height=ventRowHeight(lines);rect(left,y-height,width,height,"1 1 1",C.line);
     const limits=[11,10,22,4,5,9,10,12];let x=left;values.forEach((v,i)=>{const alert=alertAdjusted&&i===6;if(alert)rect(x,y-height,cols[i],height,C.redPale,C.red);const color=alert?C.red:i===1?(v==="Poisto"?C.exhaust:C.supply):C.ink;if(i===0)lines.forEach((row,j)=>text(row,x+3,y-11.5-j*9,6.6,false,color));else text(fit(v,limits[i]),x+3,y-11.5,6.6,i===1||alert,color);x+=cols[i];if(i<values.length-1)line(x,y-height,x,y,C.line)});y-=height;
   }
+  function drawMeasurementState(a){
+    if(a.measurementStatus==="measured")return;
+    const label=a.measurementStatus==="inaccessible"?"EI PÄÄSTY":"KESKEN",color=a.measurementStatus==="inaccessible"?C.red:C.amber,rows=wrap(label+(a.measurementReason?": "+a.measurementReason:""),82);
+    rows.forEach(row=>{if(y-13<42){newContentPage();apartmentBar(a.name,true)}text(row,left+3,y-9,7,true,color);y-=12});y-=3;
+  }
   function drawVentTable(a){
     const rows=a.vents||[];
-    if(!rows.length){text("Ei lisättyjä venttiilejä.",left+5,y-11,8,false,C.muted);y-=22;return}
-    if(y-(14+20+17)<42){newContentPage();apartmentBar(a.name,true)}
+    if(!rows.length){if(y-((measurementHeaderPage===page?0:34)+17)<42){newContentPage();apartmentBar(a.name,true)}tableHeader("MITTAUSTULOKSET");tableRow(Array(8).fill(""));y-=6;return}
+    if(y-((measurementHeaderPage===page?0:34)+17)<42){newContentPage();apartmentBar(a.name,true)}
     tableHeader("MITTAUSTULOKSET");
-    rows.forEach(v=>{const lines=spaceLines(v.space);for(let offset=0;offset<lines.length;offset+=60){const chunk=lines.slice(offset,offset+60);if(y-ventRowHeight(chunk)<42){newContentPage();apartmentBar(a.name,true);tableHeader("MITTAUSTULOKSET (jatkuu)")}tableRow([v.space,v.type==="exhaust"?"Poisto":"Tulo",v.valve,v.kpl,v.pa,v.target,v.adjusted,v.position],!!airflowDeviation(v)?.exceeds,chunk)}});
+    rows.forEach(v=>{const lines=spaceLines(v.space);for(let offset=0;offset<lines.length;offset+=60){const chunk=lines.slice(offset,offset+60);if(y-ventRowHeight(chunk)<42){newContentPage();apartmentBar(a.name,true);tableHeader("MITTAUSTULOKSET (jatkuu)")}tableRow([v.space,v.type==="exhaust"?"Poisto":"Tulo",v.valve,v.kpl,v.pa,pdfAirflow(v.target,v.type),pdfAirflow(v.adjusted,v.type),pdfPosition(v.position)],!!airflowDeviation(v)?.exceeds,chunk)}});
     y-=6;
   }
   function drawSummary(a){
     const items=summaryItems(a);if(!items.length)return;
-    if(y-50<42){newContentPage();apartmentBar(a.name,true)}
-    text("YHTEENVETO",left,y-9,7.5,true,C.ink);y-=14;line(left,y,563,y,C.green,1);y-=3;
-    const w=width/items.length;rect(left,y-34,width,34,"1 1 1",C.line);
-    items.forEach((item,i)=>{const x=left+w*i;if(i)line(x,y-34,x,y,C.line);text(fit(item.label,Math.max(10,Math.floor(w/5.4))),x+5,y-10,5.8,false,C.muted);text(fit(item.value,Math.max(10,Math.floor(w/5.1))),x+5,y-25,8.5,true,C.ink);if(item.sub)text(item.sub,x+5,y-32,5.5,true,item.color||C.green)});y-=42;
+    for(let start=0;start<items.length;start+=3){const group=items.slice(start,start+3),lines=group.map(item=>wrap(item.label+": "+item.value,36)),height=Math.max(...lines.map((rows,i)=>rows.length+(group[i].sub?1:0)))*9+5;
+      if(y-height<42){newContentPage();apartmentBar(a.name,true)}
+      group.forEach((item,i)=>{const x=left+i*width/3;lines[i].forEach((row,j)=>text(row,x+3,y-9-j*9,6.5,true,C.ink));if(item.sub)text(item.sub,x+3,y-9-lines[i].length*9,6.5,true,item.color||C.green)});y-=height;
+    }y-=3;
   }
   function drawComments(a){
-    const rows=commentRows(a),boxH=Math.max(24,10+rows.length*9);if(y-boxH-7<42){newContentPage();apartmentBar(a.name,true)}
-    const labelW=106;rect(left,y-boxH,labelW,boxH,C.pale,C.line);rect(left+labelW,y-boxH,width-labelW,boxH,"1 1 1",C.line);text("KOMMENTIT / KORJAUKSET",left+6,y-14,6.1,true,C.muted);rows.forEach((row,i)=>text(row.text,left+labelW+7,y-14-i*9,6.7,!!row.bold,row.color||C.ink));y-=boxH+12;
+    const rows=commentRows(a);if(rows.length===1&&rows[0].text==="-")return;
+    if(y-24<42){newContentPage();apartmentBar(a.name,true)}text("KOMMENTIT / KORJAUKSET",left+3,y-9,6.5,true,C.muted);y-=13;
+    rows.forEach(row=>{if(y-12<42){newContentPage();apartmentBar(a.name,true)}text(row.text,left+3,y-9,6.7,!!row.bold,row.color||C.ink);y-=10});y-=5;
   }
   function workEntrySectionHeading(continued=false){text("TYÖMERKINNÄT"+(continued?" (jatkuu)":""),left,y-14,14,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=38}
   function drawWorkEntryHeader(entry,continued=false){
-    const types=data.workTypes||[],target=String(entry.target||"").trim(),rows=continued?[]:wrap(entry.text||"",82),cleaningText=types.includes("cleaning")?cleaningLabels(entry.cleaningItems,entry.customCleaningItem).join(", "):"",cleaningRows=continued||!cleaningText?[]:wrap(cleaningText,74),conditions=continued||!(types.includes("cleaning")||types.includes("maintenance"))?[]:conditionEntries(entry.conditionRatings),conditionText=conditions.map(item=>item.label+": "+item.stateLabel).join(", "),conditionRows=conditionText?wrap(conditionText,70):[],boxH=continued?34:(target?55:34)+rows.length*9+cleaningRows.length*9+conditionRows.length*9;
+    const types=data.workTypes||[],target=String(entry.target||"").trim(),targetRows=target?wrap(target,52):[],targetExtra=Math.max(0,targetRows.length-1)*10,rows=continued?[]:wrap(entry.text||"",82),cleaningText=types.includes("cleaning")?cleaningLabels(entry.cleaningItems,entry.customCleaningItem).join(", "):"",cleaningRows=continued||!cleaningText?[]:wrap(cleaningText,74),conditions=continued||!(types.includes("cleaning")||types.includes("maintenance"))?[]:conditionEntries(entry.conditionRatings),conditionText=conditions.map(item=>item.label+": "+item.stateLabel).join(", "),conditionRows=conditionText?wrap(conditionText,70):[],boxH=(target?55+targetExtra:34)+rows.length*9+cleaningRows.length*9+conditionRows.length*9;
     if(y-boxH<42){newContentPage();workEntrySectionHeading(true)}
     const top=y;rect(left,top-boxH,width,boxH,"1 1 1",C.line);
-    if(target){const tagW=Math.min(150,Math.max(55,target.length*6+16));rect(left+10,top-29,tagW,20,C.pale,null);text(fit(target,22),left+18,top-22,7.2,true,C.green)}text(displayWorkDate(entry.date),493,top-22,7,false,C.muted);
-    if(continued)text(fit(workEntryTitle(entry)+" / KUVAT JATKUVAT",target?44:58),target?left+175:left+12,top-22,6.5,true,C.muted);
-    else{let cursor=target?top-44:top-22;text(fit(workEntryTitle(entry),target?68:58),left+12,cursor,9,true,C.ink);cursor-=14;cleaningRows.forEach((row,index)=>{text((index?"":"PUHDISTETTU: ")+row,left+12,cursor,7,true,C.green);cursor-=9});const conditionColor=conditions.some(item=>item.state==="repair")?C.red:conditions.some(item=>item.state==="attention")?C.amber:C.green;conditionRows.forEach((row,index)=>{text((index?"":"KUNTO: ")+row,left+12,cursor,7,true,conditionColor);cursor-=9});rows.forEach(row=>{text(row,left+12,cursor,8,false,C.ink);cursor-=9})}
+    if(target){rect(left+10,top-29-targetExtra,430,20+targetExtra,C.pale,null);targetRows.forEach((row,i)=>text(row,left+18,top-22-i*10,7.2,true,C.green))}text(displayWorkDate(entry.date),493,top-22,7,false,C.muted);
+    if(continued)text(fit(workEntryTitle(entry)+" / KUVAT JATKUVAT",68),left+12,target?top-44-targetExtra:top-22,6.5,true,C.muted);
+    else{let cursor=target?top-44-targetExtra:top-22;text(fit(workEntryTitle(entry),target?68:58),left+12,cursor,9,true,C.ink);cursor-=14;cleaningRows.forEach((row,index)=>{text((index?"":"PUHDISTETTU: ")+row,left+12,cursor,7,true,C.green);cursor-=9});const conditionColor=conditions.some(item=>item.state==="repair")?C.red:conditions.some(item=>item.state==="attention")?C.amber:C.green;conditionRows.forEach((row,index)=>{text((index?"":"KUNTO: ")+row,left+12,cursor,7,true,conditionColor);cursor-=9});rows.forEach(row=>{text(row,left+12,cursor,8,false,C.ink);cursor-=9})}
     y=top-boxH-10;
   }
   function drawProjectCleaning(){
@@ -948,16 +962,13 @@ async function makePdf(){
     const top=y,cellW=width/2;items.forEach((item,index)=>{const col=index%2,row=Math.floor(index/2),x=left+col*cellW,cellY=top-(row+1)*30,color=item.state==="repair"?C.red:item.state==="attention"?C.amber:C.green;rect(x,cellY,cellW,30,"1 1 1",C.line);text(fit(item.label,34),x+8,cellY+19,6.5,false,C.muted);text(item.stateLabel,x+8,cellY+7,8,true,color)});y=top-boxH-14;
   }
   function drawWorkEntry(entry){
-    const photos=(entry.photos||[]).filter(photo=>workImageMap.has(photo.id));drawWorkEntryHeader(entry);
+    const photos=(entry.photos||[]).filter(photo=>workImageMap.has(photo.id));if(photos.length&&(photosOnPage>=2||y<380)){newContentPage();workEntrySectionHeading(true)}drawWorkEntryHeader(entry);
     let photoIndex=0;
     while(photoIndex<photos.length){
-      let availableRows=Math.floor((y-50)/94);
-      if(availableRows<1){newContentPage();workEntrySectionHeading(true);drawWorkEntryHeader(entry,true);availableRows=Math.floor((y-50)/94)}
-      const remainingRows=Math.ceil((photos.length-photoIndex)/2),rowsNow=Math.max(1,Math.min(6,remainingRows,availableRows)),boxH=rowsNow*94+8,top=y,photoW=247,photoH=82,gap=13,count=Math.min(rowsNow*2,photos.length-photoIndex);
-      rect(left,top-boxH,width,boxH,"1 1 1",C.line);
-      for(let offset=0;offset<count;offset++){const photo=photos[photoIndex+offset],col=offset%2,row=Math.floor(offset/2),x=left+10+col*(photoW+gap),photoY=top-4-photoH-row*94;rect(x,photoY,photoW,photoH,C.pale,C.line);imageFit(photo,x+2,photoY+2,photoW-4,photoH-4)}
-      photoIndex+=count;y=top-boxH-12;
-      if(photoIndex<photos.length){newContentPage();workEntrySectionHeading(true);drawWorkEntryHeader(entry,true)}
+      const photo=photos[photoIndex],caption=wrap([entry.target,workEntryTitle(entry),"Kuva "+(photoIndex+1)+" / "+photos.length].filter(Boolean).join(" - "),82),photoH=250,boxH=photoH+caption.length*9+12;
+      if(photosOnPage>=2||y-boxH<42){newContentPage();workEntrySectionHeading(true);drawWorkEntryHeader(entry,true)}
+      const top=y;rect(left,top-photoH,width,photoH,C.pale,C.line);imageFit(photo,left+4,top-photoH+4,width-8,photoH-8);caption.forEach((row,i)=>text(row,left+3,top-photoH-11-i*9,7,false,C.ink));
+      photoIndex++;photosOnPage++;y=top-boxH-8;
     }
     y-=2;
   }
@@ -968,15 +979,14 @@ async function makePdf(){
   }
   function measurementSectionHeading(){text("ILMANVAIHDON MITTAUSPÖYTÄKIRJA",left,y-14,14,true,C.ink);line(left,y-24,563,y-24,C.green,1);y-=38}
   function drawMeasurements(){
-    if(!data.apartments.length)return;
-    if(workEntries.length)newContentPage();
-    measurementSectionHeading();
-    pdfApartments.forEach(a=>{ensure(apartmentHeight(a));apartmentBar(a.name);drawVentTable(a);drawSummary(a);drawComments(a)});
+    if(!pdfApartments.length)return;
+    if(workEntries.length){newContentPage();measurementSectionHeading()}
+    else if(mode!=="measurements"&&(data.workTypes||[]).some(type=>type!=="measurement"))measurementSectionHeading();
+    pdfApartments.forEach(a=>{ensure(apartmentHeight(a));apartmentBar(a.name);drawMeasurementState(a);drawVentTable(a);drawSummary(a);drawComments(a)});
   }
   if(hasCover){coverPage();newContentPage()}else{brandHeader();y=758;reportIntro()}
-  if(!data.apartments.length&&!workEntries.length){text("Ei lisättyjä mittaustuloksia tai työmerkintöjä.",left,y-14,10,false,C.muted);y-=24}
-  drawProjectCleaning();
-  drawProjectConditions();
+  if(!pdfApartments.length&&!workEntries.length){text("Ei lisättyjä mittaustuloksia tai työmerkintöjä.",left,y-14,10,false,C.muted);y-=24}
+  if(includeWork){drawProjectCleaning();drawProjectConditions()}
   drawWorkEntries();
   drawMeasurements();
   pages.forEach((p,i)=>{page=p;line(left,31,563,31,C.line);if(settings.company)text(fit(settings.company,36),left,18,6.5,false,C.muted);text("IV Mittaus",278,18,5.8,false,C.muted);text("Sivu "+(i+1)+" / "+pages.length,510,18,6.5,false,C.muted)});
@@ -1016,7 +1026,8 @@ async function generatePdf(){
 }
 function clearAll(){if(confirm("Tyhjennetäänkö koko mittaus?")){const before=data;data=emptyData();render();if(!save()){data=before;render();return}closeWorkEntryEditor();queuePhotoCleanup(projectPhotoRecords(before,before.projectId).map(record=>record.photo))}}
 function ventRows(ai){
-  const vents=data.apartments[ai].vents||[];if(!vents.length)return '<div class="empty-state" style="margin:0;padding:22px 14px"><strong>Ei venttiilejä</strong>Lisää ensimmäinen mittausrivi.</div>';
+  const apartment=data.apartments[ai],vents=apartment.vents||[],stateFields='<div class="settings-grid" style="margin-bottom:12px"><div><label for="measurement-status-'+ai+'">Mittauksen tila</label><select id="measurement-status-'+ai+'" data-ui-change="updateApartmentOption('+ai+',\'measurementStatus\',this.value)">'+[['pending','Kesken'],['measured','Mitattu'],['inaccessible','Ei päästy']].map(([value,label])=>'<option value="'+value+'"'+(apartment.measurementStatus===value?' selected':'')+'>'+label+'</option>').join('')+'</select></div><div><label for="measurement-reason-'+ai+'">Syy tai keskeneräisyyden huomio</label><input id="measurement-reason-'+ai+'" value="'+esc(apartment.measurementReason)+'" data-ui-input="updateApartmentOption('+ai+',\'measurementReason\',this.value)" placeholder="Esim. Turvalukossa / Remontissa"></div></div>';
+  if(!vents.length)return stateFields+'<div class="empty-state" style="margin:0;padding:22px 14px"><strong>Ei venttiilejä</strong>Lisää ensimmäinen mittausrivi.</div>';
   const groups=[];vents.forEach((v,vi)=>{const name=String(v.space||"").trim()||"Nimetön tila",key=name.toLocaleLowerCase("fi");let group=groups.find(g=>g.key===key);if(!group){group={key,name,items:[]};groups.push(group)}group.items.push({v,vi})});
   const ventCard=(v,vi)=>{const alert=!!airflowDeviation(v)?.exceeds;return '<details class="vent-card '+(v.type==="exhaust"?"exhaust":"supply")+'" data-vent-index="'+vi+'"><summary><span class="vent-summary-main"><strong>'+esc(v.valve||"Uusi venttiili")+'</strong><span>'+(v.type==="exhaust"?"Poisto":"Tulo")+'</span></span><span class="vent-summary-flow">'+(String(v.adjusted||"").trim()?esc(v.adjusted)+' l/s':'Ei tulosta')+'</span></summary><div class="vent-row '+(v.type==="exhaust"?"exhaust":"supply")+'">'+
   '<div class="field-space"><label>Tila</label><input value="'+esc(v.space)+'" data-ui-input="updateVent('+ai+','+vi+',\'space\',this.value)" data-ui-change="finishVentSpaceEdit('+ai+','+vi+')" placeholder="Esim. OH"></div>'+
@@ -1028,7 +1039,7 @@ function ventRows(ai){
   '<div class="field-flow"><label>Säädetty l/s / venttiili</label><input data-adjusted-result inputmode="decimal" class="'+(alert?'measurement-alert':'')+'" value="'+esc(v.adjusted)+'" data-ui-input="updateVent('+ai+','+vi+',\'adjusted\',this.value)"></div>'+
   '<div class="field-position"><label>Asento</label><input value="'+esc(v.position)+'" data-ui-input="updateVent('+ai+','+vi+',\'position\',this.value)" placeholder="-7 tai kiinni"></div>'+
   '<button type="button" class="danger small no-print remove-vent" data-ui-click="removeVent('+ai+','+vi+')">Poista</button></div></details>'};
-  return '<div class="vent-list">'+groups.map(group=>'<details class="room-group"><summary><span class="room-group-title">'+esc(group.name)+'</span><span class="room-group-count">'+group.items.length+' '+(group.items.length===1?'venttiili':'venttiiliä')+'</span></summary><div class="room-group-body">'+group.items.map(item=>ventCard(item.v,item.vi)).join('')+'</div></details>').join('')+'</div>'
+  return stateFields+'<div class="vent-list">'+groups.map(group=>'<details class="room-group"><summary><span class="room-group-title">'+esc(group.name)+'</span><span class="room-group-count">'+group.items.length+' '+(group.items.length===1?'venttiili':'venttiiliä')+'</span></summary><div class="room-group-body">'+group.items.map(item=>ventCard(item.v,item.vi)).join('')+'</div></details>').join('')+'</div>'
 }
 function render(){
 document.getElementById("kohde").value=data.kohde;document.getElementById("paiva").value=data.paiva;updateDateDisplay("paiva");document.getElementById("mittaaja").value=data.mittaaja;document.getElementById("valine").value=data.valine;document.getElementById("default-exhaust-valve").value=data.defaultExhaustValve;document.getElementById("default-supply-valve").value=data.defaultSupplyValve;
