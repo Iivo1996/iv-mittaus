@@ -2,7 +2,7 @@
 <html lang="fi" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-qPdAvxnL/B3jnOuep4AlHtRF2dymZa9cV7WsTPn7f6U='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://quuanwefzmsyjetltmzr.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-opPrSrTffZnTdEUxrsxPZwcBmcKc948z5byDFR+SAJY='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://quuanwefzmsyjetltmzr.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; worker-src 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IV Mittaus | Ilmamäärien mittauspöytäkirja</title>
 <meta name="theme-color" content="#081216">
@@ -817,6 +817,17 @@ async function pdfJpegAsset(blob){
   }finally{URL.revokeObjectURL(url)}
 }
 async function workPhotoBytes(photo){const blob=await resolvePhotoBlob(photo);return blob?pdfJpegAsset(blob):null}
+function pdfReportTitle(mode){
+  const types=mode==="measurements"?["measurement"]:mode==="work"?(data.workTypes||[]).filter(type=>type!=="measurement"):data.workTypes,title=selectedReportTitle(types);
+  if(title)return title;
+  const hasWork=mode!=="measurements"&&data.workEntries?.length,hasMeasurements=mode!=="work"&&data.apartments?.length;
+  return hasWork?(hasMeasurements?"ILMANVAIHDON TYÖ- JA MITTAUSRAPORTTI":"ILMANVAIHDON TYÖRAPORTTI"):mode==="work"?"ILMANVAIHDON TYÖRAPORTTI":"ILMAMÄÄRIEN MITTAUSPÖYTÄKIRJA";
+}
+function pdfFileName(mode){
+  const safePart=(value,maxBytes)=>{const cleaned=String(value||"").normalize("NFC").replace(/[<>:"/\\|?*\u0000-\u001f\u007f]/g," ").replace(/\s+/g," ").replace(/^[. ]+|[. ]+$/g,"");let result="",bytes=0;for(const char of cleaned){const size=new TextEncoder().encode(char).length;if(bytes+size>maxBytes)break;result+=char;bytes+=size}return result.replace(/[. ]+$/g,"")};
+  const title=pdfReportTitle(mode),type=title.charAt(0)+title.slice(1).toLocaleLowerCase("fi");
+  return(safePart(data.kohde,100)||"Nimetön kohde")+" - "+(safePart(type,130)||"Raportti")+".pdf";
+}
 async function makePdf(mode=document.getElementById("pdf-content-select")?.value||"all"){
   save();
   if(!["all","measurements","work"].includes(mode))throw new Error("Valitse PDF:n sisältö");
@@ -827,7 +838,7 @@ async function makePdf(mode=document.getElementById("pdf-content-select")?.value
   const workImages=photoRecords.map((photo,index)=>({...photo,...photoAssets[index],name:"W"+(index+1)})).filter(photo=>photo.bytes),workImageMap=new Map(workImages.map(photo=>[photo.id,photo]));
   const pages=[[]],left=32,width=531,cols=[64,57,125,30,35,67,72,81],headers=["Tila","Tulo/poisto","Venttiili / päätelaite","Kpl","Pa","Suunn. l/s","Säädetty l/s","Asento"];
   const C={ink:"0.09 0.14 0.18",muted:"0.38 0.44 0.48",line:"0.80 0.84 0.86",pale:"0.96 0.97 0.97",green:"0.06 0.65 0.43",amber:"0.72 0.43 0.04",supply:"0.38 0.50 0.59",exhaust:"0.54 0.50 0.46",red:"0.71 0.14 0.09",redPale:"0.99 0.90 0.90"};
-  const reportTitle=(mode==="measurements"?selectedReportTitle(["measurement"]):selectedReportTitle(mode==="work"?(data.workTypes||[]).filter(type=>type!=="measurement"):data.workTypes))||(workEntries.length?(pdfApartments.length?"ILMANVAIHDON TYÖ- JA MITTAUSRAPORTTI":"ILMANVAIHDON TYÖRAPORTTI"):mode==="work"?"ILMANVAIHDON TYÖRAPORTTI":"ILMAMÄÄRIEN MITTAUSPÖYTÄKIRJA"),hasCover=workEntries.length>0;
+  const reportTitle=pdfReportTitle(mode),hasCover=workEntries.length>0;
   let page=pages[0],y=0,photosOnPage=0;
   const n=v=>Number(v).toFixed(2).replace(/\.00$/,"");
   const text=(v,x,yy,size=9,bold=false,color="0 0 0")=>page.push(color+" rg BT /F"+(bold?2:1)+" "+n(size)+" Tf "+n(x)+" "+n(yy)+" Td ("+pdfText(v)+") Tj ET");
@@ -1014,12 +1025,12 @@ async function makePdf(mode=document.getElementById("pdf-content-select")?.value
 async function generatePdf(){
   try{
     const stored=saveProjectSnapshot();
-    const base=(data.kohde||"iv-mittapoytakirja").replace(/[^a-zA-Z0-9äöåÄÖÅ_-]+/g,"_");
-    pdfShareFile=new File([await makePdf()],base+".pdf",{type:"application/pdf"});
+    const mode=document.getElementById("pdf-content-select")?.value||"all",filename=pdfFileName(mode);
+    pdfShareFile=new File([await makePdf(mode)],filename,{type:"application/pdf"});
     const url=URL.createObjectURL(pdfShareFile);
     if(pdfObjectUrl)URL.revokeObjectURL(pdfObjectUrl);pdfObjectUrl=url;
     document.getElementById("pdf-preview").src=url;
-    const open=document.getElementById("pdf-open"),download=document.getElementById("pdf-download");open.href=url;download.href=url;download.download=base+".pdf";
+    const open=document.getElementById("pdf-open"),download=document.getElementById("pdf-download");open.href=url;download.href=url;download.download=filename;
     document.getElementById("pdf-modal").classList.add("open");
     showToast(stored?"PDF luotu ja projekti tallennettu":"PDF luotu, mutta projektia ei voitu tallentaa");
   }catch(e){showToast(e.message||"PDF:n luonti epäonnistui")}
